@@ -663,6 +663,26 @@ object-fit:contain;
             align-self: flex-start;
         }
 
+.catalog-download {
+text-align: center;
+margin-top: 60px;
+}
+
+.catalog-download h3 {
+font-family: 'Playfair Display', serif;
+font-size: 28px;
+color: var(--navy);
+margin-bottom: 15px;
+}
+
+.catalog-download p {
+color: var(--gray);
+font-size: 15px;
+max-width: 600px;
+margin: 0 auto 30px;
+line-height: 1.7;
+}
+
         /* ===== COMMITMENT ===== */
         .commitment { background: var(--white); }
         .commitment-content {
@@ -1009,7 +1029,33 @@ object-fit:contain;
             opacity: 1;
             transform: translateY(0);
         }
+/* ===== PDF CATALOG ===== */
 
+.pdf-catalog{
+background:#fff;
+padding:100px 0;
+}
+
+.pdf-viewer{
+margin-top:40px;
+border-radius:20px;
+overflow:hidden;
+box-shadow:0 20px 60px rgba(0,0,0,.1);
+}
+
+.pdf-viewer iframe{
+width:100%;
+height:700px;
+border:none;
+}
+
+.pdf-buttons{
+display:flex;
+justify-content:center;
+gap:20px;
+margin-top:30px;
+flex-wrap:wrap;
+}
         /* ===== RESPONSIVE ===== */
         @media (max-width: 1024px) {
             .hero-container { grid-template-columns: 1fr; text-align: center; }
@@ -1200,6 +1246,48 @@ object-fit:contain;
         </div>
     </section>
 
+<!-- ===== PDF CATALOG ===== -->
+
+<section class="pdf-catalog" id="catalogo-pdf">
+
+<div class="container">
+
+<div class="section-header reveal">
+
+<span class="section-label">
+Catálogo Digital
+</span>
+
+<h2 class="section-title">
+Consulta nuestro <span>catálogo completo</span>
+</h2>
+
+<p class="section-text">
+Visualiza nuestro catálogo directamente desde la página o descárgalo en formato PDF.
+</p>
+
+</div>
+
+
+
+<div class="pdf-buttons reveal">
+
+<a href="catalogo.pdf"
+class="btn btn-primary"
+download>
+
+<i class="fas fa-download"></i>
+
+Descargar PDF
+
+</a>
+
+</div>
+
+</div>
+
+</section>
+
     <!-- ===== CATALOG ===== -->
     <section class="catalog" id="catalogo">
         <div class="container">
@@ -1255,6 +1343,7 @@ object-fit:contain;
                 </div>
             </div>
         </div>
+
     </section>
 
     <!-- ===== COMMITMENT ===== -->
@@ -1406,6 +1495,7 @@ object-fit:contain;
                         <li><a href="#inicio">Inicio</a></li>
                         <li><a href="#nosotros">¿Quiénes Somos?</a></li>
                         <li><a href="#catalogo">Catálogo</a></li>
+<li><a href="#catalogo-pdf">Catálogo PDF</a></li>
                         <li><a href="#contacto">Contacto</a></li>
                     </ul>
                 </div>
