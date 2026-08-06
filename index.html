@@ -1,0 +1,7458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distribuidora Var San - Calidad y confianza en cada suministro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --navy: #0a1f44;
+            --navy-light: #1a3a6e;
+            --navy-dark: #051328;
+            --gold: #c9a84c;
+            --gold-light: #d4b96a;
+            --gold-dark: #a88a3a;
+            --white: #ffffff;
+            --gray-light: #f5f7fa;
+            --gray: #6b7b8e;
+            --gray-dark: #2c3e50;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+font-family: Arial, sans-serif;
+color: var(--gray-dark);
+overflow-x: hidden;
+background: var(--white);
+}
+        
+/* =========================================================
+VAR SAN — SPLASH / NAVBAR / HERO
+REDISEÑO PREMIUM
+========================================================= */
+
+
+/* =========================================================
+SPLASH SCREEN
+========================================================= */
+
+#splash-screen {
+position: fixed;
+inset: 0;
+
+width: 100%;
+height: 100vh;
+height: 100svh;
+
+background:
+radial-gradient(
+circle at 75% 25%,
+rgba(201, 168, 76, 0.12),
+transparent 28%
+),
+radial-gradient(
+circle at 20% 80%,
+rgba(53, 88, 145, 0.18),
+transparent 35%
+),
+#06142d;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+overflow: hidden;
+
+z-index: 10000;
+
+transition:
+opacity 0.9s cubic-bezier(.76, 0, .24, 1),
+visibility 0.9s;
+}
+
+
+/* textura muy sutil */
+
+#splash-screen::before {
+content: "";
+
+position: absolute;
+inset: 0;
+
+opacity: 0.06;
+
+background-image:
+linear-gradient(
+rgba(255,255,255,.5) 1px,
+transparent 1px
+),
+linear-gradient(
+90deg,
+rgba(255,255,255,.5) 1px,
+transparent 1px
+);
+
+background-size: 80px 80px;
+
+pointer-events: none;
+}
+
+
+/* línea dorada decorativa */
+
+#splash-screen::after {
+content: "";
+
+position: absolute;
+
+width: 1px;
+height: 0;
+
+top: 0;
+left: 8%;
+
+background:
+linear-gradient(
+to bottom,
+transparent,
+rgba(201,168,76,.8),
+transparent
+);
+
+animation: splashLine 1.6s ease forwards;
+}
+
+
+#splash-screen.hidden {
+opacity: 0;
+visibility: hidden;
+pointer-events: none;
+}
+
+
+/* contenido */
+
+.splash-logo {
+position: relative;
+
+display: flex;
+align-items: center;
+
+gap: 28px;
+
+z-index: 2;
+
+animation:
+splashReveal 1s
+cubic-bezier(.22,1,.36,1)
+both;
+}
+
+
+/* LOGO */
+
+.splash-logo-icon {
+width: 96px;
+height: 96px;
+
+padding: 10px;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+background: #ffffff;
+
+border-radius: 4px;
+
+box-shadow:
+0 30px 70px rgba(0,0,0,.28),
+0 0 0 1px rgba(255,255,255,.08);
+
+position: relative;
+}
+
+
+/* pequeña esquina dorada */
+
+.splash-logo-icon::after {
+content: "";
+
+position: absolute;
+
+width: 22px;
+height: 22px;
+
+right: -7px;
+bottom: -7px;
+
+border-right: 1px solid var(--gold);
+border-bottom: 1px solid var(--gold);
+}
+
+
+.splash-logo-icon img {
+width: 100%;
+height: 100%;
+
+object-fit: contain;
+}
+
+
+/* TEXTO */
+
+.splash-logo-text {
+color: var(--white);
+}
+
+
+.splash-logo-text h1 {
+margin: 0;
+
+font-size: clamp(25px, 3vw, 40px);
+
+font-weight: 700;
+
+letter-spacing: -1px;
+
+line-height: 1;
+
+color: #ffffff;
+}
+
+
+.splash-logo-text p {
+margin-top: 12px;
+
+font-size: 10px;
+
+font-weight: 600;
+
+letter-spacing: 3.5px;
+
+text-transform: uppercase;
+
+color: var(--gold);
+}
+
+
+/* estrellas */
+
+.splash-stars {
+position: absolute;
+
+left: 50%;
+bottom: 12%;
+
+transform: translateX(-50%);
+
+display: flex;
+
+gap: 8px;
+
+z-index: 2;
+
+animation:
+splashFade 1s ease .45s both;
+}
+
+
+.splash-stars i {
+color: var(--gold);
+
+font-size: 8px;
+
+opacity: .7;
+}
+
+
+/* slogan */
+
+.splash-tagline {
+position: absolute;
+
+bottom: 6%;
+
+left: 50%;
+
+transform: translateX(-50%);
+
+width: 100%;
+
+text-align: center;
+
+color: rgba(255,255,255,.45);
+
+font-size: 10px;
+
+font-weight: 500;
+
+letter-spacing: 2px;
+
+text-transform: uppercase;
+
+animation:
+splashFade 1s ease .6s both;
+}
+
+
+/* animaciones splash */
+
+@keyframes splashReveal {
+
+from {
+opacity: 0;
+transform: translateY(35px);
+}
+
+to {
+opacity: 1;
+transform: translateY(0);
+}
+
+}
+
+
+@keyframes splashFade {
+
+from {
+opacity: 0;
+}
+
+to {
+opacity: 1;
+}
+
+}
+
+
+@keyframes splashLine {
+
+from {
+height: 0;
+}
+
+to {
+height: 100%;
+}
+
+}
+
+
+/* =========================================================
+NAVBAR
+========================================================= */
+
+.navbar {
+position: fixed;
+
+top: 0;
+left: 0;
+
+width: 100%;
+
+z-index: 1000;
+
+padding: 22px 0;
+
+background: transparent;
+
+border-bottom:
+1px solid rgba(255,255,255,.08);
+
+transition:
+background .4s ease,
+padding .4s ease,
+border-color .4s ease,
+box-shadow .4s ease;
+}
+
+
+.navbar.scrolled {
+padding: 12px 0;
+
+background:
+rgba(6,20,45,.91);
+
+backdrop-filter: blur(18px);
+-webkit-backdrop-filter: blur(18px);
+
+border-bottom:
+1px solid rgba(255,255,255,.07);
+
+box-shadow:
+0 10px 40px rgba(0,0,0,.10);
+}
+
+
+.nav-container {
+width: min(1380px, calc(100% - 80px));
+
+margin: 0 auto;
+
+display: flex;
+align-items: center;
+justify-content: space-between;
+
+gap: 40px;
+}
+
+
+/* =========================================================
+LOGO NAVBAR
+========================================================= */
+
+.nav-logo {
+display: flex;
+align-items: center;
+
+gap: 14px;
+
+text-decoration: none;
+
+flex-shrink: 0;
+}
+
+
+.nav-logo-icon {
+width: 48px;
+height: 48px;
+
+padding: 4px;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+background: #ffffff;
+
+border-radius: 3px;
+
+overflow: hidden;
+}
+
+
+.nav-logo-icon img {
+width: 100%;
+height: 100%;
+
+object-fit: contain;
+}
+
+
+.nav-logo-text {
+display: flex;
+flex-direction: column;
+
+color: white;
+}
+
+
+.nav-logo-text span {
+display: block;
+
+font-size: 13px;
+
+font-weight: 700;
+
+letter-spacing: .5px;
+
+line-height: 1.1;
+
+text-transform: uppercase;
+}
+
+
+.nav-logo-text small {
+margin-top: 5px;
+
+max-width: 240px;
+
+overflow: hidden;
+
+white-space: nowrap;
+
+font-size: 7px;
+
+font-weight: 600;
+
+letter-spacing: 1.7px;
+
+text-transform: uppercase;
+
+color: var(--gold);
+}
+
+
+/* =========================================================
+LINKS NAVBAR
+========================================================= */
+
+.nav-links {
+display: flex;
+align-items: center;
+
+gap: clamp(18px, 2.2vw, 34px);
+
+margin: 0;
+padding: 0;
+
+list-style: none;
+}
+
+
+.nav-links li {
+margin: 0;
+}
+
+
+.nav-links a {
+position: relative;
+
+display: block;
+
+padding: 8px 0;
+
+color: rgba(255,255,255,.72);
+
+text-decoration: none;
+
+font-size: 11px;
+
+font-weight: 600;
+
+letter-spacing: .8px;
+
+transition:
+color .25s ease;
+}
+
+
+.nav-links a::after {
+content: "";
+
+position: absolute;
+
+left: 0;
+bottom: 1px;
+
+width: 0;
+height: 1px;
+
+background: var(--gold);
+
+transition:
+width .35s
+cubic-bezier(.22,1,.36,1);
+}
+
+
+.nav-links a:hover {
+color: #ffffff;
+}
+
+
+.nav-links a:hover::after {
+width: 100%;
+}
+
+
+/* =========================================================
+MENÚ MÓVIL
+========================================================= */
+
+.nav-toggle {
+display: none;
+
+color: #ffffff;
+
+font-size: 22px;
+
+cursor: pointer;
+}
+
+
+/* =========================================================
+HERO
+========================================================= */
+
+.hero {
+position: relative;
+
+min-height: 100vh;
+min-height: 100svh;
+
+padding: 0;
+
+display: flex;
+align-items: center;
+
+overflow: hidden;
+
+background:
+radial-gradient(
+circle at 72% 35%,
+rgba(38,75,132,.27),
+transparent 34%
+),
+radial-gradient(
+circle at 18% 90%,
+rgba(201,168,76,.07),
+transparent 26%
+),
+#06142d;
+}
+
+
+/* eliminamos la forma vieja */
+
+.hero::before {
+content: "";
+
+position: absolute;
+
+top: 0;
+right: 0;
+
+width: 48%;
+height: 100%;
+
+background:
+linear-gradient(
+180deg,
+rgba(255,255,255,.018),
+rgba(255,255,255,0)
+);
+
+border-left:
+1px solid rgba(255,255,255,.05);
+
+clip-path: none;
+
+opacity: 1;
+}
+
+
+/* brillo dorado */
+
+.hero::after {
+content: "";
+
+position: absolute;
+
+width: 700px;
+height: 700px;
+
+right: -350px;
+bottom: -350px;
+
+border-radius: 50%;
+
+border:
+1px solid rgba(201,168,76,.12);
+
+background: transparent;
+
+pointer-events: none;
+}
+
+
+/* =========================================================
+CONTENEDOR HERO
+========================================================= */
+
+.hero-container {
+position: relative;
+
+z-index: 2;
+
+width: min(1380px, calc(100% - 80px));
+
+max-width: none;
+
+margin: 0 auto;
+
+padding:
+150px 0
+90px;
+
+display: grid;
+
+grid-template-columns:
+minmax(0, 1.02fr)
+minmax(420px, .98fr);
+
+gap: clamp(55px, 7vw, 120px);
+
+align-items: center;
+}
+
+
+/* =========================================================
+CONTENIDO HERO
+========================================================= */
+
+.hero-content {
+position: relative;
+
+max-width: 720px;
+
+animation:
+heroContentIn
+1.1s
+cubic-bezier(.22,1,.36,1)
+both;
+}
+
+
+/* línea vertical */
+
+.hero-content::before {
+content: "";
+
+position: absolute;
+
+left: -40px;
+top: 2px;
+
+width: 1px;
+height: 100%;
+
+background:
+linear-gradient(
+to bottom,
+var(--gold),
+rgba(201,168,76,.05)
+);
+}
+
+
+/* =========================================================
+BADGE
+========================================================= */
+
+.hero-badge {
+display: inline-flex;
+align-items: center;
+
+gap: 10px;
+
+margin-bottom: 30px;
+
+padding: 0;
+
+border: none;
+
+border-radius: 0;
+
+background: transparent;
+
+color: var(--gold);
+
+font-size: 10px;
+
+font-weight: 700;
+
+letter-spacing: 2.4px;
+
+text-transform: uppercase;
+}
+
+
+.hero-badge i {
+font-size: 9px;
+}
+
+
+/* =========================================================
+TÍTULO
+========================================================= */
+
+.hero-title {
+margin: 0 0 28px;
+
+max-width: 760px;
+
+color: #ffffff;
+
+font-family: Arial, sans-serif;
+
+font-size:
+clamp(48px, 5.7vw, 88px);
+
+font-weight: 700;
+
+letter-spacing:
+clamp(-4px, -.3vw, -2px);
+
+line-height: .94;
+}
+
+
+.hero-title span {
+display: block;
+
+margin-top: 8px;
+
+color: var(--gold);
+
+font-weight: 400;
+}
+
+
+/* =========================================================
+TEXTO
+========================================================= */
+
+.hero-text {
+max-width: 590px;
+
+margin: 0 0 38px;
+
+color:
+rgba(255,255,255,.62);
+
+font-size: 15px;
+
+font-weight: 400;
+
+line-height: 1.8;
+
+text-align: left;
+}
+
+
+/* =========================================================
+BOTONES
+========================================================= */
+
+.hero-buttons {
+display: flex;
+align-items: center;
+
+gap: 12px;
+
+flex-wrap: wrap;
+}
+
+
+.btn {
+position: relative;
+
+min-height: 54px;
+
+padding: 0 24px;
+
+display: inline-flex;
+align-items: center;
+justify-content: center;
+
+gap: 11px;
+
+border-radius: 2px;
+
+border: 1px solid transparent;
+
+text-decoration: none;
+
+font-size: 11px;
+
+font-weight: 700;
+
+letter-spacing: .8px;
+
+cursor: pointer;
+
+transition:
+transform .3s ease,
+background .3s ease,
+color .3s ease,
+border-color .3s ease,
+box-shadow .3s ease;
+}
+
+
+.btn-primary {
+background: var(--gold);
+
+color: #06142d;
+
+border-color: var(--gold);
+}
+
+
+.btn-primary:hover {
+background: #d7b75b;
+
+border-color: #d7b75b;
+
+transform: translateY(-3px);
+
+box-shadow:
+0 15px 35px
+rgba(201,168,76,.18);
+}
+
+
+.btn-outline {
+background: transparent;
+
+color: #ffffff;
+
+border-color:
+rgba(255,255,255,.2);
+}
+
+
+.btn-outline:hover {
+color: #ffffff;
+
+border-color:
+rgba(255,255,255,.5);
+
+background:
+rgba(255,255,255,.05);
+
+transform: translateY(-3px);
+}
+
+
+/* =========================================================
+IMAGEN HERO
+========================================================= */
+
+.hero-image {
+position: relative;
+
+width: 100%;
+
+animation:
+heroVisualIn
+1.2s
+cubic-bezier(.22,1,.36,1)
+.15s both;
+}
+
+
+.hero-image-wrapper {
+position: relative;
+
+width: 100%;
+height: min(68vh, 700px);
+
+min-height: 520px;
+
+overflow: hidden;
+
+border-radius: 2px;
+
+box-shadow:
+0 40px 100px rgba(0,0,0,.35);
+}
+
+
+.hero-image-wrapper::before {
+content: "";
+
+position: absolute;
+
+inset: 0;
+
+z-index: 2;
+
+background:
+linear-gradient(
+180deg,
+rgba(6,20,45,.05) 30%,
+rgba(6,20,45,.78) 100%
+);
+
+pointer-events: none;
+}
+
+
+.hero-image-wrapper::after {
+content: "";
+
+position: absolute;
+
+inset: 18px;
+
+z-index: 3;
+
+border:
+1px solid rgba(255,255,255,.16);
+
+pointer-events: none;
+}
+
+
+.hero-image-wrapper img {
+width: 100%;
+height: 100%;
+
+display: block;
+
+object-fit: cover;
+
+transform: scale(1.02);
+
+transition:
+transform 1.2s
+cubic-bezier(.22,1,.36,1);
+}
+
+
+.hero-image:hover
+.hero-image-wrapper img {
+transform: scale(1.055);
+}
+
+
+/* =========================================================
+TEXTO SOBRE IMAGEN
+========================================================= */
+
+.hero-image-overlay {
+position: absolute;
+
+z-index: 4;
+
+left: 0;
+right: 0;
+bottom: 0;
+
+padding: 38px 42px;
+
+background: transparent;
+}
+
+
+.hero-image-overlay p {
+max-width: 330px;
+
+margin: 0;
+
+color: rgba(255,255,255,.8);
+
+font-size: 12px;
+
+font-weight: 500;
+
+line-height: 1.5;
+
+letter-spacing: .3px;
+}
+
+
+.hero-image-overlay span {
+color: #ffffff;
+
+font-weight: 700;
+}
+
+
+/* =========================================================
+TARJETAS FLOTANTES
+========================================================= */
+
+.hero-float-card {
+position: absolute;
+
+z-index: 10;
+
+min-width: 190px;
+
+padding: 15px 17px;
+
+display: flex;
+align-items: center;
+
+gap: 13px;
+
+background:
+rgba(255,255,255,.96);
+
+border-radius: 2px;
+
+box-shadow:
+0 22px 55px
+rgba(0,0,0,.18);
+
+animation: none;
+}
+
+
+/* tarjeta superior */
+
+.hero-float-card.card-1 {
+top: 42px;
+right: -26px;
+}
+
+
+/* tarjeta inferior */
+
+.hero-float-card.card-2 {
+left: -38px;
+bottom: 55px;
+}
+
+
+/* icono */
+
+.hero-float-card i {
+width: 37px;
+height: 37px;
+
+flex: 0 0 37px;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+border-radius: 50%;
+
+background:
+rgba(201,168,76,.13);
+
+color: var(--gold-dark);
+
+font-size: 14px;
+}
+
+
+.hero-float-card div h4 {
+margin: 0;
+
+color: #07152f;
+
+font-size: 11px;
+
+font-weight: 700;
+
+letter-spacing: .2px;
+}
+
+
+.hero-float-card div p {
+margin-top: 4px;
+
+color: #788493;
+
+font-size: 9px;
+
+line-height: 1.3;
+}
+
+
+/* =========================================================
+ANIMACIONES HERO
+========================================================= */
+
+@keyframes heroContentIn {
+
+from {
+opacity: 0;
+transform: translateY(35px);
+}
+
+to {
+opacity: 1;
+transform: translateY(0);
+}
+
+}
+
+
+@keyframes heroVisualIn {
+
+from {
+opacity: 0;
+transform:
+translateY(35px)
+scale(.97);
+}
+
+to {
+opacity: 1;
+transform:
+translateY(0)
+scale(1);
+}
+
+}
+
+
+/* =========================================================
+TABLET
+========================================================= */
+
+@media (max-width: 1100px) {
+
+.nav-container,
+.hero-container {
+width:
+min(100% - 48px, 1000px);
+}
+
+
+.nav-links {
+gap: 17px;
+}
+
+
+.nav-links a {
+font-size: 10px;
+}
+
+
+.nav-logo-text small {
+display: none;
+}
+
+
+.hero-container {
+grid-template-columns:
+minmax(0, 1fr)
+minmax(360px, .85fr);
+
+gap: 55px;
+}
+
+
+.hero-title {
+font-size:
+clamp(46px, 6vw, 70px);
+}
+
+
+.hero-content::before {
+display: none;
+}
+
+
+.hero-float-card.card-1 {
+right: -12px;
+}
+
+
+.hero-float-card.card-2 {
+left: -20px;
+}
+
+}
+
+
+/* =========================================================
+MÓVIL
+========================================================= */
+
+@media (max-width: 768px) {
+
+/* NAV */
+
+.navbar {
+padding: 14px 0;
+}
+
+
+.navbar.scrolled {
+padding: 10px 0;
+}
+
+
+.nav-container {
+width: calc(100% - 34px);
+}
+
+
+.nav-logo-icon {
+width: 43px;
+height: 43px;
+}
+
+
+.nav-logo-text span {
+font-size: 11px;
+}
+
+
+.nav-logo-text small {
+display: none;
+}
+
+
+.nav-toggle {
+display: block;
+
+position: relative;
+
+z-index: 20;
+}
+
+
+.nav-links {
+display: none;
+
+position: absolute;
+
+top: 100%;
+left: 0;
+
+width: 100%;
+
+padding:
+25px 24px
+30px;
+
+flex-direction: column;
+align-items: flex-start;
+
+gap: 6px;
+
+background:
+rgba(6,20,45,.98);
+
+border-top:
+1px solid
+rgba(255,255,255,.06);
+
+box-shadow:
+0 30px 50px
+rgba(0,0,0,.25);
+}
+
+
+.nav-links.active {
+display: flex;
+}
+
+
+.nav-links a {
+padding: 10px 0;
+
+font-size: 12px;
+}
+
+
+/* HERO */
+
+.hero {
+min-height: auto;
+
+padding:
+120px 0
+65px;
+}
+
+
+.hero::before {
+display: none;
+}
+
+
+.hero-container {
+width:
+calc(100% - 40px);
+
+padding: 0;
+
+grid-template-columns: 1fr;
+
+gap: 45px;
+
+text-align: left;
+}
+
+
+.hero-content {
+order: 1;
+
+max-width: none;
+}
+
+
+.hero-image {
+order: 2;
+}
+
+
+.hero-badge {
+margin-bottom: 20px;
+
+font-size: 9px;
+}
+
+
+.hero-title {
+margin-bottom: 22px;
+
+font-size:
+clamp(44px, 13vw, 66px);
+
+line-height: .96;
+
+letter-spacing: -2.5px;
+}
+
+
+.hero-text {
+max-width: none;
+
+margin-bottom: 28px;
+
+font-size: 14px;
+
+line-height: 1.7;
+}
+
+
+.hero-buttons {
+width: 100%;
+
+flex-direction: column;
+
+align-items: stretch;
+}
+
+
+.btn {
+width: 100%;
+
+min-height: 54px;
+}
+
+
+.hero-image-wrapper {
+height: 440px;
+
+min-height: 0;
+}
+
+
+.hero-image-wrapper::after {
+inset: 12px;
+}
+
+
+.hero-image-overlay {
+padding:
+30px 28px;
+}
+
+
+.hero-float-card {
+display: none;
+}
+
+
+/* SPLASH */
+
+.splash-logo {
+flex-direction: column;
+
+gap: 22px;
+
+text-align: center;
+}
+
+
+.splash-logo-icon {
+width: 90px;
+height: 90px;
+}
+
+
+.splash-logo-text h1 {
+font-size: 27px;
+}
+
+
+.splash-logo-text p {
+max-width: 290px;
+
+line-height: 1.7;
+
+font-size: 8px;
+
+letter-spacing: 2px;
+}
+
+
+.splash-tagline {
+padding: 0 25px;
+
+font-size: 8px;
+
+line-height: 1.6;
+}
+
+}
+
+
+/* =========================================================
+MÓVIL PEQUEÑO
+========================================================= */
+
+@media (max-width: 420px) {
+
+.nav-logo-text span {
+font-size: 10px;
+}
+
+
+.hero-title {
+font-size: 43px;
+}
+
+
+.hero-image-wrapper {
+height: 380px;
+}
+
+}
+
+        
+        /* ===== SECTIONS COMMON ===== */
+        section { padding: 100px 0; }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .section-label {
+            display: inline-block;
+            color: var(--gold);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+        .section-title {
+            font-family: Arial, sans-serif;
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--navy);
+            line-height: 1.3;
+        }
+        .section-title span { color: var(--gold); }
+        .section-text {
+            color: var(--gray);
+            font-size: 15px;
+            line-height: 1.8;
+            max-width: 700px;
+            margin: 20px auto 0;
+        }
+
+        /* ===== ABOUT ===== */
+        .about { background: var(--gray-light); }
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        .about-image { position: relative; }
+        .about-image-main {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        }
+        .about-image-main img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            display: block;
+        }
+        .about-image-accent {
+            position: absolute;
+            bottom: -30px; right: -20px;
+            width: 200px; height: 200px;
+            background: var(--gold);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--navy);
+            box-shadow: 0 15px 40px rgba(201,168,76,0.3);
+        }
+        .about-image-accent i {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .about-image-accent h3 {
+            font-size: 28px;
+            font-weight: 800;
+        }
+        .about-image-accent p {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .about-content h3 {
+            font-family: Arial, sans-serif;
+            font-size: 28px;
+            color: var(--navy);
+            margin-bottom: 20px;
+            line-height: 1.3;
+        }
+        .about-content p {
+            color: var(--gray);
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        /* ===== MISSION VISION ===== */
+        .mv-section { background: var(--white); }
+        .mv-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        .mv-card {
+            background: var(--gray-light);
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .mv-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 4px;
+            background: var(--gold);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+        .mv-card:hover::before { transform: scaleX(1); }
+        .mv-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+        }
+        .mv-icon {
+            width: 70px; height: 70px;
+            background: var(--navy);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            color: var(--gold);
+            font-size: 28px;
+        }
+        .mv-card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 15px;
+        }
+        .mv-card p {
+            color: var(--gray);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        /* ===== VALUES ===== */
+        .values-section {
+            background: var(--navy);
+            padding: 80px 0;
+        }
+        .values-section .section-title { color: var(--white); }
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-top: 50px;
+        }
+        .value-item {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 30px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .value-item:hover {
+            background: rgba(201,168,76,0.1);
+            border-color: rgba(201,168,76,0.3);
+            transform: translateY(-5px);
+        }
+        .value-item i {
+            font-size: 24px;
+            color: var(--gold);
+            margin-bottom: 15px;
+        }
+        .value-item h4 {
+            color: var(--white);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        
+
+
+/* =========================================================
+CATÁLOGO INTERACTIVO
+========================================================= */
+
+.catalog-showcase {
+position: relative;
+background: var(--gray-light);
+padding: 110px 0 120px;
+overflow: hidden;
+}
+
+
+/* ===== ENCABEZADO ===== */
+
+.catalog-showcase__header {
+max-width: 760px;
+margin: 0 auto 55px;
+text-align: center;
+}
+
+.catalog-showcase__header .section-text {
+max-width: 620px;
+}
+
+
+/* =========================================================
+CATEGORÍAS
+========================================================= */
+
+.catalog-tabs {
+display: flex;
+align-items: center;
+justify-content: flex-start;
+gap: 10px;
+
+width: 100%;
+margin-bottom: 28px;
+padding: 8px;
+
+background: #ffffff;
+border: 1px solid rgba(10, 31, 68, 0.08);
+border-radius: 16px;
+
+overflow-x: auto;
+scrollbar-width: none;
+
+box-shadow:
+0 8px 30px rgba(10, 31, 68, 0.05);
+}
+
+.catalog-tabs::-webkit-scrollbar {
+display: none;
+}
+
+.catalog-tab {
+position: relative;
+
+flex: 0 0 auto;
+
+padding: 13px 20px;
+
+border: 0;
+border-radius: 10px;
+
+background: transparent;
+color: var(--gray);
+
+font-family: Arial, sans-serif;
+font-size: 12px;
+font-weight: 700;
+letter-spacing: 0.3px;
+
+cursor: pointer;
+
+transition:
+background 0.3s ease,
+color 0.3s ease,
+transform 0.3s ease;
+}
+
+.catalog-tab:hover {
+color: var(--navy);
+}
+
+
+/* ===== CATEGORÍAS CON INDICADOR DESLIZANTE ===== */
+
+.catalog-tabs {
+    position: relative;
+}
+
+.catalog-tab {
+    position: relative;
+    z-index: 2;
+    background: transparent;
+}
+
+.catalog-tab.active {
+    background: transparent;
+    color: #ffffff;
+}
+
+.catalog-tab-slider {
+    position: absolute;
+    z-index: 1;
+
+    top: 0;
+    left: 0;
+
+    height: 100%;
+    border-radius: 14px;
+    background: var(--navy);
+
+    pointer-events: none;
+
+    transition:
+        transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        width 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+
+/* =========================================================
+ESCENARIO PRINCIPAL
+========================================================= */
+
+.catalog-stage {
+position: relative;
+
+display: grid;
+grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+
+min-height: 590px;
+
+background: #ffffff;
+
+border-radius: 24px;
+
+overflow: hidden;
+
+box-shadow:
+0 25px 70px rgba(10, 31, 68, 0.10);
+
+border: 1px solid rgba(10, 31, 68, 0.06);
+}
+
+
+/* =========================================================
+IMAGEN
+========================================================= */
+
+.catalog-stage__visual {
+position: relative;
+
+min-height: 590px;
+
+overflow: hidden;
+
+background: #dfe5eb;
+}
+
+.catalog-stage__visual::after {
+content: "";
+
+position: absolute;
+inset: 0;
+
+background:
+linear-gradient(
+180deg,
+rgba(5, 19, 40, 0.05) 0%,
+rgba(5, 19, 40, 0) 45%,
+rgba(5, 19, 40, 0.30) 100%
+);
+
+pointer-events: none;
+z-index: 1;
+}
+
+.catalog-stage__visual img {
+width: 100%;
+height: 100%;
+
+position: absolute;
+inset: 0;
+
+object-fit: cover;
+
+display: block;
+
+transition:
+opacity 0.35s ease,
+transform 0.7s cubic-bezier(.2,.7,.2,1);
+}
+
+.catalog-stage:hover .catalog-stage__visual img {
+transform: scale(1.025);
+}
+
+
+/* ===== CONTADOR ===== */
+
+.catalog-counter {
+position: absolute;
+top: 28px;
+left: 30px;
+
+z-index: 3;
+
+display: flex;
+align-items: center;
+gap: 6px;
+
+padding: 10px 14px;
+
+background: rgba(5, 19, 40, 0.82);
+
+backdrop-filter: blur(12px);
+-webkit-backdrop-filter: blur(12px);
+
+border: 1px solid rgba(255, 255, 255, 0.15);
+border-radius: 50px;
+
+color: rgba(255, 255, 255, 0.65);
+
+font-size: 11px;
+font-weight: 700;
+letter-spacing: 1px;
+}
+
+#catalogCurrent {
+color: var(--gold);
+}
+
+
+/* =========================================================
+FLECHAS
+========================================================= */
+
+.catalog-arrow {
+position: absolute;
+top: 50%;
+
+z-index: 4;
+
+width: 58px;
+height: 58px;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+border: 1px solid rgba(255, 255, 255, 0.4);
+border-radius: 50%;
+
+background: rgba(5, 19, 40, 0.68);
+
+backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
+
+color: #ffffff;
+
+font-size: 15px;
+
+cursor: pointer;
+
+transform: translateY(-50%);
+
+transition:
+background 0.3s ease,
+border-color 0.3s ease,
+color 0.3s ease,
+transform 0.3s ease;
+}
+
+.catalog-arrow--prev {
+left: 24px;
+}
+
+.catalog-arrow--next {
+right: 24px;
+}
+
+.catalog-arrow:hover {
+background: var(--gold);
+border-color: var(--gold);
+color: var(--navy);
+
+transform:
+translateY(-50%)
+scale(1.07);
+}
+
+
+/* =========================================================
+INFORMACIÓN DEL PRODUCTO
+========================================================= */
+
+.catalog-stage__info {
+position: relative;
+
+display: flex;
+flex-direction: column;
+
+padding: 55px 50px 45px;
+
+background: #ffffff;
+}
+
+
+/* ===== CABECERA INTERNA ===== */
+
+.catalog-stage__top {
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+
+gap: 30px;
+
+margin-bottom: 75px;
+}
+
+.catalog-stage__category {
+display: inline-flex;
+align-items: center;
+gap: 10px;
+
+color: var(--gold-dark);
+
+font-size: 10px;
+font-weight: 800;
+letter-spacing: 2px;
+text-transform: uppercase;
+}
+
+.catalog-stage__category::before {
+content: "";
+
+width: 24px;
+height: 1px;
+
+background: var(--gold);
+}
+
+.catalog-stage__number {
+color: rgba(10, 31, 68, 0.12);
+
+font-size: 58px;
+line-height: 0.8;
+font-weight: 800;
+letter-spacing: -4px;
+}
+
+
+/* ===== TÍTULO ===== */
+
+.catalog-stage__info h3 {
+max-width: 470px;
+
+margin: 0 0 22px;
+
+color: var(--navy);
+
+font-family: Arial, sans-serif;
+font-size: clamp(34px, 3.5vw, 54px);
+font-weight: 800;
+
+line-height: 0.98;
+letter-spacing: -2px;
+}
+
+
+/* ===== DESCRIPCIÓN ===== */
+
+.catalog-stage__description {
+max-width: 480px;
+
+margin-bottom: 28px;
+
+color: var(--gray);
+
+font-size: 14px;
+line-height: 1.8;
+}
+
+
+/* =========================================================
+CARACTERÍSTICAS
+========================================================= */
+
+.catalog-features {
+display: flex;
+flex-wrap: wrap;
+
+gap: 8px;
+
+margin-bottom: 38px;
+}
+
+.catalog-features span {
+display: inline-flex;
+align-items: center;
+
+padding: 8px 13px;
+
+border: 1px solid rgba(10, 31, 68, 0.12);
+border-radius: 50px;
+
+color: var(--navy);
+
+background: transparent;
+
+font-size: 10px;
+font-weight: 700;
+letter-spacing: 0.3px;
+}
+
+
+/* =========================================================
+BOTÓN CATÁLOGO
+========================================================= */
+
+.catalog-main-link {
+width: 100%;
+
+margin-top: auto;
+
+display: flex;
+align-items: center;
+justify-content: space-between;
+
+padding: 20px 0 14px;
+
+border-top: 1px solid rgba(10, 31, 68, 0.15);
+
+color: var(--navy);
+
+text-decoration: none;
+
+font-size: 12px;
+font-weight: 800;
+letter-spacing: 1px;
+text-transform: uppercase;
+
+transition:
+color 0.3s ease,
+padding 0.3s ease;
+}
+
+.catalog-main-link i {
+width: 42px;
+height: 42px;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+border-radius: 50%;
+
+background: var(--navy);
+color: #ffffff;
+
+transition:
+background 0.3s ease,
+color 0.3s ease,
+transform 0.3s ease;
+}
+
+.catalog-main-link:hover {
+color: var(--gold-dark);
+}
+
+.catalog-main-link:hover i {
+background: var(--gold);
+color: var(--navy);
+
+transform: rotate(45deg);
+}
+
+
+/* =========================================================
+NAVEGACIÓN INFERIOR
+========================================================= */
+
+.catalog-navigation {
+display: flex;
+align-items: center;
+justify-content: space-between;
+
+gap: 30px;
+
+margin-top: 24px;
+}
+
+.catalog-navigation p {
+margin: 0;
+
+color: var(--gray);
+
+font-size: 11px;
+letter-spacing: 0.5px;
+}
+
+
+/* ===== BARRA DE PROGRESO ===== */
+
+.catalog-progress {
+position: relative;
+
+width: 220px;
+height: 2px;
+
+background: rgba(10, 31, 68, 0.12);
+
+overflow: hidden;
+}
+
+.catalog-progress span {
+position: absolute;
+
+top: 0;
+left: 0;
+
+width: 11.111%;
+height: 100%;
+
+background: var(--gold);
+
+transition:
+width 0.45s cubic-bezier(.2,.7,.2,1);
+}
+
+
+/* =========================================================
+TRANSICIÓN AL CAMBIAR PRODUCTO
+========================================================= */
+
+.catalog-stage.is-changing .catalog-stage__visual img {
+opacity: 0;
+transform: scale(1.04);
+}
+
+.catalog-stage.is-changing .catalog-stage__info h3,
+.catalog-stage.is-changing .catalog-stage__description,
+.catalog-stage.is-changing .catalog-features {
+opacity: 0;
+transform: translateY(10px);
+}
+
+.catalog-stage__info h3,
+.catalog-stage__description,
+.catalog-features {
+transition:
+opacity 0.25s ease,
+transform 0.35s ease;
+}
+
+
+/* =========================================================
+TABLET
+========================================================= */
+
+@media (max-width: 1024px) {
+
+.catalog-showcase {
+padding: 90px 0;
+}
+
+.catalog-stage {
+grid-template-columns: 1fr 0.85fr;
+min-height: 540px;
+}
+
+.catalog-stage__visual {
+min-height: 540px;
+}
+
+.catalog-stage__info {
+padding: 45px 35px 35px;
+}
+
+.catalog-stage__top {
+margin-bottom: 55px;
+}
+
+.catalog-stage__number {
+font-size: 48px;
+}
+
+}
+
+
+/* =========================================================
+MÓVIL
+========================================================= */
+
+@media (max-width: 768px) {
+
+.catalog-showcase {
+padding: 70px 0 80px;
+}
+
+
+/* HEADER */
+
+.catalog-showcase__header {
+margin-bottom: 35px;
+padding: 0 4px;
+}
+
+
+/* TABS */
+
+.catalog-tabs {
+width: calc(100% + 20px);
+
+margin-left: -10px;
+margin-bottom: 18px;
+
+padding: 7px;
+
+border-radius: 13px;
+}
+
+.catalog-tab {
+padding: 11px 16px;
+
+font-size: 11px;
+}
+
+
+/* ESCENARIO */
+
+.catalog-stage {
+display: flex;
+flex-direction: column;
+
+min-height: auto;
+
+border-radius: 18px;
+}
+
+
+/* IMAGEN */
+
+.catalog-stage__visual {
+width: 100%;
+min-height: 0;
+height: 430px;
+}
+
+.catalog-stage__visual img {
+position: absolute;
+width: 100%;
+height: 100%;
+}
+
+
+/* CONTADOR */
+
+.catalog-counter {
+top: 18px;
+left: 18px;
+
+padding: 8px 12px;
+
+font-size: 10px;
+}
+
+
+/* FLECHAS */
+
+.catalog-arrow {
+width: 48px;
+height: 48px;
+
+font-size: 13px;
+}
+
+.catalog-arrow--prev {
+left: 15px;
+}
+
+.catalog-arrow--next {
+right: 15px;
+}
+
+
+/* INFORMACIÓN */
+
+.catalog-stage__info {
+min-height: 390px;
+
+padding: 32px 25px 26px;
+}
+
+.catalog-stage__top {
+margin-bottom: 38px;
+}
+
+.catalog-stage__number {
+font-size: 42px;
+}
+
+.catalog-stage__category {
+max-width: 180px;
+
+font-size: 9px;
+line-height: 1.5;
+}
+
+.catalog-stage__info h3 {
+margin-bottom: 18px;
+
+font-size: 34px;
+line-height: 1;
+letter-spacing: -1.5px;
+}
+
+.catalog-stage__description {
+font-size: 14px;
+line-height: 1.7;
+
+margin-bottom: 22px;
+}
+
+
+/* FEATURES */
+
+.catalog-features {
+margin-bottom: 30px;
+}
+
+.catalog-features span {
+padding: 7px 11px;
+
+font-size: 9px;
+}
+
+
+/* BOTÓN */
+
+.catalog-main-link {
+padding-top: 17px;
+
+font-size: 10px;
+}
+
+.catalog-main-link i {
+width: 38px;
+height: 38px;
+}
+
+
+/* PROGRESO */
+
+.catalog-navigation {
+flex-direction: column;
+align-items: flex-start;
+
+gap: 13px;
+
+margin-top: 18px;
+}
+
+.catalog-progress {
+width: 100%;
+}
+
+}
+
+
+/* =========================================================
+MÓVILES PEQUEÑOS
+========================================================= */
+
+@media (max-width: 480px) {
+
+.catalog-stage__visual {
+height: 360px;
+}
+
+.catalog-stage__info {
+min-height: 410px;
+padding: 28px 20px 22px;
+}
+
+.catalog-stage__info h3 {
+font-size: 30px;
+}
+
+.catalog-stage__number {
+font-size: 36px;
+}
+
+}
+
+
+
+/* =========================================================
+LÍNEAS DEL CATÁLOGO
+========================================================= */
+
+.catalog-lines {
+display: flex;
+justify-content: center;
+align-items: center;
+gap: 18px;
+flex-wrap: wrap;
+margin: 35px auto 45px;
+max-width: 900px;
+}
+
+.catalog-line {
+position: relative;
+border: none;
+background: transparent;
+color: var(--navy);
+font-family: inherit;
+font-size: 14px;
+font-weight: 700;
+letter-spacing: 1.5px;
+text-transform: uppercase;
+padding: 14px 20px;
+cursor: pointer;
+transition:
+color 0.3s ease,
+transform 0.3s ease;
+}
+
+/* Línea inferior */
+.catalog-line::after {
+content: "";
+position: absolute;
+left: 50%;
+bottom: 4px;
+
+width: 0;
+height: 2px;
+
+background: var(--gold);
+
+transform: translateX(-50%);
+transition: width 0.35s ease;
+}
+
+/* HOVER */
+.catalog-line:hover {
+color: var(--gold);
+}
+
+.catalog-line:hover::after {
+width: 35%;
+}
+
+/* ACTIVO */
+.catalog-line.active {
+color: var(--navy);
+}
+
+.catalog-line.active::after {
+width: 70%;
+}
+
+/* Número de la línea */
+.catalog-line__number {
+display: inline-block;
+margin-right: 8px;
+
+font-size: 11px;
+font-weight: 800;
+
+color: var(--gray);
+opacity: 0.55;
+
+transition:
+color 0.3s ease,
+opacity 0.3s ease;
+}
+
+.catalog-line.active .catalog-line__number {
+color: var(--gold);
+opacity: 1;
+}
+
+
+/* =========================================================
+AJUSTE DE CENTRADO DEL SELECTOR
+========================================================= */
+
+.catalog-line-selector {
+width: 100%;
+max-width: 1000px;
+
+margin-left: auto;
+margin-right: auto;
+
+display: flex;
+justify-content: center;
+align-items: center;
+}
+
+
+/* =========================================================
+RESPONSIVE
+========================================================= */
+
+@media (max-width: 768px) {
+
+.catalog-lines {
+gap: 8px;
+margin: 25px auto 35px;
+}
+
+.catalog-line {
+font-size: 12px;
+padding: 12px 14px;
+letter-spacing: 1px;
+}
+
+.catalog-line__number {
+font-size: 10px;
+margin-right: 5px;
+}
+}
+
+
+
+/* =========================================================
+NOTA NORMATIVA
+========================================================= */
+
+.catalog-standard {
+display: flex;
+align-items: center;
+gap: 12px;
+
+margin-top: 28px;
+padding-top: 20px;
+
+border-top: 1px solid rgba(10, 31, 68, 0.12);
+
+color: #0a1f44;
+}
+
+
+.catalog-standard[hidden] {
+display: none;
+}
+
+
+.catalog-standard i {
+flex-shrink: 0;
+
+color: #c9a84c;
+
+font-size: 15px;
+}
+
+
+.catalog-standard span {
+font-family: "DM Sans", sans-serif;
+
+font-size: 11px;
+font-weight: 600;
+
+line-height: 1.6;
+
+letter-spacing: 0.08em;
+
+text-transform: uppercase;
+
+opacity: 0.72;
+}
+
+
+
+/* =========================================================
+PARTE INFERIOR DE NAVEGACIÓN
+========================================================= */
+
+.catalog-navigation__bottom {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 30px;
+
+margin-top: 16px;
+}
+
+
+.catalog-active-line {
+flex-shrink: 0;
+
+font-family: "Manrope", sans-serif;
+
+font-size: 10px;
+font-weight: 700;
+
+letter-spacing: 0.14em;
+
+color: #0a1f44;
+
+opacity: 0.55;
+}
+
+
+
+/* =========================================================
+TRANSICIÓN DEL CONTENIDO
+========================================================= */
+
+.catalog-stage__visual img,
+.catalog-stage__info {
+transition:
+opacity 0.28s ease,
+transform 0.4s ease;
+}
+
+
+.catalog-stage.is-changing .catalog-stage__visual img {
+opacity: 0;
+transform: scale(1.025);
+}
+
+
+.catalog-stage.is-changing .catalog-stage__info {
+opacity: 0;
+transform: translateY(10px);
+}
+
+
+
+/* =========================================================
+RESPONSIVE
+========================================================= */
+
+@media (max-width: 768px) {
+
+.catalog-lines {
+margin-top: 30px;
+}
+
+
+.catalog-line {
+min-height: 72px;
+
+padding: 0 16px;
+
+gap: 10px;
+}
+
+
+.catalog-line::after {
+left: 16px;
+right: 16px;
+}
+
+
+.catalog-line__number {
+font-size: 9px;
+}
+
+
+.catalog-line__text {
+font-size: 11px;
+
+letter-spacing: 0.05em;
+}
+
+
+.catalog-navigation__bottom {
+align-items: flex-start;
+flex-direction: column;
+
+gap: 8px;
+}
+
+
+.catalog-active-line {
+font-size: 9px;
+}
+
+}
+
+
+
+@media (max-width: 480px) {
+
+.catalog-lines {
+grid-template-columns: 1fr;
+}
+
+
+.catalog-line:first-child {
+border-right: 0;
+border-bottom: 1px solid rgba(10, 31, 68, 0.16);
+}
+
+
+.catalog-line {
+min-height: 62px;
+}
+
+
+.catalog-line__text {
+font-size: 10px;
+}
+
+}
+
+
+        /* ===== COMMITMENT ===== */
+        .commitment { background: var(--white); }
+        .commitment-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .commitment-content p {
+            font-size: 18px;
+            color: var(--gray-dark);
+            line-height: 1.9;
+            font-weight: 300;
+        }
+
+        /* ===== SECTORS ===== */
+        .sectors { background: var(--navy); }
+        .sectors .section-title { color: var(--white); }
+        .sectors-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            margin-top: 50px;
+        }
+        .sector-item {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 30px 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .sector-item:hover {
+            background: rgba(201,168,76,0.1);
+            border-color: var(--gold);
+            transform: translateY(-5px);
+        }
+        .sector-item i {
+            font-size: 28px;
+            color: var(--gold);
+            margin-bottom: 15px;
+        }
+        .sector-item h4 {
+            color: var(--white);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* ===== WHY US ===== */
+        .why-us { background: var(--gray-light); }
+        .why-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+        }
+        .why-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 35px 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        .why-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        }
+        .why-card .number {
+            width: 50px; height: 50px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: var(--navy);
+            font-size: 18px;
+            font-weight: 800;
+        }
+        .why-card h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 10px;
+        }
+        .why-card p {
+            font-size: 13px;
+            color: var(--gray);
+            line-height: 1.6;
+        }
+/* ===== MARCAS ===== */
+
+.brands{
+padding:100px 20px;
+background:#f8f9fa;
+}
+
+.brands-container{
+max-width:1200px;
+margin:auto;
+}
+
+.brands-grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:35px;
+margin-top:50px;
+}
+
+.brand-card{
+background:#fff;
+border-radius:20px;
+height:170px;
+display:flex;
+justify-content:center;
+align-items:center;
+box-shadow:0 8px 25px rgba(0,0,0,.08);
+transition:.35s;
+}
+
+.brand-card:hover{
+transform:translateY(-8px);
+box-shadow:0 18px 35px rgba(0,0,0,.12);
+}
+
+.brand-card img{
+width:150px;
+max-height:90px;
+object-fit:contain;
+transition:.35s;
+filter:grayscale(100%);
+opacity:.8;
+}
+
+.brand-card:hover img{
+filter:none;
+opacity:1;
+transform:scale(1.08);
+}
+
+@media(max-width:768px){
+.brands-grid{
+grid-template-columns:repeat(2,1fr);
+}
+
+.brand-card{
+height:120px;
+}
+
+.brand-card img{
+width:90px;
+}
+}
+        /* ===== PROCESS ===== */
+        .process { background: var(--white); }
+        .process-steps {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            position: relative;
+        }
+        .process-steps::before {
+            content: '';
+            position: absolute;
+            top: 40px; left: 15%; right: 15%;
+            height: 2px;
+            background: var(--gold);
+            opacity: 0.3;
+        }
+        .process-step {
+            text-align: center;
+            max-width: 280px;
+            position: relative;
+            z-index: 1;
+        }
+        .process-step .step-number {
+            width: 80px; height: 80px;
+            background: var(--navy);
+            border: 3px solid var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            color: var(--gold);
+            font-size: 28px;
+            font-weight: 800;
+        }
+        .process-step h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 12px;
+        }
+        .process-step p {
+            color: var(--gray);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        /* ===== CONTACT ===== */
+        .contact {
+            background: var(--navy);
+            position: relative;
+            overflow: hidden;
+        }
+        .contact::before {
+            content: '';
+            position: absolute;
+            top: -100px; right: -100px;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(201,168,76,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .contact .section-title { color: var(--white); }
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        .contact-info h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            color: var(--white);
+            margin-bottom: 30px;
+        }
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .contact-item i {
+            width: 50px; height: 50px;
+            background: rgba(201,168,76,0.15);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .contact-item div h4 {
+            color: var(--white);
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .contact-item div p {
+            color: rgba(255,255,255,0.7);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .contact-item div a {
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .contact-item div a:hover { text-decoration: underline; }
+        .contact-note {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-left: 3px solid var(--gold);
+            border-radius: 0 10px 10px 0;
+        }
+        .contact-note p {
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+        .contact-image { position: relative; }
+        .contact-image img {
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+/* ===== FORMULARIO CONTACTO ===== */
+
+.contact-form-section{
+background:var(--gray-light);
+padding:100px 0;
+}
+
+.contact-form{
+max-width:700px;
+margin:auto;
+background:white;
+padding:40px;
+border-radius:20px;
+box-shadow:0 15px 40px rgba(0,0,0,.08);
+}
+
+.form-group{
+margin-bottom:25px;
+}
+
+.form-group label{
+display:block;
+color:var(--navy);
+font-size:14px;
+font-weight:700;
+margin-bottom:8px;
+}
+
+.form-group input,
+.form-group textarea{
+
+width:100%;
+padding:15px 18px;
+border:1px solid #ddd;
+border-radius:10px;
+font-size:14px;
+font-family:Arial,sans-serif;
+outline:none;
+transition:.3s;
+}
+
+
+.form-group input:focus,
+.form-group textarea:focus{
+
+border-color:var(--gold);
+box-shadow:0 0 0 3px rgba(201,168,76,.15);
+
+}
+
+
+.form-group textarea{
+
+height:150px;
+resize:none;
+
+}
+
+
+.contact-form button{
+
+display:flex;
+margin:auto;
+
+}
+        /* ===== FOOTER ===== */
+        .footer {
+            background: var(--navy-dark);
+            padding: 60px 0 30px;
+        }
+        .footer-top {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .footer-brand-icon{
+width: 70px;
+height: 70px;
+background: transparent;
+display: flex;
+align-items: center;
+justify-content: center;
+overflow: hidden;
+}
+
+.footer-brand-icon img{
+width: 100%;
+height: 100%;
+object-fit: contain;
+}
+        .footer-brand-icon span {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--navy);
+        }
+        .footer-brand-text h4 {
+            color: var(--white);
+            font-size: 16px;
+            font-weight: 700;
+        }
+        .footer-brand-text p {
+            color: var(--gold);
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .footer-desc {
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+        .footer-social {
+            display: flex;
+            gap: 12px;
+        }
+        .footer-social a {
+            width: 40px; height: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .footer-social a:hover {
+            background: var(--gold);
+            color: var(--navy);
+        }
+        .footer-links h4 {
+            color: var(--white);
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+        .footer-links ul { list-style: none; }
+        .footer-links li { margin-bottom: 12px; }
+        .footer-links a {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.3s;
+        }
+        .footer-links a:hover { color: var(--gold); }
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 25px;
+            text-align: center;
+        }
+        .footer-bottom p {
+            color: rgba(255,255,255,0.4);
+            font-size: 12px;
+        }
+
+.footer-legal{
+margin-top:20px;
+text-align:center;
+font-size:14px;
+}
+
+.footer-legal a{
+color:#fff;
+text-decoration:none;
+margin:0 8px;
+transition:.3s;
+}
+
+.footer-legal a:hover{
+color:#7fc8ff;
+}
+
+.footer-legal span{
+color:rgba(255,255,255,.6);
+}
+
+        
+        /* ===== SCROLL REVEAL ===== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s ease;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+/* ===== PDF CATALOG ===== */
+
+.pdf-catalog{
+background:#fff;
+padding:100px 0;
+}
+
+.pdf-viewer{
+margin-top:40px;
+border-radius:20px;
+overflow:hidden;
+box-shadow:0 20px 60px rgba(0,0,0,.1);
+}
+
+.pdf-viewer iframe{
+width:100%;
+height:700px;
+border:none;
+}
+
+.pdf-buttons{
+display:flex;
+justify-content:center;
+gap:20px;
+margin-top:30px;
+flex-wrap:wrap;
+}
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .hero-container { grid-template-columns: 1fr; text-align: center; }
+            .hero-content { order: 2; }
+            .hero-image { order: 1; }
+            .hero-buttons { justify-content: center; }
+            .about-grid, .contact-grid { grid-template-columns: 1fr; }
+            .mv-grid { grid-template-columns: 1fr; }
+            .catalog-grid { grid-template-columns: 1fr; }
+            .catalog-card { flex-direction: column; }
+            .catalog-card-image { width: 100%; height: 200px; }
+            .values-grid, .sectors-grid { grid-template-columns: repeat(2, 1fr); }
+            .why-grid { grid-template-columns: repeat(2, 1fr); }
+            .process-steps { flex-direction: column; align-items: center; }
+            .process-steps::before { display: none; }
+            .footer-top { grid-template-columns: 1fr 1fr; }
+        }
+       @media (max-width: 768px) {
+
+.nav-links{
+display:none;
+position:absolute;
+top:70px;
+left:0;
+width:100%;
+background:rgba(10,31,68,.98);
+flex-direction:column;
+padding:20px;
+gap:15px;
+}
+
+.nav-links.active{
+display:flex;
+}
+
+.nav-toggle{
+display:block;
+}
+
+.hero{
+min-height: 100svh;
+min-height: 100vh;
+padding: 90px 0 50px;
+}
+
+.hero-container{
+grid-template-columns:1fr;
+gap:40px;
+padding:110px 25px 70px;
+text-align:center;
+}
+
+.hero-title{
+font-size:38px;
+line-height:1.2;
+}
+
+.hero-text{
+font-size:17px;
+line-height:1.7;
+}
+
+.hero-buttons{
+flex-direction:column;
+align-items:stretch;
+}
+
+
+.btn{
+justify-content:center;
+}
+
+.hero-image-wrapper img{
+height:280px;
+}
+
+.section-title {
+text-align: center;
+margin-bottom: 40px;
+}
+
+.section-text {
+font-size: 16px;
+line-height: 1.6;
+}
+
+.about-grid,
+.contact-grid,
+.catalog-grid,
+.mv-grid,
+.why-grid,
+.values-grid,
+.sectors-grid{
+grid-template-columns:1fr;
+}
+
+.catalog-card{
+flex-direction:column;
+}
+
+.catalog-card-image{
+width:100%;
+height:220px;
+}
+
+.process-steps{
+flex-direction:column;
+gap:40px;
+}
+
+.process-steps::before{
+display:none;
+}
+
+.footer-top{
+grid-template-columns:1fr;
+text-align:center;
+}
+
+.footer-brand,
+.footer-social{
+justify-content:center;
+}
+
+.about-image-accent,
+.hero-float-card{
+display:none;
+}
+
+
+
+section{
+padding:70px 0;
+}
+}
+     
+.chatbot-container {
+position: fixed;
+bottom: 25px;
+right: 25px;
+z-index: 999;
+}
+
+.chatbot-button {
+width: 60px;
+height: 60px;
+border-radius: 50%;
+border: none;
+background: #0a1f44;
+color: white;
+font-size: 25px;
+cursor: pointer;
+}
+
+
+.chatbot-box {
+display: none;
+position: absolute;
+bottom: 80px;
+right: 0;
+width: 330px;
+background: white;
+border-radius: 15px;
+overflow: hidden;
+box-shadow: 0 5px 25px rgba(0,0,0,.2);
+}
+
+
+.chatbot-header {
+background: #0a1f44;
+color: white;
+padding: 15px;
+font-weight: bold;
+display: flex;
+justify-content: space-between;
+}
+
+
+.chatbot-header span {
+cursor: pointer;
+}
+
+
+.chatbot-messages {
+height: 260px;
+overflow-y: auto;
+padding: 15px;
+}
+
+
+.bot-message,
+.user-message {
+padding: 10px;
+border-radius: 10px;
+margin-bottom: 10px;
+font-size: 14px;
+}
+
+
+.bot-message {
+background: #e9eef7;
+}
+
+
+.user-message {
+background: #0a1f44;
+color:white;
+text-align:right;
+}
+
+
+/* BOTÓN FLOTANTE */
+.bot-float {
+position: fixed;
+right: 25px;
+bottom: 90px;
+width: 65px;
+height: 65px;
+background: #0a1f44;
+color: white;
+border-radius: 50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:32px;
+cursor:pointer;
+box-shadow:0 5px 15px rgba(0,0,0,.3);
+animation: flotar 2s infinite;
+z-index:999;
+}
+
+@keyframes flotar {
+
+0%,100% {
+transform:translateY(0);
+}
+
+50% {
+transform:translateY(-10px);
+}
+
+}
+
+
+/* CHAT */
+.chatbot {
+
+position:fixed;
+right:25px;
+bottom:80px;
+width:340px;
+background:white;
+border-radius:20px;
+box-shadow:0 10px 30px rgba(0,0,0,.25);
+overflow:hidden;
+display:none;
+z-index:1000;
+}
+
+
+.chat-header {
+
+background:#0a1f44;
+color:white;
+padding:15px;
+display:flex;
+justify-content:space-between;
+font-weight:bold;
+
+}
+
+
+.chat-header button {
+
+background:none;
+border:none;
+color:white;
+font-size:22px;
+cursor:pointer;
+
+}
+
+
+.chat-body {
+
+padding:15px;
+max-height:400px;
+overflow-y:auto;
+
+}
+
+
+.bot-msg {
+
+background:#f1f1f1;
+padding:12px;
+border-radius:15px;
+margin-bottom:15px;
+
+}
+
+
+.user-msg {
+
+background:#0a1f44;
+color:white;
+padding:12px;
+border-radius:15px;
+margin:10px 0;
+text-align:right;
+
+}
+
+
+.opciones button {
+
+width:100%;
+padding:10px;
+margin:5px 0;
+border:none;
+border-radius:10px;
+background:#e8edf5;
+cursor:pointer;
+
+}
+
+
+.opciones button:hover {
+
+background:#d2dbea;
+
+}
+
+/* ===== COOKIE BANNER ===== */
+
+.cookie-banner{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+width:90%;
+max-width:900px;
+background:#0a1f44;
+color:#fff;
+padding:18px 22px;
+border-radius:18px;
+box-shadow:0 10px 30px rgba(0,0,0,.25);
+z-index:9999;
+animation:fadeUp .5s ease;
+}
+
+.cookie-content{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:20px;
+flex-wrap:wrap;
+}
+
+.cookie-content p{
+margin:0;
+font-size:15px;
+line-height:1.6;
+}
+
+.cookie-content a{
+color:#9fd2ff;
+text-decoration:none;
+font-weight:600;
+}
+
+.cookie-buttons{
+display:flex;
+gap:10px;
+}
+
+.cookie-buttons button{
+padding:10px 18px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-weight:600;
+transition:.3s;
+}
+
+#acceptCookies{
+background:#2d8cff;
+color:white;
+}
+
+#acceptCookies:hover{
+background:#1d74d8;
+}
+
+.secondary{
+background:white;
+color:#0a1f44;
+}
+
+.secondary:hover{
+background:#ececec;
+}
+
+@keyframes fadeUp{
+from{
+opacity:0;
+transform:translate(-50%,40px);
+}
+to{
+opacity:1;
+transform:translate(-50%,0);
+}
+}
+
+/* =========================================================
+   PORTAL DE CLIENTES — DISTRIBUIDORA VAR SAN
+========================================================= */
+
+.account-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+
+    padding: 11px 18px;
+    margin-left: 15px;
+
+    border: 1px solid rgba(201, 168, 76, 0.55);
+    border-radius: 10px;
+
+    background: #c9a84c;
+    color: #0a1f44;
+
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.account-btn:hover {
+    background: #d4b96a;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+}
+
+
+/* =========================================================
+   FONDO DEL MODAL
+========================================================= */
+
+.account-overlay {
+    position: fixed;
+    inset: 0;
+
+    z-index: 99999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 25px;
+
+    background:
+        radial-gradient(
+            circle at 15% 20%,
+            rgba(201, 168, 76, 0.16),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 85% 80%,
+            rgba(26, 58, 110, 0.75),
+            transparent 35%
+        ),
+        #051328;
+
+    backdrop-filter: blur(12px);
+
+    opacity: 0;
+    visibility: hidden;
+
+    transition:
+        opacity 0.3s ease,
+        visibility 0.3s ease;
+}
+
+.account-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+/* =========================================================
+   VENTANA
+========================================================= */
+
+.account-modal {
+    position: relative;
+
+    width: min(100%, 520px);
+    max-height: 92vh;
+    overflow-y: auto;
+
+    padding: 42px 42px 34px;
+
+    background: #ffffff;
+
+    border-radius: 24px;
+    border: 1px solid rgba(201, 168, 76, 0.35);
+
+    box-shadow:
+        0 35px 90px rgba(0, 0, 0, 0.38),
+        0 0 0 1px rgba(255, 255, 255, 0.08);
+
+    transform: translateY(25px) scale(0.97);
+
+    transition: transform 0.35s cubic-bezier(.2,.8,.2,1);
+}
+
+.account-overlay.open .account-modal {
+    transform: translateY(0) scale(1);
+}
+
+
+/* LÍNEA DORADA SUPERIOR */
+
+.account-modal::before {
+    content: "";
+
+    position: absolute;
+    top: 0;
+    left: 50%;
+
+    width: 120px;
+    height: 4px;
+
+    transform: translateX(-50%);
+
+    background: linear-gradient(
+        90deg,
+        #a88a3a,
+        #d4b96a,
+        #a88a3a
+    );
+
+    border-radius: 0 0 10px 10px;
+}
+
+
+/* =========================================================
+   CERRAR
+========================================================= */
+
+.account-close {
+    position: absolute;
+
+    top: 18px;
+    right: 18px;
+
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #f5f7fa;
+    color: #0a1f44;
+
+    font-size: 17px;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.account-close:hover {
+    background: #0a1f44;
+    color: #ffffff;
+    transform: rotate(90deg);
+}
+
+
+/* =========================================================
+   MARCA
+========================================================= */
+
+.account-brand {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    margin-bottom: 30px;
+}
+
+.account-brand img {
+    width: 54px;
+    height: 54px;
+
+    object-fit: contain;
+
+    padding: 6px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e8ee;
+    border-radius: 13px;
+}
+
+.account-brand div {
+    display: flex;
+    flex-direction: column;
+}
+
+.account-brand span {
+    color: #c9a84c;
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 3px;
+}
+
+.account-brand strong {
+    margin-top: 2px;
+
+    color: #0a1f44;
+
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.account-heading {
+    margin-bottom: 25px;
+}
+
+.account-eyebrow {
+    display: inline-block;
+
+    margin-bottom: 8px;
+
+    color: #a88a3a;
+
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 2.5px;
+}
+
+.account-heading h2 {
+    margin: 0 0 8px;
+
+    color: #0a1f44;
+
+    font-size: 32px;
+    line-height: 1.1;
+    font-weight: 900;
+}
+
+.account-heading p {
+    margin: 0;
+
+    color: #6b7b8e;
+
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   INICIAR SESIÓN / CREAR CUENTA
+========================================================= */
+
+.account-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    padding: 5px;
+    margin-bottom: 27px;
+
+    background: #f1f3f7;
+
+    border-radius: 12px;
+}
+
+.account-tab {
+    padding: 12px 10px;
+
+    border: none;
+    border-radius: 9px;
+
+    background: transparent;
+    color: #6b7b8e;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+}
+
+.account-tab.active {
+    background: #0a1f44;
+    color: #ffffff;
+
+    box-shadow: 0 5px 15px rgba(10, 31, 68, 0.20);
+}
+
+
+/* =========================================================
+   FORMULARIOS
+========================================================= */
+
+.account-form {
+    display: block;
+}
+
+.account-form--hidden {
+    display: none;
+}
+
+.account-field {
+    margin-bottom: 18px;
+}
+
+.account-field label {
+    display: block;
+
+    margin: 0 0 8px 3px;
+
+    color: #0a1f44;
+
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+}
+
+.account-input {
+    position: relative;
+}
+
+.account-input i {
+    position: absolute;
+
+    left: 17px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: #c9a84c;
+
+    font-size: 15px;
+
+    pointer-events: none;
+}
+
+.account-input input {
+    width: 100%;
+    height: 55px;
+
+    box-sizing: border-box;
+
+    padding: 0 18px 0 47px;
+
+    border: 1.5px solid #dfe3e9;
+    border-radius: 12px;
+
+    outline: none;
+
+    background: #ffffff;
+    color: #0a1f44;
+
+    font-family: inherit;
+    font-size: 14px;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.account-input input::placeholder {
+    color: #a8b0bb;
+}
+
+.account-input input:focus {
+    border-color: #c9a84c;
+
+    background: #fffefa;
+
+    box-shadow:
+        0 0 0 4px rgba(201, 168, 76, 0.12);
+}
+
+
+/* =========================================================
+   MENSAJES
+========================================================= */
+
+.account-message {
+    display: none;
+
+    margin: 4px 0 16px;
+    padding: 11px 13px;
+
+    border-radius: 9px;
+
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+.account-message.error {
+    display: block;
+
+    background: #fff2f2;
+    color: #9d2929;
+
+    border: 1px solid #f1cccc;
+}
+
+.account-message.success {
+    display: block;
+
+    background: #effaf3;
+    color: #267342;
+
+    border: 1px solid #cce9d5;
+}
+
+
+/* =========================================================
+   BOTÓN PRINCIPAL
+========================================================= */
+
+.account-submit {
+    width: 100%;
+    height: 56px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 13px;
+
+    margin-top: 7px;
+
+    border: none;
+    border-radius: 12px;
+
+    background: linear-gradient(
+        135deg,
+        #c9a84c,
+        #d4b96a
+    );
+
+    color: #071a38;
+
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 1px;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 10px 25px rgba(201, 168, 76, 0.25);
+
+    transition: all 0.25s ease;
+}
+
+.account-submit:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 14px 30px rgba(201, 168, 76, 0.35);
+}
+
+.account-submit i {
+    transition: transform 0.25s ease;
+}
+
+.account-submit:hover i {
+    transform: translateX(4px);
+}
+
+
+/* =========================================================
+   PIE
+========================================================= */
+
+.account-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    margin-top: 25px;
+    padding-top: 20px;
+
+    border-top: 1px solid #edf0f4;
+
+    color: #8793a2;
+
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+}
+
+.account-footer i {
+    color: #c9a84c;
+}
+
+
+/* =========================================================
+   MÓVIL
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .account-btn {
+        margin-left: auto;
+        margin-right: 12px;
+
+        width: 42px;
+        height: 42px;
+
+        padding: 0;
+
+        border-radius: 50%;
+    }
+
+    .account-btn i {
+        font-size: 16px;
+    }
+
+    .account-btn {
+        font-size: 0;
+    }
+
+    .account-overlay {
+        padding: 0;
+
+        align-items: flex-end;
+    }
+
+    .account-modal {
+        width: 100%;
+        max-height: 94vh;
+
+        padding:
+            35px
+            24px
+            calc(28px + env(safe-area-inset-bottom));
+
+        border-radius: 25px 25px 0 0;
+
+        border-bottom: none;
+    }
+
+    .account-heading h2 {
+        font-size: 28px;
+    }
+
+    .account-brand {
+        margin-bottom: 25px;
+    }
+
+    .account-brand img {
+        width: 48px;
+        height: 48px;
+    }
+
+    .account-input input {
+        height: 58px;
+        font-size: 16px;
+    }
+
+    .account-submit {
+        height: 58px;
+    }
+
+}
+
+/*==================================================
+PORTAL DEL CLIENTE
+==================================================*/
+
+.client-portal{
+
+position:fixed;
+inset:0;
+
+background:rgba(7,20,50,.78);
+
+backdrop-filter:blur(10px);
+
+display:none;
+
+align-items:center;
+justify-content:center;
+
+padding:30px;
+
+z-index:99999;
+
+}
+
+.client-portal.open{
+
+display:flex;
+
+animation:fadePortal .35s ease;
+
+}
+
+.client-portal-card{
+
+width:100%;
+max-width:650px;
+
+background:#ffffff;
+
+border-radius:28px;
+
+overflow:hidden;
+
+box-shadow:0 30px 80px rgba(0,0,0,.30);
+
+position:relative;
+
+}
+
+.client-header{
+
+background:linear-gradient(135deg,#071b46,#0d2c73);
+
+padding:45px;
+
+color:#fff;
+
+}
+
+.client-header h2{
+
+font-size:38px;
+
+font-weight:800;
+
+margin-bottom:8px;
+
+}
+
+.client-header p{
+
+opacity:.9;
+
+font-size:18px;
+
+}
+
+.client-information{
+
+padding:40px;
+
+}
+
+.client-information h3{
+
+font-size:15px;
+
+letter-spacing:3px;
+
+color:#c9a84c;
+
+margin-bottom:25px;
+
+}
+
+.client-item{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:18px 0;
+
+border-bottom:1px solid #ececec;
+
+}
+
+.client-item span{
+
+color:#777;
+
+font-size:15px;
+
+}
+
+.client-item strong{
+
+font-size:18px;
+
+color:#071b46;
+
+}
+
+.client-actions{
+
+padding:35px;
+
+display:flex;
+
+flex-direction:column;
+
+gap:15px;
+
+background:#f7f8fc;
+
+}
+
+.client-button{
+
+height:58px;
+
+border:none;
+
+border-radius:15px;
+
+cursor:pointer;
+
+font-size:17px;
+
+font-weight:700;
+
+transition:.25s;
+
+background:#071b46;
+
+color:#fff;
+
+}
+
+.client-button:hover{
+
+transform:translateY(-2px);
+
+background:#0b2d73;
+
+}
+
+.client-button-danger{
+
+background:#c9a84c;
+
+color:#071b46;
+
+}
+
+.client-button-danger:hover{
+
+background:#b7963e;
+
+}
+
+.client-close{
+
+position:absolute;
+
+top:20px;
+
+right:20px;
+
+width:48px;
+
+height:48px;
+
+border-radius:50%;
+
+border:none;
+
+background:#ffffff;
+
+cursor:pointer;
+
+font-size:18px;
+
+color:#071b46;
+
+box-shadow:0 10px 25px rgba(0,0,0,.15);
+
+}
+
+@keyframes fadePortal{
+
+from{
+
+opacity:0;
+transform:scale(.95);
+
+}
+
+to{
+
+opacity:1;
+transform:scale(1);
+
+}
+
+}
+
+    </style>
+</head>
+<body>
+
+    <!-- ===== SPLASH SCREEN ===== -->
+    <div id="splash-screen">
+        <div class="splash-logo">
+           <div class="splash-logo-icon">
+<img src="logo.png" alt="Distribuidora Var San">
+</div>
+            <div class="splash-logo-text">
+                <h1>Distribuidora Var San</h1>
+                <p>Soluciones en limpieza y protección para tu empresa</p>
+            </div>
+        </div>
+        <div class="splash-stars">
+<i class="fas fa-star"></i>
+<i class="fas fa-star"></i>
+<i class="fas fa-star"></i>
+<i class="fas fa-star"></i>
+<i class="fas fa-star"></i>
+</div>
+        <p class="splash-tagline">"Calidad y confianza en cada suministro."</p>
+    </div>
+
+  <!-- ===== NAVBAR ===== -->
+<nav class="navbar" id="navbar">
+    <div class="nav-container">
+
+        <a href="#" class="nav-logo">
+            <div class="nav-logo-icon">
+                <img src="logo.png" alt="Distribuidora Var San">
+            </div>
+
+            <div class="nav-logo-text">
+                <span>Distribuidora Var San</span>
+                <small>Soluciones en limpieza y protección para tu empresa</small>
+            </div>
+        </a>
+
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#inicio">Inicio</a></li>
+            <li><a href="#nosotros">¿Quiénes Somos?</a></li>
+            <li><a href="#catalogo">Catálogo</a></li>
+            <li><a href="#compromiso">Compromiso</a></li>
+            <li><a href="#proceso">Proceso</a></li>
+            <li><a href="#contacto">Contacto</a></li>
+            <li><a href="#formulario">Contáctenos</a></li>
+        </ul>
+
+        <!-- BOTÓN DE CUENTA -->
+<button class="account-btn" id="openAccount" type="button">
+    <i class="fas fa-user"></i>
+    Mi cuenta
+</button>
+
+
+  
+        <!-- MENÚ MÓVIL -->
+        <div class="nav-toggle" id="navToggle">
+            <i class="fas fa-bars"></i>
+        </div>
+
+    </div>
+</nav>
+
+<!-- =========================================================
+     PANEL DE CUENTA
+========================================================= -->
+
+<div class="account-overlay" id="accountOverlay">
+
+    <div class="account-modal">
+
+        <!-- CERRAR -->
+        <button
+            class="account-close"
+            id="closeAccount"
+            type="button"
+            aria-label="Cerrar"
+        >
+            <i class="fas fa-xmark"></i>
+        </button>
+
+
+        <!-- IDENTIDAD -->
+        <div class="account-brand">
+
+            <img src="logo.png" alt="Distribuidora Var San">
+
+            <div>
+                <span>DISTRIBUIDORA</span>
+                <strong>VAR SAN</strong>
+            </div>
+
+        </div>
+
+
+        <!-- ENCABEZADO -->
+        <div class="account-heading">
+
+            <span class="account-eyebrow">
+                PORTAL DE CLIENTES
+            </span>
+
+            <h2 id="accountTitle">
+                Inicia sesión
+            </h2>
+
+            <p id="accountSubtitle">
+                Accede a tu cuenta de Distribuidora Var San.
+            </p>
+
+        </div>
+  
+
+           
+<div class="account-tabs">
+
+    <button
+    class="account-tab active"
+    id="loginTab"
+    data-account-tab="login"
+    type="button">
+    Iniciar sesión
+</button>
+
+    <button
+        id="registerTab"
+        class="account-tab"
+        data-account-tab="register"
+        type="button">
+        Crear cuenta
+    </button>
+
+</div>
+
+
+        <!-- ==============================
+             INICIAR SESIÓN
+        =============================== -->
+
+        <form class="account-form" id="loginForm">
+
+            <div class="account-field">
+
+                <label for="loginEmail">
+                    CORREO ELECTRÓNICO
+                </label>
+
+                <div class="account-input">
+
+                    <i class="fas fa-envelope"></i>
+
+                    <input
+                        type="email"
+                        id="loginEmail"
+                        placeholder="correo@empresa.com"
+                        autocomplete="email"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="account-field">
+
+                <label for="loginPassword">
+                    CONTRASEÑA
+                </label>
+
+                <div class="account-input">
+
+                    <i class="fas fa-lock"></i>
+
+                    <input
+                        type="password"
+                        id="loginPassword"
+                        placeholder="Tu contraseña"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="account-message"
+                id="loginMessage"
+            ></div>
+<button
+    class="account-submit"
+    type="submit">
+    <span>INICIAR SESIÓN</span>
+    <i class="fas fa-arrow-right"></i>
+</button>
+
+</form>
+
+         
+
+
+        <!-- ==============================
+             CREAR CUENTA
+        =============================== -->
+
+        <form
+            class="account-form account-form--hidden"
+            id="registerForm"
+        >
+
+            <div class="account-field">
+
+                <label for="registerName">
+                    NOMBRE
+                </label>
+
+                <div class="account-input">
+
+                    <i class="fas fa-user"></i>
+
+                    <input
+                        type="text"
+                        id="registerName"
+                        placeholder="Tu nombre"
+                        autocomplete="name"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="account-field">
+
+                <label for="registerCompany">
+                    EMPRESA
+                </label>
+
+                <div class="account-input">
+
+                    <i class="fas fa-building"></i>
+
+                    <input
+                        type="text"
+                        id="registerCompany"
+                        placeholder="Nombre de tu empresa"
+                        autocomplete="organization"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="account-field">
+
+                <label for="registerEmail">
+                    CORREO ELECTRÓNICO
+                </label>
+
+                <div class="account-input">
+
+                    <i class="fas fa-envelope"></i>
+
+                    <input
+                        type="email"
+                        id="registerEmail"
+                        placeholder="correo@empresa.com"
+                        autocomplete="email"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="account-field">
+
+                <label for="registerPassword">
+                    CONTRASEÑA
+                </label>
+
+                <div class="account-input">
+
+                    <i class="fas fa-lock"></i>
+
+                    <input
+                        type="password"
+                        id="registerPassword"
+                        placeholder="Mínimo 6 caracteres"
+                        autocomplete="new-password"
+                        minlength="6"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="account-field">
+
+                <label for="registerPasswordConfirm">
+                    CONFIRMAR CONTRASEÑA
+                </label>
+
+                <div class="account-input">
+
+                    <i class="fas fa-shield-halved"></i>
+
+                    <input
+                        type="password"
+                        id="registerPasswordConfirm"
+                        placeholder="Repite tu contraseña"
+                        autocomplete="new-password"
+                        minlength="6"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="account-message"
+                id="registerMessage"
+            ></div>
+
+
+          <button
+    class="account-submit"
+    type="submit">
+    <span>CREAR CUENTA</span>
+    <i class="fas fa-arrow-right"></i>
+</button>
+
+</form>
+
+
+        <!-- PIE -->
+        <div class="account-footer">
+            <i class="fas fa-lock"></i>
+            <span>Acceso seguro para clientes Var San</span>
+        </div>
+
+    </div>
+
+</div>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero" id="inicio">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge"><i class="fas fa-shield-alt"></i> Distribuidora Var San</div>
+                <h1 class="hero-title">Soluciones profesionales para cada <span>espacio de trabajo</span>.</h1>
+                <p class="hero-text">En Distribuidora Var San ofrecemos productos cuidadosamente seleccionados para cubrir las necesidades de limpieza, higiene, mantenimiento y protección de empresas, oficinas, industrias, comercios e instituciones. Nuestro compromiso es brindar atención personalizada, calidad en cada producto y un servicio confiable para nuestros clientes.</p>
+                <div class="hero-buttons">
+                    <a href="#catalogo" class="btn btn-primary"><i class="fas fa-book-open"></i> Ver catálogo</a>
+                    <a href="#contacto" class="btn btn-outline"><i class="fas fa-file-invoice"></i> Solicitar cotización</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="hero-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1669101602108-fa5ba89507ee?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Limpieza profesional">
+                    <div class="hero-image-overlay"><p>Productos de <span>calidad garantizada</span> para tu empresa</p></div>
+                </div>
+                <div class="hero-float-card card-1">
+                    <i class="fas fa-award"></i>
+                    <div><h4>Calidad Garantizada</h4><p>Productos seleccionados</p></div>
+                </div>
+                <div class="hero-float-card card-2">
+                    <i class="fas fa-headset"></i>
+                    <div><h4>Atención Personalizada</h4><p>Servicio cercano y confiable</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== ABOUT ===== -->
+    <section class="about" id="nosotros">
+        <div class="container">
+            <div class="about-grid reveal">
+                <div class="about-image">
+                    <div class="about-image-main">
+                        <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80" alt="Distribuidora Var San">
+                    </div>
+                    <div class="about-image-accent">
+
+    <i class="fas fa-award"></i>
+
+    <h3>Servicio</h3>
+
+    <p>Atención personalizada</p>
+
+</div>
+                </div>
+                <div class="about-content">
+                    <span class="section-label">¿Quiénes Somos?</span>
+                    <h3>Comprometidos con brindar soluciones para tu empresa.</h3>
+                    <p>Distribuidora Var San nace con el propósito de ofrecer productos que faciliten las actividades de limpieza, mantenimiento y seguridad en empresas de distintos sectores.</p>
+                    <p>Nuestro enfoque es proporcionar soluciones prácticas mediante un catálogo de productos seleccionados por su calidad, buscando construir relaciones de confianza con cada cliente a través de un servicio cercano, atención personalizada y un compromiso constante con la excelencia.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== MISSION VISION ===== -->
+    <section class="mv-section">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-label">Nuestra Esencia</span>
+                <h2 class="section-title">Lo que nos <span>impulsa</span> cada día</h2>
+            </div>
+            <div class="mv-grid reveal">
+                <div class="mv-card">
+                    <div class="mv-icon"><i class="fas fa-bullseye"></i></div>
+                    <h3>Nuestra Misión</h3>
+                    <p>Brindar soluciones integrales en productos de limpieza, higiene, mantenimiento y equipo de protección personal, ofreciendo calidad, atención personalizada y un servicio confiable que contribuya al buen funcionamiento de empresas e instituciones.</p>
+                </div>
+                <div class="mv-card">
+                    <div class="mv-icon"><i class="fas fa-eye"></i></div>
+                    <h3>Nuestra Visión</h3>
+                    <p>Consolidarnos como una distribuidora reconocida por la calidad de nuestros productos, la confianza que generamos en nuestros clientes y nuestro compromiso con un servicio eficiente, buscando crecer de manera constante y convertirnos en un aliado estratégico para empresas de distintos sectores.</p>
+                </div>
+                <div class="mv-card">
+                    <div class="mv-icon"><i class="fas fa-heart"></i></div>
+                    <h3>Nuestros Valores</h3>
+                    <p>Calidad, Honestidad, Responsabilidad, Compromiso, Confianza, Atención personalizada, Innovación y Trabajo en equipo. Cada valor guía nuestras acciones y define la manera en que servimos a nuestros clientes.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== VALUES ===== -->
+    <section class="values-section">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-label">Nuestros Valores</span>
+                <h2 class="section-title">Principios que nos <span>definen</span></h2>
+            </div>
+            <div class="values-grid reveal">
+                <div class="value-item"><i class="fas fa-gem"></i><h4>Calidad</h4></div>
+                <div class="value-item"><i class="fas fa-balance-scale"></i><h4>Honestidad</h4></div>
+                <div class="value-item"><i class="fas fa-clipboard-check"></i><h4>Responsabilidad</h4></div>
+                <div class="value-item"><i class="fas fa-hand-holding-heart"></i><h4>Compromiso</h4></div>
+                <div class="value-item"><i class="fas fa-shield-alt"></i><h4>Confianza</h4></div>
+                <div class="value-item"><i class="fas fa-user-tie"></i><h4>Atención personalizada</h4></div>
+                <div class="value-item"><i class="fas fa-lightbulb"></i><h4>Innovación</h4></div>
+                <div class="value-item"><i class="fas fa-users"></i><h4>Trabajo en equipo</h4></div>
+            </div>
+        </div>
+    </section>
+
+<!-- ===== PDF CATALOG ===== -->
+
+<section class="pdf-catalog" id="catalogo-pdf">
+
+<div class="container">
+
+<div class="section-header reveal">
+
+<span class="section-label">
+Catálogo Digital
+</span>
+
+<h2 class="section-title">
+Consulta nuestro <span>catálogo completo</span>
+</h2>
+
+<p class="section-text">
+Visualiza nuestro catálogo directamente desde la página o descárgalo en formato PDF.
+</p>
+
+</div>
+
+
+
+<div class="pdf-buttons reveal">
+
+    <a href="catalogo.pdf"
+       class="btn btn-primary"
+       target="_blank">
+
+        <i class="fas fa-shield-halved"></i>
+        Catálogo Seguridad Industrial
+
+    </a>
+
+    <a href="catalogo-medico.pdf"
+       class="btn btn-primary"
+       target="_blank">
+
+        <i class="fas fa-briefcase-medical"></i>
+        Catálogo Médico
+
+    </a>
+
+</div>
+
+</div>
+
+</section>
+
+ 
+<!-- =========================================================
+CATÁLOGO INTERACTIVO
+========================================================= -->
+
+<section class="catalog-showcase" id="catalogo">
+
+<div class="container">
+
+<!-- =================================================
+ENCABEZADO
+================================================== -->
+
+<div class="catalog-showcase__header reveal">
+
+<span class="section-label">
+¿QUÉ OFRECEMOS?
+</span>
+
+<h2 class="section-title">
+Catálogo de <span>Productos</span>
+</h2>
+
+<p class="section-text">
+Explora nuestras soluciones de protección, seguridad
+y suministros para distintos entornos profesionales.
+</p>
+
+</div>
+
+
+<!-- =================================================
+SELECTOR DE LÍNEA
+================================================== -->
+
+<div class="catalog-lines reveal">
+
+<button
+class="catalog-line active"
+data-line="industrial"
+type="button"
+>
+<span class="catalog-line__number">01</span>
+
+<span class="catalog-line__text">
+SEGURIDAD INDUSTRIAL
+</span>
+</button>
+
+
+<button
+class="catalog-line"
+data-line="medical"
+type="button"
+>
+<span class="catalog-line__number">02</span>
+
+<span class="catalog-line__text">
+LÍNEA MÉDICA
+</span>
+</button>
+
+</div>
+
+
+<!-- =================================================
+CATEGORÍAS
+El JavaScript cambiará estas categorías
+dependiendo de la línea seleccionada.
+================================================== -->
+
+<div
+class="catalog-tabs reveal"
+id="catalogTabs"
+>
+
+<button
+class="catalog-tab active"
+data-product="0"
+type="button"
+>
+Guantes
+</button>
+
+<button
+class="catalog-tab"
+data-product="1"
+type="button"
+>
+Respiratoria
+</button>
+
+<button
+class="catalog-tab"
+data-product="2"
+type="button"
+>
+Ocular
+</button>
+
+<button
+class="catalog-tab"
+data-product="3"
+type="button"
+>
+Auditiva
+</button>
+
+<button
+class="catalog-tab"
+data-product="4"
+type="button"
+>
+Cascos
+</button>
+
+<button
+class="catalog-tab"
+data-product="5"
+type="button"
+>
+Alturas
+</button>
+
+<button
+class="catalog-tab"
+data-product="6"
+type="button"
+>
+Ropa industrial
+</button>
+
+<button
+class="catalog-tab"
+data-product="7"
+type="button"
+>
+Seguridad vial
+</button>
+
+<button
+class="catalog-tab"
+data-product="8"
+type="button"
+>
+LOTO
+</button>
+
+</div>
+
+
+<!-- =================================================
+ESCENARIO DEL PRODUCTO
+================================================== -->
+
+<div class="catalog-stage reveal">
+
+
+<!-- =============================================
+IMAGEN
+============================================== -->
+
+<div class="catalog-stage__visual">
+
+<div class="catalog-counter">
+
+<span id="catalogCurrent">
+01
+</span>
+
+<span>/</span>
+
+<span id="catalogTotal">
+09
+</span>
+
+</div>
+
+
+<img
+id="catalogImage"
+src="https://images.unsplash.com/photo-1628235176517-71013205a2de?q=85&w=1400&auto=format&fit=crop"
+alt="Guantes de seguridad"
+>
+
+
+<!-- FLECHA ANTERIOR -->
+
+<button
+class="catalog-arrow catalog-arrow--prev"
+id="catalogPrev"
+type="button"
+aria-label="Categoría anterior"
+>
+
+<i class="fas fa-arrow-left"></i>
+
+</button>
+
+
+<!-- FLECHA SIGUIENTE -->
+
+<button
+class="catalog-arrow catalog-arrow--next"
+id="catalogNext"
+type="button"
+aria-label="Categoría siguiente"
+>
+
+<i class="fas fa-arrow-right"></i>
+
+</button>
+
+</div>
+
+
+<!-- =============================================
+INFORMACIÓN
+============================================== -->
+
+<div class="catalog-stage__info">
+
+
+<!-- SUPERIOR -->
+
+<div class="catalog-stage__top">
+
+<span
+class="catalog-stage__category"
+id="catalogCategory"
+>
+SEGURIDAD INDUSTRIAL
+</span>
+
+
+<span
+class="catalog-stage__number"
+id="catalogNumber"
+>
+01
+</span>
+
+</div>
+
+
+<!-- TÍTULO -->
+
+<h3 id="catalogTitle">
+Guantes de Seguridad
+</h3>
+
+
+<!-- DESCRIPCIÓN -->
+
+<p
+class="catalog-stage__description"
+id="catalogDescription"
+>
+Soluciones de protección para las manos
+diseñadas para distintos riesgos, procesos
+y entornos de trabajo.
+</p>
+
+
+<!-- =========================================
+FAMILIAS DE PRODUCTOS
+========================================== -->
+
+<div
+class="catalog-features"
+id="catalogFeatures"
+>
+
+<span>Anticorte</span>
+<span>Recubiertos</span>
+<span>Contra químicos</span>
+<span>Desechables</span>
+<span>Textiles</span>
+<span>De piel</span>
+
+</div>
+
+
+<!-- =========================================
+NOTA NORMATIVA
+Se utilizará principalmente en línea médica
+========================================== -->
+
+<div
+class="catalog-standard"
+id="catalogStandard"
+hidden
+>
+
+<i class="fa-solid fa-shield-halved"></i>
+
+<span id="catalogStandardText"></span>
+
+</div>
+
+
+<!-- =========================================
+CATÁLOGO PDF
+========================================== -->
+
+<a
+href="catalogo.pdf"
+target="_blank"
+rel="noopener noreferrer"
+class="catalog-main-link"
+id="catalogMainLink"
+>
+
+<span>
+Consultar catálogo completo
+</span>
+
+<i class="fas fa-arrow-up-right-from-square"></i>
+
+</a>
+
+</div>
+
+</div>
+
+
+<!-- =================================================
+NAVEGACIÓN INFERIOR
+================================================== -->
+
+<div class="catalog-navigation">
+
+<div class="catalog-progress">
+
+<span id="catalogProgress"></span>
+
+</div>
+
+<div class="catalog-navigation__bottom">
+
+<p id="catalogNavigationText">
+Utiliza las flechas para explorar nuestras categorías.
+</p>
+
+
+<span
+class="catalog-active-line"
+id="catalogActiveLine"
+>
+SEGURIDAD INDUSTRIAL
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+    <!-- ===== COMMITMENT ===== -->
+    <section class="commitment" id="compromiso">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-label">Nuestro Compromiso</span>
+                <h2 class="section-title">Más allá de un <span>producto</span></h2>
+            </div>
+            <div class="commitment-content reveal">
+                <p>En Distribuidora Var San creemos que un buen servicio va más allá de entregar un producto. Buscamos ofrecer atención personalizada, respuestas oportunas y soluciones adaptadas a las necesidades de cada cliente. Nos esforzamos por construir relaciones basadas en la confianza, el profesionalismo y el compromiso, acompañando a nuestros clientes durante todo el proceso de atención.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTORS ===== -->
+    <section class="sectors">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-label">¿A Quiénes Atendemos?</span>
+                <h2 class="section-title">Sectores que <span>servimos</span></h2>
+            </div>
+            <div class="sectors-grid reveal">
+                <div class="sector-item"><i class="fas fa-building"></i><h4>Empresas</h4></div>
+                <div class="sector-item"><i class="fas fa-briefcase"></i><h4>Oficinas</h4></div>
+                <div class="sector-item"><i class="fas fa-store"></i><h4>Comercios</h4></div>
+                <div class="sector-item"><i class="fas fa-industry"></i><h4>Industrias</h4></div>
+                <div class="sector-item"><i class="fas fa-school"></i><h4>Escuelas</h4></div>
+                <div class="sector-item"><i class="fas fa-hospital"></i><h4>Hospitales y Clínicas</h4></div>
+                <div class="sector-item"><i class="fas fa-utensils"></i><h4>Restaurantes</h4></div>
+                <div class="sector-item"><i class="fas fa-hotel"></i><h4>Hoteles</h4></div>
+                <div class="sector-item"><i class="fas fa-landmark"></i><h4>Instituciones</h4></div>
+                <div class="sector-item"><i class="fas fa-store-alt"></i><h4>Negocios en general</h4></div>
+            </div>
+        </div>
+    </section>
+
+
+
+<!-- MARCAS -->
+<section class="brands">
+<div class="brands-container">
+
+<div class="section-header">
+<span class="section-label">MARCAS</span>
+
+<h2 class="section-title">
+Marcas que trabajamos
+</h2>
+
+<p class="section-text">
+Distribuimos productos originales de fabricantes reconocidos por su calidad y seguridad.
+</p>
+
+</div>
+
+<div class="brands-grid">
+
+<div class="brand-card">
+<img src="dermacare.png" alt="DermaCare">
+</div>
+
+<div class="brand-card">
+<img src="3m.png" alt="3M">
+</div>
+
+<div class="brand-card">
+<img src="steelpro.png" alt="SteelPro Safety">
+</div>
+
+<div class="brand-card">
+<img src="suk.png" alt="SUK">
+</div>
+
+<div class="brand-card">
+<img src="safe.png" alt="SAFE">
+</div>
+
+<div class="brand-card">
+<img src="climax.png" alt="Climax">
+</div>
+
+<div class="brand-card">
+<img src="abus.png" alt="ABUS">
+</div>
+
+</div>
+
+</div>
+</section>
+    <!-- ===== WHY US ===== -->
+    <section class="why-us">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-label">¿Por Qué Elegirnos?</span>
+                <h2 class="section-title">Razones para confiar en <span>nosotros</span></h2>
+            </div>
+            <div class="why-grid reveal">
+                <div class="why-card"><div class="number">1</div><h4>Productos cuidadosamente seleccionados</h4><p>Cada producto en nuestro catálogo cumple con altos estándares de calidad.</p></div>
+                <div class="why-card"><div class="number">2</div><h4>Atención personalizada</h4><p>Trato cercano y adaptado a las necesidades específicas de cada cliente.</p></div>
+                <div class="why-card"><div class="number">3</div><h4>Cotizaciones rápidas</h4><p>Respuesta ágil a tus solicitudes de cotización para agilizar tu proceso.</p></div>
+                <div class="why-card"><div class="number">4</div><h4>Soluciones adaptadas a cada cliente</h4><p>Entendemos que cada empresa es única y ofrecemos soluciones a medida.</p></div>
+                <div class="why-card"><div class="number">5</div><h4>Servicio profesional</h4><p>Equipo capacitado y comprometido con brindar la mejor experiencia.</p></div>
+                <div class="why-card"><div class="number">6</div><h4>Compromiso con la calidad</h4><p>Garantizamos la excelencia en cada producto que distribuimos.</p></div>
+                <div class="why-card"><div class="number">7</div><h4>Respuesta ágil y eficiente</h4><p>Tiempos de respuesta optimizados para no hacer esperar a nuestros clientes.</p></div>
+                <div class="why-card"><div class="number">8</div><h4>Atención para empresas e instituciones</h4><p>Especializados en atender las necesidades del sector empresarial.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PROCESS ===== -->
+    <section class="process" id="proceso">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-label">Proceso de Atención</span>
+                <h2 class="section-title">Así de <span>sencillo</span> es trabajar con nosotros</h2>
+            </div>
+            <div class="process-steps reveal">
+                <div class="process-step">
+                    <div class="step-number">1</div>
+                    <h3>Solicita tu cotización</h3>
+                    <p>Contáctanos por WhatsApp, teléfono o correo electrónico y comparte los productos que necesitas.</p>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">2</div>
+                    <h3>Elaboramos tu propuesta</h3>
+                    <p>Revisamos tu solicitud y preparamos una cotización personalizada de acuerdo con tus requerimientos.</p>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">3</div>
+                    <h3>Coordinamos tu pedido</h3>
+                    <p>Una vez aceptada la cotización, coordinamos contigo la entrega o la recolección de los productos en la fecha acordada.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CONTACT ===== -->
+    <section class="contact" id="contacto">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-label">Contacto</span>
+                <h2 class="section-title">Estamos listos para <span>ayudarte</span></h2>
+            </div>
+            <div class="contact-grid reveal">
+                <div class="contact-info">
+                    <h3>Si deseas solicitar una cotización o conocer más acerca de nuestros productos, puedes comunicarte con nosotros mediante los siguientes medios.</h3>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h4>Correo electrónico</h4>
+                            <p><a href="mailto:distribuidora.varsan@outlook.com">distribuidora.varsan@outlook.com</a></p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone-alt"></i>
+                        <div>
+                            <h4>Teléfono</h4>
+                            <p><a href="tel:+528332189032">+52 (833) 218 9032</a></p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fab fa-whatsapp"></i>
+                        <div>
+                            <h4>WhatsApp</h4>
+                            <p>Botón flotante disponible durante toda la navegación para solicitar cotizaciones de forma rápida y sencilla.</p>
+                        </div>
+                    </div>
+                    <div class="contact-note">
+                        <p>Actualmente la atención se realiza de manera personalizada y la entrega o recolección de los productos se coordina previamente con cada cliente, de acuerdo con las características de su pedido.</p>
+                    </div>
+                </div>
+                <div class="contact-image">
+                    <img src="https://images.unsplash.com/photo-1423666639041-f56000c27a9a?w=800&q=80" alt="Contacto">
+                </div>
+            </div>
+        </div>
+    </section>
+
+<!-- ===== FORMULARIO DE CONTACTO ===== -->
+
+<section class="contact-form-section" id="formulario">
+<div class="container">
+
+<div class="section-header reveal">
+<span class="section-label">Contáctenos</span>
+<h2 class="section-title">Solicita información o una <span>cotización</span></h2>
+<p class="section-text">
+Déjanos tus datos y nos pondremos en contacto contigo para atender tu solicitud.
+</p>
+</div>
+
+
+<form class="contact-form reveal" onsubmit="enviarWhatsApp(event)">
+
+<div class="form-group">
+<label>Nombre</label>
+<input type="text" placeholder="Escribe tu nombre">
+</div>
+
+
+<div class="form-group">
+<label>Correo electrónico</label>
+<input type="email" placeholder="Escribe tu correo electrónico">
+</div>
+
+
+<div class="form-group">
+<label>Teléfono</label>
+<input type="tel" placeholder="Escribe tu número telefónico">
+</div>
+
+
+<div class="form-group">
+<label>Comentarios</label>
+<textarea placeholder="Escribe tu mensaje"></textarea>
+</div>
+
+
+<button type="submit" class="btn btn-primary">
+<i class="fas fa-paper-plane"></i>
+Enviar formulario
+</button>
+
+</form>
+
+</div>
+</section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-top">
+                <div>
+                    <div class="footer-brand">
+<div class="footer-brand-icon">
+<img src="logo.png" alt="Distribuidora Var San">
+</div>
+<div class="footer-brand-text">
+<h4>Distribuidora Var San</h4>
+                            <p>Soluciones en limpieza y protección</p>
+                        </div>
+                    </div>
+                    <p class="footer-desc">Soluciones en limpieza y protección para tu empresa. Comprometidos con brindar soluciones confiables en limpieza, mantenimiento y protección para empresas, comercios e instituciones.</p>
+                    <div class="footer-social">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Navegación</h4>
+                    <ul>
+                        <li><a href="#inicio">Inicio</a></li>
+                        <li><a href="#nosotros">¿Quiénes Somos?</a></li>
+                        <li><a href="#catalogo">Catálogo</a></li>
+<li><a href="#catalogo-pdf">Catálogo PDF</a></li>
+                        <li><a href="#contacto">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Productos</h4>
+                    <ul>
+                        <li><a href="#catalogo">Productos de Limpieza</a></li>
+                        <li><a href="#catalogo">Equipo de Protección</a></li>
+                        <li><a href="#catalogo">Ferretería</a></li>
+                        <li><a href="#catalogo">Lubricantes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Contacto</h4>
+                    <ul>
+                        <li><a href="mailto:distribuidora.varsan@outlook.com">distribuidora.varsan@outlook.com</a></li>
+                        <li><a href="tel:+528332189032">+52 (833) 218 9032</a></li>
+                        <li><a href="#contacto">Solicitar cotización</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 Distribuidora Var San. Todos los derechos reservados. | Soluciones en limpieza y protección para tu empresa.</p>
+            </div>
+        </div>
+<div class="footer-legal">
+<a href="privacidad.html">Aviso de Privacidad</a>
+<span>|</span>
+<a href="cookies.html">Política de Cookies</a>
+<span>|</span>
+<a href="terminos.html">Términos y Condiciones</a>
+</div>
+
+    </footer>
+
+
+<!-- =======================================================
+     PORTAL DEL CLIENTE
+======================================================= -->
+
+<div class="client-portal" id="clientPortal">
+
+    <div class="client-portal-card">
+
+        <button
+            class="client-close"
+            id="closeClientPortal">
+
+            <i class="fas fa-times"></i>
+
+        </button>
+
+       <div class="client-header">
+
+   
+    <div class="client-header-info">
+
+        <small id="clientGreeting">
+            Buenos días
+        </small>
+
+        <h2 id="clientWelcomeName">
+
+            Cliente Var San
+
+        </h2>
+
+       <p id="clientWelcome">
+
+    Bienvenido al Portal de Clientes de
+    Distribuidora Var San.
+
+</p>
+
+    </div>
+
+</div>
+       <div class="client-information">
+
+    <div class="client-card">
+
+        <span>Nombre</span>
+
+        <strong id="clientName">
+
+            Usuario
+
+        </strong>
+
+    </div>
+
+    <div class="client-card">
+
+        <span>Correo electrónico</span>
+
+        <strong id="clientEmail">
+
+            correo@empresa.com
+
+        </strong>
+
+    </div>
+
+    <div class="client-card">
+
+        <span>Empresa</span>
+
+        <strong id="clientCompany">
+
+            No especificada
+
+        </strong>
+
+    </div>
+
+</div>
+        <div class="client-actions">
+
+            <button class="client-button" id="profileBtn">
+                Mi perfil
+            </button>
+
+            <button class="client-button" id="settingsBtn">
+                Configuración
+            </button>
+
+            <button
+                class="client-button client-button-danger"
+                id="logoutBtn">
+                Cerrar sesión
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =====================================
+MI PERFIL
+===================================== -->
+
+<div class="profile-page" id="profilePage">
+
+    <div class="profile-card">
+
+        <button
+            class="profile-close"
+            id="closeProfile">
+
+            <i class="fas fa-times"></i>
+
+        </button>
+
+        <h2>
+
+            Mi perfil
+
+        </h2>
+
+        <div class="profile-field">
+
+            <label>Nombre</label>
+
+            <input
+                id="profileName"
+                type="text">
+
+        </div>
+
+        <div class="profile-field">
+
+            <label>Correo electrónico</label>
+
+            <input
+                id="profileEmail"
+                type="email"
+                disabled>
+
+        </div>
+
+        <div class="profile-field">
+
+            <label>Empresa</label>
+
+            <input
+                id="profileCompany"
+                type="text">
+
+        </div>
+
+        <button
+            class="profile-save"
+            id="saveProfile">
+
+            Guardar cambios
+
+        </button>
+
+    </div>
+
+</div>
+ 
+    <!-- ===== SCRIPTS ===== -->
+    <script>
+        // Splash Screen
+        setTimeout(() => {
+            document.getElementById('splash-screen').classList.add('hidden');
+        }, 3000);
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile menu toggle
+        document.getElementById('navToggle').addEventListener('click', () => {
+            document.getElementById('navLinks').classList.toggle('active');
+        });
+
+        // Close mobile menu on link click
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('navLinks').classList.remove('active');
+            });
+        });
+
+        // Scroll reveal animation
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+        revealElements.forEach(el => revealObserver.observe(el));
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+function enviarWhatsApp(e){
+
+e.preventDefault();
+
+let nombre = document.querySelector('.form-group input[type="text"]').value;
+let correo = document.querySelector('.form-group input[type="email"]').value;
+let telefono = document.querySelector('.form-group input[type="tel"]').value;
+let comentarios = document.querySelector('.form-group textarea').value;
+
+
+let mensaje =
+`Hola, Distribuidora Var San. Me gustaría solicitar información.
+
+Nombre: ${nombre}
+
+Correo: ${correo}
+
+Teléfono: ${telefono}
+
+Comentarios:
+${comentarios}`;
+
+
+let numero = "528332189032";
+
+let url = "https://wa.me/" + numero + "?text=" + encodeURIComponent(mensaje);
+
+window.open(url, "_blank");
+
+}
+
+
+    </script>
+
+
+<!-- BOTÓN CHATBOT FLOTANTE -->
+<div class="bot-float" onclick="abrirBot()">
+🤖
+</div>
+
+<!-- VENTANA DEL CHAT -->
+<div class="chatbot" id="chatbot">
+
+<div class="chat-header">
+<span>Distribuidora Varsan</span>
+<button onclick="cerrarBot()">×</button>
+</div>
+
+<div class="chat-body" id="chatBody">
+
+<div class="bot-msg">
+Hola 👋 Bienvenido a Distribuidora Var San.
+¿En qué podemos ayudarte?
+</div>
+
+<div class="opciones">
+<button onclick="pregunta('catalogo')">📦 Ver catálogo</button>
+<button onclick="pregunta('entregas')">🚚 ¿Dónde hacen entregas?</button>
+<button onclick="pregunta('telefono')">📞 Atención a clientes</button>
+<button onclick="pregunta('correo')">✉️ Correo electrónico</button>
+</div>
+
+</div>
+
+</div>
+<script>
+
+function abrirBot(){
+
+document.getElementById("chatbot").style.display="block";
+
+}
+
+
+function cerrarBot(){
+
+document.getElementById("chatbot").style.display="none";
+
+}
+
+
+function agregarMensaje(texto, clase){
+
+let chat=document.getElementById("chatBody");
+
+let mensaje=document.createElement("div");
+
+mensaje.className=clase;
+
+mensaje.innerHTML=texto;
+
+chat.appendChild(mensaje);
+
+chat.scrollTop=chat.scrollHeight;
+
+}
+
+
+
+function pregunta(opcion){
+
+
+let respuesta="";
+
+
+if(opcion=="catalogo"){
+
+agregarMensaje("📦 Ver catálogo","user-msg");
+
+respuesta=`
+Aquí puedes consultar nuestro catálogo actualizado:
+<br><br>
+<a href="catalogo.pdf" target="_blank">
+Abrir catálogo
+</a>
+`;
+
+}
+
+
+if(opcion=="entregas"){
+
+agregarMensaje("🚚 ¿Dónde hacen entregas?","user-msg");
+
+respuesta=
+"Actualmente realizamos entregas en Tampico, Ciudad Madero y Altamira.";
+
+}
+
+
+
+if(opcion=="telefono"){
+
+agregarMensaje("📞 Atención a clientes","user-msg");
+
+respuesta=
+"Nuestro número de atención a clientes es:<br><br>📱 +52 8332189032";
+
+}
+
+
+
+if(opcion=="correo"){
+
+agregarMensaje("✉️ Correo electrónico","user-msg");
+
+respuesta=
+"Nuestro correo de atención es:<br><br>📩 distribuidora.varsan@outlook.com";
+
+}
+
+
+
+setTimeout(function(){
+
+agregarMensaje(respuesta,"bot-msg");
+
+},500);
+
+
+}
+
+</script>
+<div id="cookie-banner" class="cookie-banner">
+<div class="cookie-content">
+<p>
+Querido usurario utilizamos cookies para mejorar tu experiencia de navegación. Al continuar usando este sitio, aceptas el uso de cookies. Puedes consultar nuestra
+<a href="privacidad.html">Política de Privacidad</a> y
+<a href="cookies.html">Política de Cookies</a>.
+</p>
+
+<div class="cookie-buttons">
+<button id="acceptCookies">Aceptar</button>
+<button id="rejectCookies" class="secondary">Rechazar</button>
+</div>
+</div>
+</div>
+
+<script>
+
+const banner=document.getElementById("cookie-banner");
+
+if(localStorage.getItem("cookiesDecision")){
+banner.style.display="none";
+}
+
+document.getElementById("acceptCookies").onclick=function(){
+localStorage.setItem("cookiesDecision","accepted");
+banner.style.display="none";
+}
+
+document.getElementById("rejectCookies").onclick=function(){
+localStorage.setItem("cookiesDecision","rejected");
+banner.style.display="none";
+}
+
+</script>
+
+
+
+<script>
+// =========================================================
+// CATÁLOGO INTERACTIVO — VAR SAN
+// =========================================================
+
+const catalogLines = {
+
+// =====================================================
+// SEGURIDAD INDUSTRIAL
+// =====================================================
+
+industrial: [
+
+{
+category: "SEGURIDAD INDUSTRIAL",
+title: "Guantes de Seguridad",
+description:
+"Soluciones de protección para manos diseñadas para distintos niveles de riesgo, manipulación, contacto químico, corte y actividades industriales.",
+features: [
+"Anticorte",
+"Recubiertos",
+"Desechables",
+"Contra químicos",
+"Textiles",
+"Piel"
+],
+image:
+"https://images.unsplash.com/photo-1628235176517-71013205a2de?q=80&w=870&auto=format&fit=crop"
+},
+
+{
+category: "PROTECCIÓN RESPIRATORIA",
+title: "Protección Respiratoria",
+description:
+"Equipos y componentes para protección respiratoria frente a partículas, polvos, neblinas, vapores, gases y otros contaminantes.",
+features: [
+"Mascarillas",
+"Respiradores",
+"Filtros y cartuchos",
+"Válvulas",
+"Accesorios",
+"Autorrescatadores"
+],
+image:
+"https://images.unsplash.com/photo-1576918783754-00613f24b68b?q=80&w=874&auto=format&fit=crop"
+},
+
+{
+category: "PROTECCIÓN OCULAR",
+title: "Protección Ocular",
+description:
+"Equipos diseñados para proteger los ojos y el rostro frente a partículas, impactos, proyecciones y salpicaduras durante las actividades laborales.",
+features: [
+"Lentes",
+"Goggles",
+"Máscaras para soldar",
+"Micas",
+"Cabezales"
+],
+image:
+"https://plus.unsplash.com/premium_photo-1682147303900-9f3debe39f44?q=80&w=870&auto=format&fit=crop"
+},
+
+{
+category: "PROTECCIÓN AUDITIVA",
+title: "Protección Auditiva",
+description:
+"Soluciones para reducir la exposición al ruido y brindar protección auditiva en distintas áreas de trabajo.",
+features: [
+"Orejeras",
+"Orejeras para casco",
+"Tapones desechables",
+"Tapones reutilizables"
+],
+image:
+"https://plus.unsplash.com/premium_photo-1681732426326-13ddfeecb960?q=80&w=870&auto=format&fit=crop"
+},
+
+{
+category: "PROTECCIÓN PARA LA CABEZA",
+title: "Cascos de Seguridad",
+description:
+"Protección para la cabeza destinada a construcción, industria, mantenimiento, trabajo en alturas y áreas operativas.",
+features: [
+"Cascos industriales",
+"Cascos ventilados",
+"Cascos para alturas",
+"Suspensiones",
+"Barbiquejos"
+],
+image:
+"https://images.unsplash.com/photo-1567954970774-58d6aa6c50dc?q=80&w=1032&auto=format&fit=crop"
+},
+
+{
+category: "TRABAJO EN ALTURA",
+title: "Protección Contra Alturas",
+description:
+"Sistemas y equipos destinados a prevenir y detener caídas, posicionar al trabajador y desarrollar actividades en altura de forma segura.",
+features: [
+"Arneses",
+"Líneas de vida",
+"Retráctiles",
+"Eslingas",
+"Anclajes",
+"Absorbedores"
+],
+image:
+"https://plus.unsplash.com/premium_photo-1664301191471-0dc137e504bc?q=80&w=870&auto=format&fit=crop"
+},
+
+{
+category: "VESTUARIO Y PROTECCIÓN",
+title: "Ropa Industrial",
+description:
+"Prendas, accesorios y soluciones de protección personal para actividades operativas y distintos sectores industriales.",
+features: [
+"Ropa industrial",
+"Desechables",
+"Impermeables",
+"Calzado industrial",
+"Overoles",
+"Ergonómicos"
+],
+image:
+"https://images.unsplash.com/photo-1662309376159-b95fb193d96b?q=80&w=387&auto=format&fit=crop"
+},
+
+{
+category: "SEÑALIZACIÓN Y TRÁNSITO",
+title: "Seguridad Vial",
+description:
+"Elementos de señalización, delimitación y alta visibilidad para proteger zonas de tránsito y trabajo.",
+features: [
+"Chalecos",
+"Cintas",
+"Cadenas",
+"Postes",
+"Trafitambos",
+"Conos",
+"Señalización"
+],
+image:
+"https://images.unsplash.com/photo-1620389523785-bdbe8bfc03c0?q=80&w=385&auto=format&fit=crop"
+},
+
+{
+category: "CONTROL DE ENERGÍA",
+title: "Bloqueo y Etiquetado",
+description:
+"Dispositivos para procedimientos de bloqueo y etiquetado orientados al aislamiento seguro de fuentes de energía durante el mantenimiento.",
+features: [
+"Candados",
+"Aspas de bloqueo",
+"Cajas grupales",
+"Bloqueos eléctricos",
+"Bloqueos de válvulas",
+"Etiquetas"
+],
+image:
+"https://images.unsplash.com/photo-1682637275957-8e62180efd1b?q=80&w=387&auto=format&fit=crop"
+}
+
+],
+
+
+// =====================================================
+// LÍNEA MÉDICA
+// =====================================================
+
+medical: [
+
+    // =====================================================
+    // 01 — RECOLECTORES
+    // =====================================================
+
+    {
+        category: "LÍNEA MÉDICA · MANEJO DE RPBI",
+
+        title: "Recolectores",
+
+        description:
+            "Soluciones para la recolección segura de residuos peligrosos biológico-infecciosos, incluyendo punzocortantes y residuos líquidos.",
+
+        features: [
+            "Punzocortantes",
+            "Líquidos",
+            "Sujetadores",
+            "Canastillas",
+            "Botes con pedal"
+        ],
+
+        image: "Rt2.png"
+    },
+
+
+    // =====================================================
+    // 02 — BOLSAS RPBI
+    // =====================================================
+
+    {
+        category: "LÍNEA MÉDICA · RESIDUOS",
+
+        title: "Bolsas RPBI",
+
+        description:
+            "Bolsas para la identificación, separación y manejo de residuos, disponibles en diferentes capacidades y presentaciones.",
+
+        features: [
+            "Bolsa roja",
+            "Bolsa amarilla",
+            "Bolsa negra",
+            "Bolsa para cadáver",
+            "Diferentes capacidades"
+        ],
+
+        image: "Rt3.png"
+    },
+
+
+    // =====================================================
+    // 03 — ALMACENAMIENTO TEMPORAL
+    // =====================================================
+
+    {
+        category: "LÍNEA MÉDICA · ALMACENAMIENTO",
+
+        title: "Almacenamiento Temporal",
+
+        description:
+            "Contenedores y carros para almacenamiento temporal, manejo y desplazamiento de residuos en instalaciones médicas e institucionales.",
+
+        features: [
+            "Contenedores HD",
+            "Carros móviles",
+            "Cargacarros",
+            "Volquetes",
+            "Diversas capacidades"
+        ],
+
+        image: "Rt4.png"
+    },
+
+
+    // =====================================================
+    // 04 — CONTENEDORES
+    // =====================================================
+
+    {
+        category: "LÍNEA MÉDICA · CONTENEDORES",
+
+        title: "Contenedores",
+
+        description:
+            "Contenedores de diferentes capacidades y configuraciones para la separación, almacenamiento y traslado de residuos.",
+
+        features: [
+            "Polietileno",
+            "Alta capacidad",
+            "Con ruedas",
+            "Con tapa",
+            "Uso institucional"
+        ],
+
+        image: "Rt5.png"
+    }
+
+],
+
+};
+
+
+// =========================================================
+// ESTADO DEL CATÁLOGO
+// =========================================================
+
+let currentCatalogLine = "industrial";
+let currentProduct = 0;
+
+
+// =========================================================
+// ELEMENTOS DEL CATÁLOGO
+// =========================================================
+
+const catalogImage = document.getElementById("catalogImage");
+const catalogCategory = document.getElementById("catalogCategory");
+const catalogTitle = document.getElementById("catalogTitle");
+const catalogMainLink = document.getElementById("catalogMainLink");
+const catalogDescription = document.getElementById("catalogDescription");
+const catalogFeatures = document.getElementById("catalogFeatures");
+
+const catalogCurrent = document.getElementById("catalogCurrent");
+const catalogTotal = document.getElementById("catalogTotal");
+const catalogNumber = document.getElementById("catalogNumber");
+const catalogProgress = document.getElementById("catalogProgress");
+
+const catalogPrev = document.getElementById("catalogPrev");
+const catalogNext = document.getElementById("catalogNext");
+
+const catalogTabs = document.querySelectorAll(".catalog-tab");
+const catalogLineButtons = document.querySelectorAll("[data-line]");
+
+
+// =========================================================
+// OBTENER CATÁLOGO ACTUAL
+// =========================================================
+
+function getCurrentCatalog() {
+
+return catalogLines[currentCatalogLine];
+
+}
+
+
+// =========================================================
+// ACTUALIZAR PRODUCTO
+// =========================================================
+
+function updateCatalog(index) {
+
+const products = getCurrentCatalog();
+
+if (!products || !products.length) return;
+
+
+// LOOP AUTOMÁTICO
+
+if (index < 0) {
+index = products.length - 1;
+}
+
+if (index >= products.length) {
+index = 0;
+}
+
+
+currentProduct = index;
+
+const product = products[currentProduct];
+
+const formattedNumber =
+String(currentProduct + 1).padStart(2, "0");
+
+const formattedTotal =
+String(products.length).padStart(2, "0");
+
+
+// =====================================================
+// INFORMACIÓN
+// =====================================================
+
+if (catalogCategory) {
+catalogCategory.textContent = product.category;
+}
+
+if (catalogTitle) {
+catalogTitle.textContent = product.title;
+}
+
+if (catalogDescription) {
+catalogDescription.textContent = product.description;
+}
+
+if (catalogCurrent) {
+catalogCurrent.textContent = formattedNumber;
+}
+
+if (catalogTotal) {
+catalogTotal.textContent = formattedTotal;
+}
+
+if (catalogNumber) {
+catalogNumber.textContent = formattedNumber;
+}
+
+
+// =====================================================
+// FICHITAS
+// =====================================================
+
+if (catalogFeatures) {
+
+catalogFeatures.innerHTML = "";
+
+product.features.forEach(feature => {
+
+const featureElement =
+document.createElement("span");
+
+featureElement.textContent = feature;
+
+catalogFeatures.appendChild(featureElement);
+
+});
+
+}
+
+
+// =====================================================
+// IMAGEN
+// =====================================================
+
+if (catalogImage) {
+
+catalogImage.classList.add("is-changing");
+
+setTimeout(() => {
+
+catalogImage.src = product.image;
+catalogImage.alt = product.title;
+
+catalogImage.onload = () => {
+
+catalogImage.classList.remove("is-changing");
+
+};
+
+}, 180);
+
+}
+
+
+// =====================================================
+// PROGRESO
+// =====================================================
+
+if (catalogProgress) {
+
+const percentage =
+((currentProduct + 1) / products.length) * 100;
+
+catalogProgress.style.width =
+`${percentage}%`;
+
+}
+
+
+// =====================================================
+// TAB ACTIVO
+// =====================================================
+
+const currentTabs =
+document.querySelectorAll(".catalog-tab");
+
+currentTabs.forEach((tab, tabIndex) => {
+
+    tab.classList.toggle(
+        "active",
+        tabIndex === currentProduct
+    );
+
+});
+
+requestAnimationFrame(() => {
+
+    updateTabSlider();
+
+});
+// =====================================================
+// CATÁLOGO PDF SEGÚN LA LÍNEA
+// =====================================================
+
+if (catalogMainLink) {
+
+    if (currentCatalogLine === "medical") {
+        catalogMainLink.href = "catalogo-medico.pdf";
+    } else {
+        catalogMainLink.href = "catalogo.pdf";
+    }
+
+}
+}
+
+
+// =========================================================
+// FLECHA SIGUIENTE
+// =========================================================
+
+if (catalogNext) {
+
+catalogNext.addEventListener("click", () => {
+
+updateCatalog(currentProduct + 1);
+
+});
+
+}
+
+
+// =========================================================
+// FLECHA ANTERIOR
+// =========================================================
+
+if (catalogPrev) {
+
+catalogPrev.addEventListener("click", () => {
+
+updateCatalog(currentProduct - 1);
+
+});
+
+}
+
+
+// =========================================================
+// CATEGORÍAS
+// =========================================================
+
+catalogTabs.forEach((tab, index) => {
+
+tab.addEventListener("click", () => {
+
+updateCatalog(index);
+
+});
+
+});
+
+
+// =========================================================
+// CAMBIO DE LÍNEA
+// SEGURIDAD INDUSTRIAL / LÍNEA MÉDICA
+// =========================================================
+
+catalogLineButtons.forEach(button => {
+
+button.addEventListener("click", () => {
+
+const selectedLine =
+button.dataset.line;
+
+if (!catalogLines[selectedLine]) return;
+
+
+// CAMBIAR LÍNEA
+
+currentCatalogLine = selectedLine;
+currentProduct = 0;
+
+
+// BOTÓN ACTIVO
+
+catalogLineButtons.forEach(btn => {
+
+btn.classList.remove("active");
+
+});
+
+button.classList.add("active");
+
+
+// RECONSTRUIR CATEGORÍAS
+
+rebuildCatalogTabs();
+
+
+// MOSTRAR PRIMER PRODUCTO
+
+updateCatalog(0);
+
+});
+
+});
+
+
+// =========================================================
+// RECONSTRUIR PESTAÑAS
+// =========================================================
+
+
+function rebuildCatalogTabs() {
+
+    const tabsContainer =
+        document.querySelector(".catalog-tabs");
+
+    if (!tabsContainer) return;
+
+    const products = getCurrentCatalog();
+
+    tabsContainer.innerHTML = "";
+
+
+    // =====================================================
+    // INDICADOR AZUL DESLIZANTE
+    // =====================================================
+
+    const slider = document.createElement("span");
+    slider.className = "catalog-tab-slider";
+
+    tabsContainer.appendChild(slider);
+
+
+    // =====================================================
+    // CREAR PESTAÑAS
+    // =====================================================
+
+    products.forEach((product, index) => {
+
+        const button =
+            document.createElement("button");
+
+        button.className = "catalog-tab";
+
+        if (index === 0) {
+            button.classList.add("active");
+        }
+
+        button.dataset.product = index;
+
+
+        // NOMBRE CORTO PARA CADA PESTAÑA
+
+        let tabName = product.title;
+
+        const shortNames = {
+
+            "Guantes de Seguridad": "Guantes",
+
+            "Protección Respiratoria": "Respiratoria",
+
+            "Protección Ocular": "Ocular",
+
+            "Protección Auditiva": "Auditiva",
+
+            "Cascos de Seguridad": "Cascos",
+
+            "Protección Contra Alturas": "Alturas",
+
+            "Ropa Industrial": "Ropa industrial",
+
+            "Seguridad Vial": "Seguridad vial",
+
+            "Bloqueo y Etiquetado": "LOTO",
+
+            "Recolectores": "Recolectores",
+
+            "Bolsas RPBI": "Bolsas RPBI",
+
+            "Almacenamiento Temporal": "Almacenamiento",
+
+            "Contenedores": "Contenedores"
+
+        };
+
+
+        if (shortNames[product.title]) {
+
+            tabName =
+                shortNames[product.title];
+
+        }
+
+
+        button.textContent = tabName;
+
+
+        button.addEventListener("click", () => {
+
+    updateCatalog(index);
+
+    requestAnimationFrame(() => {
+        updateTabSlider();
+    });
+
+});
+
+
+tabsContainer.appendChild(button);
+
+});
+
+    // =====================================================
+    // ACTUALIZAR REFERENCIAS
+    // =====================================================
+
+    refreshCatalogTabs();
+
+
+    // =====================================================
+    // COLOCAR EL AZUL EN LA PRIMERA PESTAÑA
+    // =====================================================
+
+    requestAnimationFrame(() => {
+
+        updateTabSlider();
+
+    });
+
+}
+
+
+
+
+function updateTabSlider() {
+
+    const tabsContainer =
+        document.querySelector(".catalog-tabs");
+
+    if (!tabsContainer) return;
+
+
+    const activeTab =
+        tabsContainer.querySelector(".catalog-tab.active");
+
+    const slider =
+        tabsContainer.querySelector(".catalog-tab-slider");
+
+
+    if (!activeTab || !slider) return;
+
+
+    slider.style.width =
+        `${activeTab.offsetWidth}px`;
+
+    slider.style.transform =
+        `translateX(${activeTab.offsetLeft}px)`;
+
+}
+
+
+// =========================================================
+// ACTUALIZAR REFERENCIA DE PESTAÑAS
+// =========================================================
+
+function refreshCatalogTabs() {
+
+const newTabs =
+document.querySelectorAll(".catalog-tab");
+
+
+newTabs.forEach((tab, index) => {
+
+tab.onclick = () => {
+
+updateCatalog(index);
+
+};
+
+});
+
+}
+
+
+// =========================================================
+// INICIAR CATÁLOGO
+// =========================================================
+
+rebuildCatalogTabs();
+updateCatalog(0);
+</script>
+
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+
+import {
+initializeAppCheck,
+ReCaptchaEnterpriseProvider
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app-check.js";
+
+import {
+getAI,
+getGenerativeModel,
+GoogleAIBackend
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-ai.js";
+
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
+import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    updateDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyATf3RVsdICF5fofg5r7sQiFodywn2O3sQ",
+    authDomain: "distribuidora-var-san.firebaseapp.com",
+    projectId: "distribuidora-var-san",
+    storageBucket: "distribuidora-var-san.firebasestorage.app",
+    messagingSenderId: "413139004866",
+    appId: "1:413139004866:web:8d4ef20982bdfd278dfa5b",
+    measurementId: "G-KEQXE5DMCP"
+  };
+
+  // Initialize Firebase
+self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+  const app = initializeApp(firebaseConfig);
+// App Check - modo de desarrollo local
+
+const appCheck = initializeAppCheck(app, {
+provider: new ReCaptchaEnterpriseProvider("6LeWf3ctAAAAANEe3p1VYDWJNFUqb1pbKl4FaF7b"),
+isTokenAutoRefreshEnabled: true
+});
+
+// Firebase AI Logic
+const ai = getAI(app, {
+backend: new GoogleAIBackend()
+});
+
+const model = getGenerativeModel(ai, {
+model: "gemini-3.0-flash"
+});
+
+
+const analytics = getAnalytics(app);
+
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+
+
+// =========================================================
+// PRUEBA DE CONEXIÓN CON GEMINI
+// =========================================================
+
+async function probarGemini() {
+
+try {
+
+const result = await model.generateContent(
+"Responde únicamente: Asistente Var San conectado correctamente."
+);
+
+const response = result.response;
+const text = response.text();
+
+console.log("RESPUESTA GEMINI:", text);
+
+} catch (error) {
+
+console.error("ERROR DE GEMINI:", error);
+
+}
+
+}
+
+probarGemini();
+
+// =========================================================
+// =========================================================
+// MI CUENTA / PANEL DE USUARIO
+// =========================================================
+
+const accountOverlay = document.getElementById("accountOverlay");
+const accountMenu = document.getElementById("accountMenu");
+
+const openAccount = document.getElementById("openAccount");
+const closeAccount = document.getElementById("closeAccount");
+
+let userLogged = false;
+
+if (openAccount) {
+
+    openAccount.addEventListener("click", () => {
+
+        if (userLogged) {
+
+            accountMenu.classList.toggle("show");
+
+        } else {
+
+            accountOverlay.classList.add("open");
+            document.body.style.overflow = "hidden";
+
+        }
+
+    });
+
+}
+
+
+if (closeAccount && accountOverlay) {
+    closeAccount.addEventListener("click", () => {
+        accountOverlay.classList.remove("open");
+        document.body.style.overflow = "";
+    });
+}
+
+
+// CERRAR TOCANDO FUERA DE LA VENTANA
+
+if (accountOverlay) {
+    accountOverlay.addEventListener("click", (e) => {
+
+        if (e.target === accountOverlay) {
+            accountOverlay.classList.remove("open");
+            document.body.style.overflow = "";
+        }
+
+    });
+}
+
+
+// CERRAR CON ESC
+
+document.addEventListener("keydown", (e) => {
+
+    if (e.key === "Escape" && accountOverlay) {
+        accountOverlay.classList.remove("open");
+        document.body.style.overflow = "";
+    }
+
+});
+
+
+// =========================================================
+// CAMBIAR ENTRE INICIAR SESIÓN / CREAR CUENTA
+// =========================================================
+
+const accountTabs = document.querySelectorAll(".account-tab");
+
+const loginForm = document.getElementById("loginForm");
+const registerForm = document.getElementById("registerForm");
+const accountTitle = document.getElementById("accountTitle");
+const accountSubtitle = document.getElementById("accountSubtitle");
+
+accountTabs.forEach((tab) => {
+  tab.addEventListener("click", () => {
+    const selectedTab = tab.dataset.accountTab;
+
+    // Quitar estado activo de las dos pestañas
+    accountTabs.forEach((item) => {
+      item.classList.remove("active");
+    });
+
+    // Activar la pestaña seleccionada
+    tab.classList.add("active");
+
+    // INICIAR SESIÓN
+    if (selectedTab === "login") {
+      loginForm.classList.remove("account-form--hidden");
+      registerForm.classList.add("account-form--hidden");
+
+      accountTitle.textContent = "Inicia sesión";
+      accountSubtitle.textContent =
+        "Accede a tu cuenta de Distribuidora Var San.";
+    }
+
+    // CREAR CUENTA
+    if (selectedTab === "register") {
+      loginForm.classList.add("account-form--hidden");
+      registerForm.classList.remove("account-form--hidden");
+
+      accountTitle.textContent = "Crea tu cuenta";
+      accountSubtitle.textContent =
+        "Regístrate para acceder al portal de clientes Var San.";
+    }
+  });
+});
+
+// =========================================================
+// CREAR CUENTA EN FIREBASE
+// =========================================================
+
+if (registerForm) {
+
+    registerForm.addEventListener("submit", async (event) => {
+
+        event.preventDefault();
+
+       const name =
+    document.getElementById("registerName").value.trim();
+
+const company =
+    document.getElementById("registerCompany").value.trim();
+
+const email =
+    document.getElementById("registerEmail").value.trim();
+
+const password =
+    document.getElementById("registerPassword").value;
+        try {
+
+            const userCredential =
+    await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+    );
+
+const user = userCredential.user;
+
+await setDoc(doc(db, "users", user.uid), {
+
+    name: name,
+
+    company: company,
+
+    email: email,
+
+    createdAt: serverTimestamp()
+
+});
+
+console.log("Documento guardado en Firestore:", user.uid);
+
+console.log("Usuario creado:", user);
+
+alert("Cuenta creada correctamente.");
+
+accountOverlay.classList.remove("open");
+document.body.style.overflow = "";
+
+        } catch (error) {
+
+            console.error(error);
+
+            if (error.code === "auth/email-already-in-use") {
+                alert("Este correo electrónico ya tiene una cuenta.");
+            }
+
+            else if (error.code === "auth/weak-password") {
+                alert("La contraseña es demasiado débil.");
+            }
+
+            else if (error.code === "auth/invalid-email") {
+                alert("El correo electrónico no es válido.");
+            }
+
+            else {
+                alert("No se pudo crear la cuenta: " + error.message);
+            }
+
+        }
+
+    });
+
+}
+
+
+// =========================================================
+// INICIAR SESIÓN
+// =========================================================
+
+if (loginForm) {
+
+    loginForm.addEventListener("submit", async (event) => {
+
+        event.preventDefault();
+
+        const email =
+            document.getElementById("loginEmail").value.trim();
+
+        const password =
+            document.getElementById("loginPassword").value;
+
+        try {
+
+            const userCredential =
+                await signInWithEmailAndPassword(
+                    auth,
+                    email,
+                    password
+                );
+
+            console.log(
+                "Sesión iniciada:",
+                userCredential.user
+            );
+
+            accountOverlay.classList.remove("open");
+            document.body.style.overflow = "";
+
+            alert("Sesión iniciada correctamente.");
+
+        } catch (error) {
+
+            console.error(error);
+
+            if (
+                error.code === "auth/invalid-credential" ||
+                error.code === "auth/wrong-password" ||
+                error.code === "auth/user-not-found"
+            ) {
+                alert("Correo o contraseña incorrectos.");
+            }
+
+            else if (error.code === "auth/invalid-email") {
+                alert("El correo electrónico no es válido.");
+            }
+
+            else {
+                alert("No se pudo iniciar sesión: " + error.message);
+            }
+
+        }
+
+    });
+
+}
+
+
+// =========================================================
+// DETECTAR SESIÓN
+// =========================================================
+
+const clientPortal = document.getElementById("clientPortal");
+const profilePage = document.getElementById("profilePage");
+const closeProfile = document.getElementById("closeProfile");
+
+const profileName = document.getElementById("profileName");
+const profileEmail = document.getElementById("profileEmail");
+const profileCompany = document.getElementById("profileCompany");
+const closeClientPortal = document.getElementById("closeClientPortal");
+
+let currentUser = null;
+
+onAuthStateChanged(auth, async (user) => {
+
+    currentUser = user;
+    userLogged = !!user;
+
+    if (user) {
+
+        console.log("Usuario conectado:", user.email);
+
+        // =====================================================
+        // SALUDO SEGÚN LA HORA
+        // =====================================================
+
+        const hour = new Date().getHours();
+
+        let greeting = "Buenas noches";
+
+        if (hour >= 6 && hour < 12) {
+            greeting = "Buenos días";
+        } else if (hour >= 12 && hour < 19) {
+            greeting = "Buenas tardes";
+        }
+
+        const clientGreeting =
+            document.getElementById("clientGreeting");
+
+        if (clientGreeting) {
+            clientGreeting.textContent = greeting;
+        }
+
+
+        // =====================================================
+        // CARGAR INFORMACIÓN DESDE FIRESTORE
+        // =====================================================
+
+        try {
+
+            const userDoc =
+                await getDoc(doc(db, "users", user.uid));
+
+            if (userDoc.exists()) {
+
+                const data = userDoc.data();
+
+                const name =
+                    data.name || "Cliente Var San";
+
+                const email =
+                    data.email || user.email || "";
+
+                const company =
+                    data.company || "No especificada";
+
+
+                document.getElementById("clientName").textContent =
+                    name;
+
+                document.getElementById("clientEmail").textContent =
+                    email;
+
+                document.getElementById("clientCompany").textContent =
+                    company;
+
+                document.getElementById("clientWelcomeName").textContent =
+                    name;
+
+                
+
+                const clientWelcome =
+                    document.getElementById("clientWelcome");
+
+                if (clientWelcome) {
+
+                    clientWelcome.textContent =
+                        "Bienvenido nuevamente a Distribuidora Var San.";
+
+                }
+
+            } else {
+
+                console.warn(
+                    "El usuario existe en Authentication, pero no tiene perfil en Firestore."
+                );
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Error al cargar el perfil desde Firestore:",
+                error
+            );
+
+        }
+
+
+        // =====================================================
+        // BOTÓN CUANDO HAY SESIÓN
+        // =====================================================
+
+        openAccount.innerHTML = `
+            <i class="fas fa-user-check"></i>
+            Mi cuenta
+        `;
+
+
+    } else {
+
+        console.log("No hay sesión iniciada.");
+
+        openAccount.innerHTML = `
+            <i class="fas fa-user"></i>
+            Mi cuenta
+        `;
+
+    }
+
+});
+
+// =========================================================
+// BOTÓN MI CUENTA
+// =========================================================
+
+openAccount.addEventListener("click", () => {
+
+    if (currentUser) {
+
+        clientPortal.classList.add("open");
+
+    } else {
+
+        accountOverlay.classList.add("open");
+
+    }
+
+});
+
+
+// =========================================================
+// CERRAR PORTAL
+// =========================================================
+
+closeClientPortal.addEventListener("click", () => {
+
+    clientPortal.classList.remove("open");
+
+});
+
+// =========================================================
+// BOTONES DEL PORTAL
+// =========================================================
+
+// Mi Perfil
+document.getElementById("profileBtn").addEventListener("click", () => {
+
+    clientPortal.classList.remove("open");
+
+    profilePage.classList.add("open");
+
+    profileName.value =
+        document.getElementById("clientName").textContent;
+
+    profileEmail.value =
+        document.getElementById("clientEmail").textContent;
+
+    profileCompany.value =
+        document.getElementById("clientCompany").textContent;
+
+});
+
+closeProfile.addEventListener("click", () => {
+
+    profilePage.classList.remove("open");
+
+    clientPortal.classList.add("open");
+
+});
+
+
+// Configuración
+document.getElementById("settingsBtn").addEventListener("click", () => {
+
+    alert("Configuración disponible próximamente.");
+
+});
+
+
+// Cerrar sesión
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+
+    try {
+
+        await signOut(auth);
+
+        clientPortal.classList.remove("open");
+
+        alert("Has cerrado sesión correctamente.");
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
