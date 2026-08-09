@@ -1,0 +1,313 @@
+Voy a proporcionarte los archivos HTML, CSS y JavaScript actuales de mi página web de “Distribuidora Var San”. Quiero que trabajes SOBRE ESTE CÓDIGO EXISTENTE y lo mejores profesionalmente.
+
+IMPORTANTE: NO quiero que reconstruyas la página desde cero ni que generes una página completamente diferente. Conserva la estructura, contenido, secciones, imágenes, enlaces, funcionalidades, navegación y lógica JavaScript que ya existen. Primero analiza cuidadosamente los tres archivos y entiende cómo está construida actualmente la página antes de modificarla.
+
+OBJETIVO PRINCIPAL:
+Quiero transformar el diseño actual de Distribuidora Var San en una página mucho más moderna, minimalista, elegante, limpia, corporativa y visualmente premium, como una empresa profesional de distribución y suministros que podría tener una página web comercial de alto nivel.
+
+La página debe transmitir:
+- Profesionalismo
+- Confianza
+- Calidad
+- Orden
+- Elegancia
+- Solidez empresarial
+- Modernidad
+- Atención personalizada
+
+IDENTIDAD VISUAL:
+Mantén la identidad visual actual de Distribuidora Var San utilizando principalmente:
+- Azul marino profundo: #0a1f44
+- Azul corporativo: #1a3a6e
+- Azul oscuro: #051328
+- Dorado: #c9a84c
+- Dorado claro: #d4b96a
+- Dorado oscuro: #a88a3a
+- Blanco: #ffffff
+- Gris muy claro: #f5f7fa
+- Gris: #6b7b8e
+- Gris oscuro: #2c3e50
+
+El azul debe ser el color principal de la identidad y el dorado debe utilizarse como color de acento de manera elegante y moderada. NO quiero exceso de dorado.
+
+ESTILO GENERAL:
+Quiero un diseño minimalista y sofisticado. Evita que la página se vea saturada, antigua, genérica o como una plantilla básica.
+
+Utiliza:
+- Mucho espacio en blanco.
+- Secciones visualmente bien separadas.
+- Márgenes y paddings equilibrados.
+- Bordes sutiles.
+- Sombras suaves y profesionales.
+- Tarjetas limpias.
+- Bordes redondeados de forma moderada.
+- Jerarquía visual clara.
+- Excelente alineación.
+- Composición equilibrada.
+- Transiciones suaves.
+- Microinteracciones discretas.
+- Hover effects elegantes.
+- Animaciones ligeras y profesionales, nunca exageradas.
+
+TIPOGRAFÍA:
+Quiero que mejores considerablemente la tipografía de toda la página.
+
+No quiero que todos los textos tengan exactamente el mismo aspecto. Crea una jerarquía tipográfica profesional entre:
+- Títulos principales.
+- Subtítulos.
+- Encabezados de sección.
+- Texto descriptivo.
+- Botones.
+- Navegación.
+- Etiquetas pequeñas.
+- Formularios.
+
+Utiliza una combinación tipográfica moderna, elegante y altamente legible. Puedes elegir las fuentes que consideres más apropiadas para una empresa corporativa moderna, pero evita fuentes excesivamente decorativas o difíciles de leer.
+
+Los títulos pueden tener mayor personalidad, pero deben seguir siendo profesionales.
+
+NAVEGACIÓN:
+Mejora visualmente la barra de navegación existente.
+
+Actualmente contiene secciones como:
+Inicio
+Esencia
+Familia
+Soluciones
+Elección
+Impulsamos
+Marcas
+Atención
+Contacto
+
+Conserva estas secciones y sus enlaces.
+
+Quiero una navegación:
+- Elegante.
+- Limpia.
+- Bien espaciada.
+- Fácil de leer.
+- Profesional.
+- Responsive.
+- Con estados hover y active discretos.
+- Con una apariencia premium.
+
+Si existe un botón o elemento de acceso/cuenta, conserva su funcionalidad y mejóralo visualmente sin eliminarlo.
+
+INICIO / HERO:
+Mejora el hero existente sin cambiar su contenido fundamental.
+
+Debe tener una primera impresión fuerte y profesional, con una composición limpia, buen contraste y excelente jerarquía visual.
+
+Evita llenar el hero con demasiados elementos.
+
+El usuario debe entender rápidamente que Distribuidora Var San ofrece soluciones profesionales de suministro y distribución.
+
+ESENCIA / QUIÉNES SOMOS:
+Haz que esta sección se vea corporativa y elegante.
+
+Utiliza una composición limpia, con textos fáciles de leer y elementos visuales que aporten estructura sin saturar.
+
+FAMILIA:
+Mejora visualmente las tarjetas o elementos de esta sección.
+
+Deben tener:
+- Diseño uniforme.
+- Espaciado consistente.
+- Bordes y sombras sutiles.
+- Hover elegante.
+- Buena jerarquía de títulos y descripción.
+
+SOLUCIONES:
+Haz que esta sección tenga una presentación moderna y fácil de explorar.
+
+Las diferentes soluciones deben sentirse como servicios profesionales y no como simples bloques de texto.
+
+ELECCIÓN:
+Mejora la presentación de esta sección para reforzar por qué los clientes deberían elegir Distribuidora Var San.
+
+IMPULSAMOS:
+Mantén su contenido y funcionalidad, pero mejora considerablemente su presentación visual.
+
+MARCAS:
+Esta sección debe verse especialmente profesional.
+
+Conserva las marcas e imágenes existentes.
+
+Haz que los logotipos estén perfectamente alineados y tengan tamaños visualmente equilibrados.
+
+Evita que una marca se vea mucho más grande que otra debido a sus dimensiones originales.
+
+Utiliza contenedores limpios y uniformes para los logotipos.
+
+ATENCIÓN / PROCESO:
+Actualmente existe una sección titulada:
+
+“PROCESO DE ATENCIÓN”
+
+con el título:
+
+“ASÍ DE SENCILLO ES TRABAJAR CON NOSOTROS”
+
+y tres pasos:
+
+1. Solicita tu cotización
+“Contáctanos por WhatsApp, teléfono o correo electrónico y comparte los productos que necesitas.”
+
+2. Elaboramos tu propuesta
+“Revisamos tu solicitud y preparamos una cotización personalizada de acuerdo con tus requerimientos.”
+
+3. Coordinamos tu pedido
+“Una vez aceptada la cotización, coordinamos contigo la entrega o la recolección de los productos en la fecha acordada.”
+
+CONSERVA exactamente esta información.
+
+Visualmente, quiero que estos tres pasos tengan una composición horizontal elegante en escritorio y que se adapten correctamente a una columna en dispositivos móviles.
+
+Los círculos numerados deben verse modernos, refinados y consistentes con la identidad azul y dorada.
+
+CONTACTO:
+Actualmente existe una sección:
+
+“CONTÁCTENOS”
+
+“SOLICITA INFORMACIÓN O UNA COTIZACIÓN”
+
+“Déjanos tus datos y nos pondremos en contacto contigo para atender tu solicitud.”
+
+Y contiene un formulario con:
+
+Nombre
+Correo electrónico
+Teléfono
+Comentarios
+
+Botón:
+“Enviar formulario”
+
+Conserva todos estos campos, textos y funcionalidad.
+
+Mejora el formulario visualmente para que parezca un formulario corporativo premium:
+- Campos amplios.
+- Etiquetas claras.
+- Bordes elegantes.
+- Focus states profesionales.
+- Botón atractivo.
+- Excelente espaciado.
+- Diseño responsive.
+- Mensajes de validación claros si ya existen.
+
+NO elimines ni rompas la funcionalidad JavaScript existente del formulario.
+
+RESPONSIVE:
+Quiero que revises TODA la página para garantizar que funcione perfectamente en:
+- Computadoras de escritorio.
+- Laptops.
+- Tablets.
+- Teléfonos móviles.
+
+No quiero únicamente que “quepa” en móvil. Quiero un verdadero diseño responsive.
+
+Revisa:
+- Navegación.
+- Hero.
+- Imágenes.
+- Tarjetas.
+- Grids.
+- Sección de marcas.
+- Proceso de atención.
+- Formulario.
+- Botones.
+- Espaciados.
+- Tamaños de títulos.
+- Ancho máximo del contenido.
+- Overflow horizontal.
+
+Elimina cualquier scroll horizontal innecesario.
+
+ANIMACIONES:
+Agrega microanimaciones elegantes donde realmente aporten valor:
+- Aparición suave de secciones.
+- Hover en tarjetas.
+- Hover en botones.
+- Transiciones de navegación.
+- Movimiento muy ligero de elementos.
+
+NO quiero animaciones exageradas, lentas o que hagan que la página parezca un sitio de videojuego.
+
+CSS:
+Organiza y optimiza el CSS.
+
+Si existen estilos duplicados, conflictos o reglas innecesarias, puedes limpiarlos cuidadosamente.
+
+Utiliza variables CSS para colores, sombras, radios, transiciones y otros valores repetidos cuando sea conveniente.
+
+Evita utilizar !important salvo que sea realmente necesario.
+
+No agregues estilos que entren en conflicto con componentes existentes.
+
+JAVASCRIPT:
+Revisa el JavaScript actual.
+
+Conserva todas las funcionalidades existentes.
+
+Corrige errores si los encuentras.
+
+No reemplaces una funcionalidad funcional por una implementación completamente diferente sin necesidad.
+
+Si agregas nuevas interacciones, deben ser ligeras, rápidas y compatibles con el código existente.
+
+ACCESIBILIDAD:
+Mejora, cuando sea posible:
+- Contraste.
+- Estados focus.
+- Labels de formularios.
+- Botones correctamente identificables.
+- Navegación mediante teclado.
+- Atributos alt de imágenes cuando falten.
+
+SEO:
+Sin modificar innecesariamente el contenido, mejora aspectos técnicos básicos de SEO:
+- Estructura semántica HTML.
+- Jerarquía correcta de headings.
+- Title.
+- Meta description.
+- Alt text.
+- Open Graph si resulta apropiado.
+- Elementos semánticos como header, nav, main, section y footer.
+
+REGLA FUNDAMENTAL:
+NO elimines contenido existente.
+NO elimines secciones existentes.
+NO cambies los nombres de las secciones.
+NO elimines imágenes.
+NO elimines enlaces.
+NO elimines funcionalidades.
+NO cambies la identidad de Distribuidora Var San.
+NO sustituyas todo el proyecto por una plantilla genérica.
+NO generes una página nueva desde cero.
+
+Primero analiza HTML, CSS y JS.
+
+Después realiza las mejoras directamente sobre los archivos existentes.
+
+Quiero que el resultado final se sienta como una evolución profesional de MI página actual, no como otra página diferente.
+
+Antes de terminar, revisa visualmente toda la página y comprueba que:
+1. No existan errores de HTML, CSS o JavaScript.
+2. Todas las secciones sigan funcionando.
+3. Todos los enlaces sigan funcionando.
+4. Las imágenes sigan cargando.
+5. El formulario siga funcionando.
+6. No exista overflow horizontal.
+7. El diseño sea consistente entre todas las secciones.
+8. Los colores sean coherentes.
+9. La tipografía tenga una jerarquía profesional.
+10. La página se vea excelente tanto en escritorio como en móvil.
+
+Prioridad absoluta:
+FUNCIONALIDAD EXISTENTE > ESTRUCTURA EXISTENTE > IDENTIDAD DE MARCA > MEJORA VISUAL.
+
+No quiero que sacrifiques algo que ya funciona solamente para hacer que visualmente se vea diferente.
+
+Haz que Distribuidora Var San se vea minimalista, moderna, elegante, corporativa y premium.

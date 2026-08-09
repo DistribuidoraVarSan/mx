@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Distribuidora Var San"
+description = "Sitio web corporativo de Distribuidora Var San para presentar soluciones de limpieza, protección, seguridad industrial y línea médica, con catálogo interactivo, contacto por WhatsApp y portal de clientes."
+version = "1.0.0"
+id = "artifacts/distribuidora-var-san"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22331
+
+[services.development]
+run = "pnpm --filter @workspace/distribuidora-var-san run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/distribuidora-var-san", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/distribuidora-var-san/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22331"
+BASE_PATH = "/"
