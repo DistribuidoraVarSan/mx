@@ -1,4 +1,17 @@
-import { useEffect, useState, type FormEvent, type MouseEvent } from 'react';
+import { useEffect, useState, type FormEvent, type KeyboardEvent, type MouseEvent } from 'react';
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  type User as FirebaseUser,
+} from 'firebase/auth';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db, googleProvider } from './firebase';
+import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
+import PoliticaCookies from './pages/PoliticaCookies';
+import TerminosCondiciones from './pages/TerminosCondiciones';
 import {
   ArrowLeft,
   ArrowRight,
@@ -19,6 +32,7 @@ import {
   Headphones,
   Hospital,
   Laptop,
+  Loader2,
   LockKeyhole,
   Mail,
   Menu,
@@ -46,6 +60,19 @@ type Product = {
   description: string;
   features: string[];
   image: string;
+};
+
+type ChatAction = {
+  key: string;
+  label: string;
+  href: string;
+  kind: 'internal' | 'pdf';
+};
+
+type ChatMessage = {
+  role: 'bot' | 'user';
+  text: string;
+  actions?: ChatAction[];
 };
 
 const queryClient = new QueryClient();
@@ -134,35 +161,36 @@ const industrialProducts: Product[] = [
 ];
 
 const medicalProducts: Product[] = [
-  {
-    category: 'LÍNEA MÉDICA · MANEJO DE RPBI',
-    title: 'Recolectores',
-    description: 'Soluciones para la recolección segura de residuos peligrosos biológico-infecciosos, incluyendo punzocortantes y residuos líquidos.',
-    features: ['Punzocortantes', 'Líquidos', 'Sujetadores', 'Canastillas', 'Botes con pedal'],
-    image: 'https://images.unsplash.com/photo-1584982751601-97dcc096659c?q=80&w=1400&auto=format&fit=crop',
-  },
-  {
-    category: 'LÍNEA MÉDICA · RESIDUOS',
-    title: 'Bolsas RPBI',
-    description: 'Bolsas para la identificación, separación y manejo de residuos, disponibles en diferentes capacidades y presentaciones.',
-    features: ['Rojo', 'Amarillo', 'Diferentes capacidades', 'Calibre', 'Identificación'],
-    image: 'https://images.unsplash.com/photo-1584362917165-526a968579e8?q=80&w=1400&auto=format&fit=crop',
-  },
-  {
-    category: 'LÍNEA MÉDICA · ALMACENAMIENTO',
-    title: 'Almacenamiento Temporal',
-    description: 'Soluciones para organizar y almacenar temporalmente residuos y materiales dentro de espacios médicos y operativos.',
-    features: ['Organización', 'Seguridad', 'Traslado', 'Resistencia', 'Señalización'],
-    image: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=1400&auto=format&fit=crop',
-  },
-  {
-    category: 'LÍNEA MÉDICA · CONTENEDORES',
-    title: 'Contenedores',
-    description: 'Contenedores y accesorios para el manejo responsable de residuos y suministros en instituciones de salud.',
-    features: ['Contenedores rígidos', 'Tapas', 'Pedal', 'Recolección', 'Higiene'],
-    image: 'https://images.unsplash.com/photo-1585435557343-3b092031a831?q=80&w=1400&auto=format&fit=crop',
-  },
+{
+category: 'LÍNEA MÉDICA · MANEJO DE RPBI',
+title: 'Recolectores',
+description: 'Soluciones para la recolección segura de residuos peligrosos biológico-infecciosos, incluyendo punzocortantes y residuos líquidos.',
+features: ['Punzocortantes', 'Líquidos', 'Sujetadores', 'Canastillas', 'Botes con pedal'],
+image: '/Rt2.png',
+},
+{
+category: 'LÍNEA MÉDICA · RESIDUOS',
+title: 'Bolsas RPBI',
+description: 'Bolsas para la identificación, separación y manejo de residuos, disponibles en diferentes capacidades y presentaciones.',
+features: ['Rojo', 'Amarillo', 'Diferentes capacidades', 'Calibre', 'Identificación'],
+image: '/Rt3.png',
+},
+{
+category: 'LÍNEA MÉDICA · ALMACENAMIENTO',
+title: 'Almacenamiento Temporal',
+description: 'Soluciones para organizar y almacenar temporalmente residuos y materiales dentro de espacios médicos y operativos.',
+features: ['Organización', 'Seguridad', 'Traslado', 'Resistencia', 'Señalización'],
+image: '/Rt4.png',
+},
+{
+category: 'LÍNEA MÉDICA · CONTENEDORES',
+title: 'Contenedores',
+description: 'Contenedores y accesorios para el manejo responsable de residuos y suministros en instituciones de salud.',
+features: ['Contenedores', 'Tapas', 'Pedal', 'Recolección', 'Higiene'],
+image: '/Rt5.png',
+},
 ];
+
 
 const sectors = [
   ['Empresas', Building2], ['Oficinas', BriefcaseBusiness], ['Comercios', Store], ['Industrias', Factory], ['Escuelas', Laptop],
@@ -177,6 +205,7 @@ function BrandMark() {
 
 function App() {
   const [splashVisible, setSplashVisible] = useState(true);
+const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [splashExiting, setSplashExiting] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -189,12 +218,18 @@ function App() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [accountTab, setAccountTab] = useState<'login' | 'register'>('login');
   const [accountMessage, setAccountMessage] = useState('');
+  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
+  const [profile, setProfile] = useState({ name: '', email: '', company: '' });
   const [chatOpen, setChatOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState([{ role: 'bot', text: 'Hola. Soy el asistente de Distribuidora Var San. Puedo orientarte sobre nuestras líneas de productos y medios de contacto.' }]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{ role: 'bot', text: 'Hola. Soy el Asistente Var San. Puedo orientarte sobre nuestras líneas de productos, catálogos, cobertura de entrega y medios de contacto.' }]);
   const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
   const [cookies, setCookies] = useState(() => {
     try { return localStorage.getItem('varsan-cookies') !== null; } catch { return false; }
   });
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [newsletterMessage, setNewsletterMessage] = useState('');
 
   useEffect(() => {
     const exitTimer = window.setTimeout(() => setSplashExiting(true), 1150);
@@ -208,18 +243,78 @@ function App() {
     };
   }, []);
 
+useEffect(() => {
+const handlePopState = () => {
+setCurrentPath(window.location.pathname);
+};
+
+window.addEventListener('popstate', handlePopState);
+
+return () => {
+window.removeEventListener('popstate', handlePopState);
+};
+}, []);
+
+
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setCurrentUser(user);
+
+      if (!user) {
+        setProfile({ name: '', email: '', company: '' });
+        return;
+      }
+
+      try {
+        const profileSnapshot = await getDoc(doc(db, 'users', user.uid));
+        const data = profileSnapshot.exists() ? profileSnapshot.data() : {};
+
+        setProfile({
+          name: (data.name as string) || user.displayName || 'Cliente Var San',
+          email: (data.email as string) || user.email || '',
+          company: (data.company as string) || 'No especificada',
+        });
+      } catch (error) {
+        console.error('Error al cargar el perfil de Firebase:', error);
+        setProfile({
+          name: user.displayName || 'Cliente Var San',
+          email: user.email || '',
+          company: 'No especificada',
+        });
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
   const products = catalogLine === 'industrial' ? industrialProducts : medicalProducts;
   const product = products[catalogIndex] ?? products[0];
   const WhyIcon = whySlides[whyIndex][2];
 
-  const navigateAndClose = (event: MouseEvent<HTMLAnchorElement>) => {
-    setMobileMenu(false);
-    const href = event.currentTarget.getAttribute('href');
-    if (href?.startsWith('#')) {
-      event.preventDefault();
-      document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+const navigateAndClose = (event: MouseEvent<HTMLAnchorElement>) => {
+setMobileMenu(false);
+
+const href = event.currentTarget.getAttribute('href');
+
+if (!href) return;
+
+if (href.startsWith('#')) {
+event.preventDefault();
+document.querySelector(href)?.scrollIntoView({
+behavior: 'smooth',
+});
+return;
+}
+
+if (href.startsWith('/')) {
+event.preventDefault();
+window.history.pushState({}, '', href);
+setCurrentPath(href);
+window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+};
+
 
   const acceptCookies = (value: 'accepted' | 'rejected') => {
     try { localStorage.setItem('varsan-cookies', value); } catch { /* preferencias locales no disponibles */ }
@@ -233,31 +328,232 @@ function App() {
     window.open(`https://wa.me/528332189032?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
   };
 
-  const submitAccount = (event: FormEvent<HTMLFormElement>) => {
+  const submitNewsletter = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setAccountMessage('Firebase no está disponible en esta versión frontend. La información no se guarda ni se envía; puedes solicitar atención por WhatsApp o correo.');
+    if (newsletterStatus === 'loading') return;
+
+    const email = newsletterEmail.trim();
+
+    setNewsletterStatus('loading');
+    setNewsletterMessage('');
+
+    try {
+      const response = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const data: { status?: string; message?: string; error?: string } = await response
+        .json()
+        .catch(() => ({}));
+
+      if (!response.ok) {
+        setNewsletterStatus('error');
+        setNewsletterMessage(data.error || 'No pudimos completar tu suscripción. Intenta de nuevo.');
+        return;
+      }
+
+      setNewsletterStatus('success');
+      setNewsletterMessage(
+        data.message ||
+          (data.status === 'already_subscribed'
+            ? 'Este correo ya está suscrito a nuestro newsletter.'
+            : '¡Listo! Te suscribiste correctamente.'),
+      );
+      setNewsletterEmail('');
+    } catch (error) {
+      console.error('Error al suscribirse al newsletter:', error);
+      setNewsletterStatus('error');
+      setNewsletterMessage('No pudimos conectar con el servidor. Intenta de nuevo en unos segundos.');
+    }
   };
 
-  const sendChat = (event?: FormEvent<HTMLFormElement>, quickMessage?: string) => {
+  const submitAccount = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setAccountMessage('');
+
+    const data = new FormData(event.currentTarget);
+    const email = String(data.get('email') ?? '').trim();
+    const password = String(data.get('password') ?? '');
+
+    try {
+      if (accountTab === 'register') {
+        const name = String(data.get('name') ?? '').trim();
+        const company = String(data.get('company') ?? '').trim();
+        const confirmPassword = String(data.get('confirmPassword') ?? '');
+
+        if (password !== confirmPassword) {
+          setAccountMessage('Las contraseñas no coinciden.');
+          return;
+        }
+
+        const credential = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, 'users', credential.user.uid), {
+          name,
+          company,
+          email,
+          createdAt: serverTimestamp(),
+        }, { merge: true });
+
+        setProfile({ name: name || 'Cliente Var San', email, company: company || 'No especificada' });
+        setAccountMessage('Cuenta creada correctamente.');
+        setAccountOpen(false);
+        setPortalOpen(true);
+        return;
+      }
+
+      await signInWithEmailAndPassword(auth, email, password);
+      setAccountMessage('Sesión iniciada correctamente.');
+      setAccountOpen(false);
+      setPortalOpen(true);
+    } catch (error: any) {
+console.error("ERROR REAL DE FIREBASE:", error);
+console.error("CÓDIGO:", error?.code);
+console.error("MENSAJE:", error?.message);
+
+if (error?.code === "auth/email-already-in-use") {
+setAccountMessage("Este correo electrónico ya tiene una cuenta.");
+} else if (error?.code === "auth/weak-password") {
+setAccountMessage("La contraseña debe tener al menos 6 caracteres.");
+} else if (error?.code === "auth/invalid-email") {
+setAccountMessage("El correo electrónico no es válido.");
+} else if (
+error?.code === "auth/invalid-credential" ||
+error?.code === "auth/wrong-password" ||
+error?.code === "auth/user-not-found"
+) {
+setAccountMessage("El correo o la contraseña son incorrectos.");
+} else if (error?.code === "auth/too-many-requests") {
+setAccountMessage("Demasiados intentos. Espera un momento e inténtalo nuevamente.");
+} else {
+setAccountMessage(
+`Firebase: ${error?.code || "error desconocido"} — ${
+error?.message || "sin mensaje"
+}`
+);
+}
+}
+
+  };
+
+  const signInWithGoogle = async () => {
+    setAccountMessage('');
+    try {
+      const credential = await signInWithPopup(auth, googleProvider);
+      const existing = await getDoc(doc(db, 'users', credential.user.uid));
+
+      if (!existing.exists()) {
+        await setDoc(doc(db, 'users', credential.user.uid), {
+          name: credential.user.displayName || 'Cliente Var San',
+          company: '',
+          email: credential.user.email || '',
+          createdAt: serverTimestamp(),
+        }, { merge: true });
+      }
+
+      setAccountOpen(false);
+      setPortalOpen(true);
+    } catch (error: any) {
+      console.error('Error al iniciar con Google:', error);
+      if (error?.code !== 'auth/popup-closed-by-user') {
+        setAccountMessage('No se pudo iniciar sesión con Google.');
+      }
+    }
+  };
+
+  const saveProfile = async () => {
+    if (!currentUser) return;
+
+    try {
+      await setDoc(doc(db, 'users', currentUser.uid), {
+        name: profile.name.trim(),
+        company: profile.company.trim(),
+        email: currentUser.email || profile.email,
+      }, { merge: true });
+      setProfileOpen(false);
+      setPortalOpen(true);
+    } catch (error) {
+      console.error('Error al guardar el perfil:', error);
+      setAccountMessage('No se pudo guardar el perfil.');
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      setPortalOpen(false);
+      setProfileOpen(false);
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
+
+  const sendChat = async (event?: FormEvent<HTMLFormElement>, quickMessage?: string) => {
     event?.preventDefault();
     const text = (quickMessage ?? chatInput).trim();
-    if (!text) return;
-    const lower = text.toLowerCase();
-    let answer = 'Para confirmar modelos, medidas, precios o existencia, escríbenos al +52 833 218 9032 o a distribuidora.varsan@outlook.com.';
-    if (lower.includes('vende') || lower.includes('producto') || lower.includes('catálogo')) answer = 'Manejamos seguridad industrial, línea médica, insumos de limpieza, higiene, protección personal, recolectores y bolsas para RPBI.';
-    if (lower.includes('contact') || lower.includes('teléfono') || lower.includes('whatsapp')) answer = 'Puedes contactarnos por WhatsApp o teléfono al +52 833 218 9032, o escribir a distribuidora.varsan@outlook.com.';
-    setChatMessages((messages) => [...messages, { role: 'user', text }, { role: 'bot', text: answer }]);
+    if (!text || chatLoading) return;
+
+    const history = chatMessages.slice(-10).map(({ role, text: messageText }) => ({ role, text: messageText }));
+
+    setChatMessages((messages) => [...messages, { role: 'user', text }]);
     setChatInput('');
+    setChatLoading(true);
+
+    try {
+      const response = await fetch('/api/assistant/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, history }),
+      });
+
+      if (!response.ok) {
+        throw new Error('respuesta no válida del asistente');
+      }
+
+      const data: { reply: string; actions?: ChatAction[] } = await response.json();
+      setChatMessages((messages) => [...messages, { role: 'bot', text: data.reply, actions: data.actions }]);
+    } catch (error) {
+      console.error('Error al conectar con el asistente:', error);
+      setChatMessages((messages) => [
+        ...messages,
+        {
+          role: 'bot',
+          text: 'No pudimos conectar con el asistente en este momento. Intenta de nuevo en unos segundos o escríbenos directamente al +52 833 218 9032 o a distribuidora.varsan@outlook.com.',
+        },
+      ]);
+    } finally {
+      setChatLoading(false);
+    }
   };
+
+  const handleChatKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      event.currentTarget.form?.requestSubmit();
+    }
+  };
+
+  if (currentPath === '/privacidad') {
+    return <PoliticaPrivacidad />;
+  }
+
+  if (currentPath === '/cookies') {
+    return <PoliticaCookies />;
+  }
+
+  if (currentPath === '/terminos') {
+    return <TerminosCondiciones />;
+  }
 
   return (
     <div className="site-shell">
-      {splashVisible && <div className={`splash${splashExiting ? ' is-exiting' : ''}`} role="status" aria-label="Cargando Distribuidora Var San"><div className="splash-inner"><img className="splash-logo-image" src={varSanLogo} alt="Distribuidora Var San" /></div><p className="splash-tagline">Calidad y confianza en cada suministro.</p></div>}
+      {splashVisible && <div className={`splash${splashExiting ? ' is-exiting' : ''}`} role="status" aria-label="Cargando Distribuidora Var San"><div className="splash-inner"><div className="splash-title-wrap"><span className="splash-kicker">Distribuidora</span><h1 className="splash-title">Var San</h1><span className="splash-rule" /></div></div><p className="splash-tagline">Calidad y confianza en cada suministro.</p></div>}
 
       <header className={`navbar${scrolled ? ' scrolled' : ''}`}>
         <div className="container nav-container">
           <a href="#inicio" className="nav-logo" onClick={navigateAndClose} data-testid="link-brand">
-            <BrandMark /><span className="nav-wordmark"><strong>Distribuidora Var San</strong><small>Soluciones en limpieza y protección</small></span>
+            <img className="nav-logo-image" src={varSanLogo} alt="Logo oficial de Distribuidora Var San" /><span className="nav-wordmark"><strong>Distribuidora Var San</strong><small>Soluciones en limpieza y protección</small></span>
           </a>
           <nav aria-label="Navegación principal">
             <ul className={`nav-links${mobileMenu ? ' is-open' : ''}`}>
@@ -267,7 +563,7 @@ function App() {
               })}
             </ul>
           </nav>
-          <button className="account-button" onClick={() => { setAccountOpen(true); setAccountMessage(''); }} data-testid="button-open-account"><User size={15} /><span>Mi cuenta</span></button>
+          <button className="account-button" onClick={() => { if (currentUser) setPortalOpen(true); else { setAccountOpen(true); setAccountMessage(''); } }} data-testid="button-open-account"><User size={15} /><span>Mi cuenta</span></button>
           <button className="nav-toggle" aria-label={mobileMenu ? 'Cerrar menú' : 'Abrir menú'} aria-expanded={mobileMenu} onClick={() => setMobileMenu(!mobileMenu)} data-testid="button-mobile-menu">{mobileMenu ? <X size={22} /> : <Menu size={22} />}</button>
         </div>
       </header>
@@ -321,20 +617,168 @@ function App() {
         <section id="proceso" className="section section--paper"><div className="container"><div className="section-heading section-heading--center"><span className="eyebrow">Proceso de Atención</span><h2 className="section-title">Así de <em>sencillo</em> es trabajar con nosotros</h2></div><div className="process-steps">{[['1', 'Solicita tu cotización', 'Contáctanos por WhatsApp, teléfono o correo electrónico y comparte los productos que necesitas.'], ['2', 'Elaboramos tu propuesta', 'Revisamos tu solicitud y preparamos una cotización personalizada de acuerdo con tus requerimientos.'], ['3', 'Coordinamos tu pedido', 'Una vez aceptada la cotización, coordinamos contigo la entrega o la recolección de los productos en la fecha acordada.']].map(([number, title, text]) => <article className="process-step" key={number}><div className="step-number">{number}</div><h3>{title}</h3><p>{text}</p></article>)}</div></div></section>
 
         <section id="contacto" className="section contact-section"><div className="container contact-grid"><div><span className="eyebrow">Contáctenos</span><h2 className="section-title">Solicita información o una <em>cotización</em></h2><p className="section-lede">Déjanos tus datos y nos pondremos en contacto contigo para atender tu solicitud.</p><div className="contact-details"><div className="contact-detail"><Mail size={18} /><div><span>Correo electrónico</span><a href="mailto:distribuidora.varsan@outlook.com" data-testid="link-email">distribuidora.varsan@outlook.com</a></div></div><div className="contact-detail"><Phone size={18} /><div><span>Teléfono y WhatsApp</span><a href="tel:+528332189032" data-testid="link-phone">+52 833 218 9032</a></div></div><div className="contact-detail"><Clock3 size={18} /><div><span>Atención</span><strong>Empresas, industrias, comercios e instituciones</strong></div></div></div></div><form id="formulario" className="contact-form" onSubmit={submitContact}><div className="form-grid"><div className="form-field"><label htmlFor="name">Nombre</label><input id="name" name="name" type="text" placeholder="Escribe tu nombre" required data-testid="input-contact-name" /></div><div className="form-field"><label htmlFor="email">Correo electrónico</label><input id="email" name="email" type="email" placeholder="Escribe tu correo electrónico" required data-testid="input-contact-email" /></div><div className="form-field"><label htmlFor="phone">Teléfono</label><input id="phone" name="phone" type="tel" placeholder="Escribe tu número telefónico" required data-testid="input-contact-phone" /></div><div className="form-field form-field--full"><label htmlFor="comments">Comentarios</label><textarea id="comments" name="comments" placeholder="Escribe tu mensaje" required data-testid="input-contact-comments" /></div></div><button className="button button--navy form-submit" type="submit" data-testid="button-submit-contact"><Send size={15} />Enviar formulario</button><p className="form-note">Al enviar, se abrirá WhatsApp con los datos de tu solicitud.</p></form></div></section>
+
+        <section id="newsletter" className="section newsletter-section">
+          <div className="container newsletter-inner">
+            <h2 className="section-title">¡Suscríbete!</h2>
+            <p className="section-lede">Regístrate en nuestro newsletter y sé el primero en enterarte de nuestros lanzamientos y promociones</p>
+            <form className="newsletter-form" onSubmit={submitNewsletter} noValidate>
+              <input
+                type="email"
+                name="email"
+                value={newsletterEmail}
+                onChange={(event) => { setNewsletterEmail(event.target.value); if (newsletterStatus !== 'idle') { setNewsletterStatus('idle'); setNewsletterMessage(''); } }}
+                placeholder="Correo Electrónico"
+                required
+                aria-label="Correo electrónico para suscripción al newsletter"
+                disabled={newsletterStatus === 'loading'}
+                data-testid="input-newsletter-email"
+              />
+              <button
+                type="submit"
+                aria-label="Suscribirme al newsletter"
+                disabled={newsletterStatus === 'loading'}
+                data-testid="button-newsletter-submit"
+              >
+                {newsletterStatus === 'loading' ? <Loader2 size={17} className="newsletter-spinner" /> : <ArrowRight size={17} />}
+              </button>
+            </form>
+            {newsletterMessage && (
+              <p className={`newsletter-message newsletter-message--${newsletterStatus}`} role="status" data-testid="status-newsletter">
+                {newsletterStatus === 'success' && <CircleCheck size={15} />}
+                {newsletterMessage}
+              </p>
+            )}
+          </div>
+        </section>
       </main>
 
-      <footer className="footer"><div className="container"><div className="footer-grid"><div><div className="footer-brand-row"><BrandMark /><div><h2>Distribuidora Var San</h2><p>Soluciones en limpieza y protección</p></div></div><p className="footer-description">Soluciones en limpieza y protección para tu empresa. Comprometidos con brindar soluciones confiables en limpieza, mantenimiento y protección para empresas, comercios e instituciones.</p></div><div><h3>Navegación</h3><ul className="footer-links">{['inicio:Inicio', 'esencia:Esencia', 'familia:Familia', 'soluciones:Soluciones', 'eleccion:Elección'].map((item) => { const [id, label] = item.split(':'); return <li key={id}><a href={`#${id}`} onClick={navigateAndClose} data-testid={`footer-link-${id}`}>{label}</a></li>; })}</ul></div><div><h3>Contacto</h3><ul className="footer-links"><li><a href="mailto:distribuidora.varsan@outlook.com" data-testid="footer-link-email">distribuidora.varsan@outlook.com</a></li><li><a href="tel:+528332189032" data-testid="footer-link-phone">+52 (833) 218 9032</a></li><li><a href="#formulario" onClick={navigateAndClose} data-testid="footer-link-quote">Solicitar cotización</a></li></ul></div></div><div className="footer-bottom"><span>© 2026 Distribuidora Var San. Todos los derechos reservados. | Soluciones en limpieza y protección para tu empresa.</span><span className="footer-legal"><a href="#contacto" onClick={navigateAndClose}>Aviso de Privacidad</a><a href="#contacto" onClick={navigateAndClose}>Política de Cookies</a><a href="#contacto" onClick={navigateAndClose}>Términos y Condiciones</a></span></div></div></footer>
+      <footer className="footer">
+<div className="container">
+<div className="footer-grid">
+<div>
+<div className="footer-brand-row">
+<BrandMark />
+<div>
+<h2>Distribuidora Var San</h2>
+<p>Soluciones en limpieza y protección</p>
+</div>
+</div>
+
+<p className="footer-description">
+Soluciones en limpieza y protección para tu empresa.
+Comprometidos con brindar soluciones confiables en limpieza,
+mantenimiento y protección para empresas, comercios e instituciones.
+</p>
+</div>
+
+<div>
+<h3>Navegación</h3>
+<ul className="footer-links">
+{[
+'inicio:Inicio',
+'esencia:Esencia',
+'familia:Familia',
+'soluciones:Soluciones',
+'eleccion:Elección'
+].map((item) => {
+const [id, label] = item.split(':');
+
+return (
+<li key={id}>
+<a
+href={`#${id}`}
+onClick={navigateAndClose}
+data-testid={`footer-link-${id}`}
+>
+{label}
+</a>
+</li>
+);
+})}
+</ul>
+</div>
+
+<div>
+<h3>Contacto</h3>
+<ul className="footer-links">
+<li>
+<a
+href="mailto:distribuidora.varsan@outlook.com"
+data-testid="footer-link-email"
+>
+distribuidora.varsan@outlook.com
+</a>
+</li>
+
+<li>
+<a
+href="tel:+528332189032"
+data-testid="footer-link-phone"
+>
++52 (833) 218 9032
+</a>
+</li>
+
+<li>
+<a
+href="#formulario"
+onClick={navigateAndClose}
+data-testid="footer-link-quote"
+>
+Solicitar cotización
+</a>
+</li>
+</ul>
+</div>
+</div>
+
+<div className="footer-bottom">
+<span>
+© 2026 Distribuidora Var San. Todos los derechos reservados. |
+Soluciones en limpieza y protección para tu empresa.
+</span>
+
+<span className="footer-legal">
+<a
+href="/privacidad"
+onClick={navigateAndClose}
+data-testid="footer-link-privacy"
+>
+Aviso de Privacidad
+</a>
+
+<a
+href="/cookies"
+onClick={navigateAndClose}
+data-testid="footer-link-cookies"
+>
+Política de Cookies
+</a>
+
+<a
+href="/terminos"
+onClick={navigateAndClose}
+>
+Términos y Condiciones
+</a>
+</span>
+
+</div>
+</div>
+</footer>
+
 
       <button className="chat-trigger" onClick={() => setChatOpen(!chatOpen)} aria-label={chatOpen ? 'Cerrar chatbot' : 'Abrir chatbot'} data-testid="button-open-chat">{chatOpen ? <X size={21} /> : <MessageCircle size={21} />}</button>
-      {chatOpen && <aside className="chat-window" aria-label="Chatbot Var San"><div className="chat-header"><div><strong>Asistente Var San</strong><small>Orientación sobre productos y contacto</small></div><button className="chat-close" onClick={() => setChatOpen(false)} aria-label="Cerrar chatbot" data-testid="button-close-chat"><X size={17} /></button></div><div className="chat-body">{chatMessages.map((message, index) => <div className={`chat-message chat-message--${message.role}`} key={`${message.role}-${index}`} data-testid={`chat-message-${index}`}>{message.text}</div>)}</div><div className="chat-quick"><button onClick={() => sendChat(undefined, '¿Qué productos manejan?')} data-testid="button-chat-catalog">Ver productos</button><button onClick={() => sendChat(undefined, '¿Cómo puedo contactarlos?')} data-testid="button-chat-contact">Contacto</button></div><form className="chat-form" onSubmit={sendChat}><input value={chatInput} onChange={(event) => setChatInput(event.target.value)} placeholder="Escribe tu consulta" aria-label="Consulta para el asistente" data-testid="input-chat" /><button type="submit" aria-label="Enviar consulta" data-testid="button-send-chat"><Send size={15} /></button></form></aside>}
+      {chatOpen && <aside className="chat-window" aria-label="Chatbot Var San"><div className="chat-header"><div><strong>Asistente Var San</strong><small>Orientación sobre productos y contacto</small></div><button className="chat-close" onClick={() => setChatOpen(false)} aria-label="Cerrar chatbot" data-testid="button-close-chat"><X size={17} /></button></div><div className="chat-body">{chatMessages.map((message, index) => <div className={`chat-message chat-message--${message.role}`} key={`${message.role}-${index}`} data-testid={`chat-message-${index}`}>{message.text}{message.actions && message.actions.length > 0 && <div className="chat-message-actions">{message.actions.map((action) => action.kind === 'internal' ? <a key={action.key} href={action.href} onClick={navigateAndClose} className="chat-action-button" data-testid={`chat-action-${action.key}`}>{action.label}</a> : <a key={action.key} href={action.href} target="_blank" rel="noopener noreferrer" className="chat-action-button" data-testid={`chat-action-${action.key}`}>{action.label}</a>)}</div>}</div>)}{chatLoading && <div className="chat-message chat-message--bot chat-message--loading" aria-live="polite" data-testid="chat-message-loading"><span className="chat-typing"><span></span><span></span><span></span></span></div>}</div><div className="chat-quick"><button onClick={() => sendChat(undefined, '¿Qué productos manejan?')} disabled={chatLoading} data-testid="button-chat-catalog">Ver productos</button><button onClick={() => sendChat(undefined, '¿Cómo puedo contactarlos?')} disabled={chatLoading} data-testid="button-chat-contact">Contacto</button></div><form className="chat-form" onSubmit={sendChat}><textarea value={chatInput} onChange={(event) => setChatInput(event.target.value)} onKeyDown={handleChatKeyDown} placeholder="Escribe tu consulta (Enter para enviar, Shift+Enter para salto de línea)" aria-label="Consulta para el asistente" rows={1} disabled={chatLoading} data-testid="input-chat" /><button type="submit" aria-label="Enviar consulta" disabled={chatLoading || !chatInput.trim()} data-testid="button-send-chat"><Send size={15} /></button></form></aside>}
 
-      {!cookies && <aside className="cookie-banner" aria-label="Preferencias de cookies"><p>Querido usuario, utilizamos cookies para mejorar tu experiencia de navegación. Al continuar usando este sitio, aceptas el uso de cookies. Puedes consultar nuestra <a href="#contacto" onClick={navigateAndClose}>Política de Privacidad</a> y <a href="#contacto" onClick={navigateAndClose}>Política de Cookies</a>.</p><div className="cookie-actions"><button className="accept" onClick={() => acceptCookies('accepted')} data-testid="button-accept-cookies">Aceptar</button><button className="reject" onClick={() => acceptCookies('rejected')} data-testid="button-reject-cookies">Rechazar</button></div></aside>}
+      {!cookies && <aside className="cookie-banner" aria-label="Preferencias de cookies"><p>Querido usuario, utilizamos cookies para mejorar tu experiencia de navegación. Al continuar usando este sitio, aceptas el uso de cookies. Puedes consultar nuestra <a href="/privacidad" onClick={navigateAndClose}>Política de Privacidad</a> y <a href="/cookies" onClick={navigateAndClose}>Política de Cookies</a>.</p><div className="cookie-actions"><button className="accept" onClick={() => acceptCookies('accepted')} data-testid="button-accept-cookies">Aceptar</button><button className="reject" onClick={() => acceptCookies('rejected')} data-testid="button-reject-cookies">Rechazar</button></div></aside>}
 
-      {accountOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setAccountOpen(false); }}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="account-heading"><button className="modal-close" onClick={() => setAccountOpen(false)} aria-label="Cerrar" data-testid="button-close-account"><X size={18} /></button><div className="modal-brand"><BrandMark /><div><strong>DISTRIBUIDORA VAR SAN</strong><small>Portal de clientes</small></div></div><h2 id="account-heading">{accountTab === 'login' ? 'Inicia sesión' : 'Crea tu cuenta'}</h2><p className="modal-intro">{accountTab === 'login' ? 'Accede a tu cuenta de Distribuidora Var San.' : 'Regístrate para acceder al portal de clientes Var San.'}</p><div className="account-tabs"><button className={`account-tab${accountTab === 'login' ? ' active' : ''}`} onClick={() => { setAccountTab('login'); setAccountMessage(''); }} data-testid="button-tab-login">Iniciar sesión</button><button className={`account-tab${accountTab === 'register' ? ' active' : ''}`} onClick={() => { setAccountTab('register'); setAccountMessage(''); }} data-testid="button-tab-register">Crear cuenta</button></div><form className="account-form" onSubmit={submitAccount}>{accountTab === 'register' && <><div className="form-field"><label htmlFor="account-name">Nombre</label><input id="account-name" required placeholder="Tu nombre" data-testid="input-account-name" /></div><div className="form-field"><label htmlFor="account-company">Empresa</label><input id="account-company" placeholder="Nombre de tu empresa" data-testid="input-account-company" /></div></>}<div className="form-field"><label htmlFor="account-email">Correo electrónico</label><input id="account-email" type="email" required placeholder="correo@empresa.com" data-testid="input-account-email" /></div><div className="form-field"><label htmlFor="account-password">Contraseña</label><input id="account-password" type="password" required minLength={6} placeholder={accountTab === 'login' ? 'Tu contraseña' : 'Mínimo 6 caracteres'} data-testid="input-account-password" /></div>{accountTab === 'register' && <div className="form-field"><label htmlFor="account-confirm">Confirmar contraseña</label><input id="account-confirm" type="password" required minLength={6} placeholder="Repite tu contraseña" data-testid="input-account-confirm" /></div>}{accountMessage && <div className="account-message account-message--warning" role="status" data-testid="status-account">{accountMessage}</div>}<button className="button button--navy" type="submit" data-testid="button-submit-account">{accountTab === 'login' ? 'Iniciar sesión' : 'Crear cuenta'} <ArrowRight size={15} /></button></form><button className="demo-link" onClick={() => { setAccountOpen(false); setPortalOpen(true); }} data-testid="button-open-portal-demo">Explorar la interfaz del portal</button><div className="account-footer"><LockKeyhole size={13} /> Acceso seguro para clientes Var San. Firebase no está disponible en esta migración frontend-only.</div></section></div>}
+      {accountOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setAccountOpen(false); }}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="account-heading"><button className="modal-close" onClick={() => setAccountOpen(false)} aria-label="Cerrar" data-testid="button-close-account"><X size={18} /></button><div className="modal-brand"><BrandMark /><div><strong>DISTRIBUIDORA VAR SAN</strong><small>Portal de clientes</small></div></div><h2 id="account-heading">{accountTab === 'login' ? 'Inicia sesión' : 'Crea tu cuenta'}</h2><p className="modal-intro">{accountTab === 'login' ? 'Accede a tu cuenta de Distribuidora Var San.' : 'Regístrate para acceder al portal de clientes Var San.'}</p><div className="account-tabs"><button className={`account-tab${accountTab === 'login' ? ' active' : ''}`} onClick={() => { setAccountTab('login'); setAccountMessage(''); }} data-testid="button-tab-login">Iniciar sesión</button><button className={`account-tab${accountTab === 'register' ? ' active' : ''}`} onClick={() => { setAccountTab('register'); setAccountMessage(''); }} data-testid="button-tab-register">Crear cuenta</button></div><form className="account-form" onSubmit={submitAccount}>{accountTab === 'register' && <><div className="form-field"><label htmlFor="account-name">Nombre</label><input id="account-name" name="name" required placeholder="Tu nombre" data-testid="input-account-name" /></div><div className="form-field"><label htmlFor="account-company">Empresa</label><input id="account-company" name="company" placeholder="Nombre de tu empresa" data-testid="input-account-company" /></div></>}<div className="form-field"><label htmlFor="account-email">Correo electrónico</label><input id="account-email" name="email" type="email" required placeholder="correo@empresa.com" data-testid="input-account-email" /></div><div className="form-field"><label htmlFor="account-password">Contraseña</label><input id="account-password" name="password" type="password" required minLength={6} placeholder={accountTab === 'login' ? 'Tu contraseña' : 'Mínimo 6 caracteres'} data-testid="input-account-password" /></div>{accountTab === 'register' && <div className="form-field"><label htmlFor="account-confirm">Confirmar contraseña</label><input id="account-confirm" name="confirmPassword" type="password" required minLength={6} placeholder="Repite tu contraseña" data-testid="input-account-confirm" /></div>}{accountMessage && <div className="account-message account-message--warning" role="status" data-testid="status-account">{accountMessage}</div>}<button className="button button--navy" type="submit" data-testid="button-submit-account">{accountTab === 'login' ? 'Iniciar sesión' : 'Crear cuenta'} <ArrowRight size={15} /></button></form><button className="button button--outline" type="button" onClick={signInWithGoogle} style={{ color: 'var(--navy)', borderColor: 'var(--line)', marginTop: 10 }}><User size={15} /> Continuar con Google</button><div className="account-footer"><LockKeyhole size={13} /> Acceso seguro para clientes Var San mediante Firebase Authentication y Firestore.</div></section></div>}
 
-      {portalOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setPortalOpen(false); }}><section className="modal modal--wide" role="dialog" aria-modal="true" aria-labelledby="portal-heading"><button className="modal-close" onClick={() => setPortalOpen(false)} aria-label="Cerrar portal" data-testid="button-close-portal"><X size={18} /></button><div className="portal-header"><span className="eyebrow">Portal de clientes</span><h2 id="portal-heading">Bienvenido a Var San.</h2><p className="modal-intro">Consulta la interfaz de tu espacio de cliente y gestiona tus datos de contacto.</p></div><div className="portal-note">Modo demostración: Firebase no está disponible en esta migración frontend. No hay una sesión persistente ni datos guardados.</div><div className="profile-summary"><div className="profile-row"><span>Nombre</span><strong>Cliente Var San</strong></div><div className="profile-row"><span>Correo electrónico</span><strong>No conectado</strong></div><div className="profile-row"><span>Empresa</span><strong>Por especificar</strong></div></div><div className="portal-actions"><button className="button button--navy" onClick={() => setProfileOpen(true)} data-testid="button-open-profile"><UserCheck size={15} />Mi perfil</button><button className="button button--outline" onClick={() => setAccountOpen(true)} data-testid="button-portal-login"><LockKeyhole size={15} />Intentar iniciar sesión</button><button className="button button--outline" onClick={() => setPortalOpen(false)} data-testid="button-close-portal-action">Cerrar portal</button></div></section></div>}
+      {portalOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setPortalOpen(false); }}><section className="modal modal--wide" role="dialog" aria-modal="true" aria-labelledby="portal-heading"><button className="modal-close" onClick={() => setPortalOpen(false)} aria-label="Cerrar portal" data-testid="button-close-portal"><X size={18} /></button><div className="portal-header"><span className="eyebrow">Portal de clientes</span><h2 id="portal-heading">Bienvenido{profile.name ? `, ${profile.name}` : ''}.</h2><p className="modal-intro">Tu sesión está conectada a Firebase y tus datos de cliente se cargan desde Firestore.</p></div><div className="profile-summary"><div className="profile-row"><span>Nombre</span><strong>{profile.name || 'Cliente Var San'}</strong></div><div className="profile-row"><span>Correo electrónico</span><strong>{profile.email || currentUser?.email || 'No disponible'}</strong></div><div className="profile-row"><span>Empresa</span><strong>{profile.company || 'No especificada'}</strong></div></div><div className="portal-actions"><button className="button button--navy" onClick={() => { setPortalOpen(false); setProfileOpen(true); }} data-testid="button-open-profile"><UserCheck size={15} />Mi perfil</button><button className="button button--outline" style={{ color: 'var(--navy)', borderColor: 'var(--line)' }} onClick={handleSignOut} data-testid="button-logout"><LockKeyhole size={15} />Cerrar sesión</button><button className="button button--outline" style={{ color: 'var(--navy)', borderColor: 'var(--line)' }} onClick={() => setPortalOpen(false)} data-testid="button-close-portal-action">Cerrar portal</button></div></section></div>}
 
-      {profileOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setProfileOpen(false); }}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="profile-heading"><button className="modal-close" onClick={() => setProfileOpen(false)} aria-label="Cerrar perfil" data-testid="button-close-profile"><X size={18} /></button><div className="modal-brand"><BrandMark /><div><strong>MI PERFIL</strong><small>Vista previa</small></div></div><h2 id="profile-heading">Datos del cliente</h2><p className="modal-intro">Estos campos representan el perfil dentro del portal. No se guardan en esta versión.</p><div className="account-form"><div className="form-field"><label htmlFor="profile-name">Nombre</label><input id="profile-name" defaultValue="Cliente Var San" data-testid="input-profile-name" /></div><div className="form-field"><label htmlFor="profile-email">Correo electrónico</label><input id="profile-email" defaultValue="No conectado" disabled data-testid="input-profile-email" /></div><div className="form-field"><label htmlFor="profile-company">Empresa</label><input id="profile-company" placeholder="Nombre de tu empresa" data-testid="input-profile-company" /></div><button className="button button--navy" onClick={() => setProfileOpen(false)} data-testid="button-save-profile"><Check size={15} />Cerrar vista previa</button></div></section></div>}
+      {profileOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setProfileOpen(false); }}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="profile-heading"><button className="modal-close" onClick={() => setProfileOpen(false)} aria-label="Cerrar perfil" data-testid="button-close-profile"><X size={18} /></button><div className="modal-brand"><BrandMark /><div><strong>MI PERFIL</strong><small>Cliente Var San</small></div></div><h2 id="profile-heading">Datos del cliente</h2><p className="modal-intro">Los cambios se guardan en tu perfil de Firestore.</p><div className="account-form"><div className="form-field"><label htmlFor="profile-name">Nombre</label><input id="profile-name" value={profile.name} onChange={(event) => setProfile((value) => ({ ...value, name: event.target.value }))} data-testid="input-profile-name" /></div><div className="form-field"><label htmlFor="profile-email">Correo electrónico</label><input id="profile-email" value={profile.email || currentUser?.email || ''} disabled data-testid="input-profile-email" /></div><div className="form-field"><label htmlFor="profile-company">Empresa</label><input id="profile-company" value={profile.company} onChange={(event) => setProfile((value) => ({ ...value, company: event.target.value }))} placeholder="Nombre de tu empresa" data-testid="input-profile-company" /></div><button className="button button--navy" onClick={saveProfile} data-testid="button-save-profile"><Check size={15} />Guardar cambios</button></div></section></div>}
     </div>
   );
 }
