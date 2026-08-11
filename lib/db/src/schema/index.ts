@@ -1,20 +1,41 @@
-// Export your models here. Add one export per file
-// export * from "./posts";
-//
-// Each model/table should ideally be split into different files.
-// Each model/table should define a Drizzle table, insert schema, and types:
-//
-//   import { pgTable, text, serial } from "drizzle-orm/pg-core";
-//   import { createInsertSchema } from "drizzle-zod";
-//   import { z } from "zod/v4";
-//
-//   export const postsTable = pgTable("posts", {
-//     id: serial("id").primaryKey(),
-//     title: text("title").notNull(),
-//   });
-//
-//   export const insertPostSchema = createInsertSchema(postsTable).omit({ id: true });
-//   export type InsertPost = z.infer<typeof insertPostSchema>;
-//   export type Post = typeof postsTable.$inferSelect;
+import {
+pgTable,
+serial,
+text,
+timestamp,
+} from "drizzle-orm/pg-core";
 
-export {}
+export const newsletterSubscribersTable = pgTable(
+"newsletter_subscribers",
+{
+id: serial("id").primaryKey(),
+
+email: text("email").notNull().unique(),
+
+status: text("status")
+.notNull()
+.default("subscribed"),
+
+source: text("source")
+.notNull()
+.default("website_footer"),
+
+unsubscribeToken: text("unsubscribe_token")
+.notNull()
+.unique(),
+
+subscribedAt: timestamp("subscribed_at", {
+withTimezone: true,
+})
+.notNull()
+.defaultNow(),
+
+unsubscribedAt: timestamp("unsubscribed_at", {
+withTimezone: true,
+}),
+
+welcomeEmailSentAt: timestamp("welcome_email_sent_at", {
+withTimezone: true,
+}),
+},
+);
