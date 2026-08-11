@@ -501,7 +501,7 @@ error?.message || "sin mensaje"
     setChatLoading(true);
 
     try {
-      const response = await fetch('/api/assistant/chat', {
+      const response = await fetch('https://varsan-api.onrender.com/api/assistant/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text, history }),
