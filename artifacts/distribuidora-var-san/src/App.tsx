@@ -338,7 +338,7 @@ window.scrollTo({ top: 0, behavior: 'smooth' });
     setNewsletterMessage('');
 
     try {
-      const response = await fetch('/api/newsletter/subscribe', {
+      const response = await fetch('https://varsan-api.onrender.com/api/newsletter/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
