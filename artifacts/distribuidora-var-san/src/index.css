@@ -249,7 +249,7 @@ a { color: inherit; }
 
 .contact-section { background: var(--navy); color: var(--white); }
 .contact-grid { align-items: start; display: grid; gap: 72px; grid-template-columns: .8fr 1.2fr; }
-.contact-section .section-title { max-width: 430px; }
+.contact-section .section-title { max-width: 430px; color: var(--white); }
 .contact-section .section-lede { margin-bottom: 36px; }
 .contact-details { display: grid; gap: 18px; }
 .contact-detail { align-items: flex-start; display: flex; gap: 13px; }
