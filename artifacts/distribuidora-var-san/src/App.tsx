@@ -200,7 +200,7 @@ const sectors = [
 const brands = ['DermaCare', '3M', 'SteelPro Safety', 'SUK', 'SAFE', 'Climax', 'ABUS'];
 
 function BrandMark() {
-  return <span className="brand-mark" aria-label="Monograma Var San">V<span>S</span></span>;
+  return <img className="brand-mark" src={varSanLogo} alt="Logo oficial de Distribuidora Var San" />;
 }
 
 function App() {

@@ -106,7 +106,7 @@ a { color: inherit; }
 .splash-kicker { animation: splash-word-in .8s .15s both; color: var(--gold-light); font-family: var(--font-mono); font-size: clamp(.62rem, 1.2vw, .78rem); letter-spacing: .38em; margin-left: .38em; text-transform: uppercase; }
 .splash-title { animation: splash-word-in 1s .28s both; color: var(--white); font-family: var(--font-display); font-size: clamp(3.3rem, 9vw, 7rem); font-weight: 800; letter-spacing: -.1em; line-height: .9; margin: 12px 0 19px; }
 .splash-rule { animation: splash-rule-in .75s .72s both; background: var(--gold); display: block; height: 2px; transform-origin: center; width: 58px; }
-.brand-mark { align-items: center; background: var(--white); color: var(--navy); display: inline-flex; flex: 0 0 auto; font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; height: 54px; justify-content: center; letter-spacing: -.08em; width: 54px; }
+.brand-mark { align-items: center; background: var(--white); color: var(--navy); display: inline-flex; flex: 0 0 auto; font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; height: 54px; justify-content: center; letter-spacing: -.08em; object-fit: contain; width: 54px; }
 .brand-mark span { color: var(--gold-dark, #a88a3a); }
 .splash .brand-mark { box-shadow: 12px 18px 45px rgba(0,0,0,.25); height: 84px; width: 84px; font-size: 1.8rem; }
 .splash-subtitle { color: var(--gold-light); font-family: var(--font-mono); font-size: .63rem; letter-spacing: .17em; margin: 8px 0 0; text-transform: uppercase; }
