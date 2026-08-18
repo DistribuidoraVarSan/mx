@@ -1,0 +1,85 @@
+name: Build and deploy to GitHub Pages
+
+# Runs on every push to main that touches the app or this workflow.
+# Also runnable manually from the Actions tab (workflow_dispatch).
+"on":
+  push:
+    branches: [main]
+    paths:
+      - "artifacts/distribuidora-var-san/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+# Required for the official actions/deploy-pages action.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deployment in flight at a time; a new push cancels a stale one.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Reads the "packageManager" field in package.json to pin the right
+      # pnpm version automatically. If your package.json doesn't have that
+      # field, add `with: { version: 9 }` (or whatever major you use).
+- name: Setup pnpm
+uses: pnpm/action-setup@v6
+with:
+version: 11.20.0
+
+- name: Setup Node
+uses: actions/setup-node@v4
+with:
+node-version: 22
+cache: pnpm
+cache-dependency-path: pnpm-lock.yaml
+          cache: pnpm
+          # ADJUST if your pnpm-lock.yaml is NOT at the repo root — e.g. if
+          # it lives at artifacts/distribuidora-var-san/pnpm-lock.yaml,
+          # change this path to match.
+          cache-dependency-path: pnpm-lock.yaml
+
+      # ADJUST if this is not a true pnpm workspace: if
+      # artifacts/distribuidora-var-san has its OWN separate lockfile
+      # instead of sharing the root one, move --frozen-lockfile install
+      # into that directory instead (working-directory: artifacts/distribuidora-var-san).
+      - name: Install dependencies (workspace root)
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        working-directory: artifacts/distribuidora-var-san
+        env:
+          BASE_PATH: /
+          NODE_ENV: production
+        run: pnpm build
+
+      # Keeps the custom domain attached to every Actions-based deploy.
+      # Safe to run even if a CNAME already exists elsewhere — this only
+      # touches the build output directory, nothing tracked in git.
+      - name: Preserve custom domain
+        run: echo "distribuidoravarsan.com.mx" > artifacts/distribuidora-var-san/dist/public/CNAME
+
+      - name: Upload build output as Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: artifacts/distribuidora-var-san/dist/public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
