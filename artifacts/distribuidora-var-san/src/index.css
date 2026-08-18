@@ -5,6 +5,70 @@
 /* =========================================================
    DESIGN TOKENS — Var San Liquid Glass system
    ========================================================= */
+/* -----------------------------------------------------------
+   @property registrations for the Liquid Glass color tokens.
+
+   Root cause of the bug: Lightning CSS (used internally by the
+   Tailwind v4 Vite plugin for production minification) performs
+   "custom property folding" — when a plain custom property is
+   only referenced a handful of times, its minifier inlines the
+   literal value at each call site and deletes the original
+   `--x: value;` declaration, since keeping the declaration is no
+   longer the smaller output. That's why --glass-border/--glass-
+   blur/--glass-shadow (10+ usages each) survived, while --glass-
+   bg, --glass-bg-strong and --glass-bg-soft (2–6 usages) were
+   folded away first.
+
+   Per the CSS Houdini spec (and Lightning CSS's own documented
+   behavior), a custom property registered via @property is never
+   folded, because doing so could change its runtime semantics.
+   Registering these here — while still keeping the plain --x
+   declaration below as the actual value and as a fallback for
+   browsers that ignore @property — guarantees they always survive
+   minification, regardless of usage count.
+   ----------------------------------------------------------- */
+@property --glass-bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(255, 255, 255, .5);
+}
+@property --glass-bg-strong {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(255, 255, 255, .72);
+}
+@property --glass-bg-soft {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(255, 255, 255, .32);
+}
+@property --glass-border {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(255, 255, 255, .75);
+}
+@property --glass-navy-bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(10, 22, 46, .58);
+}
+@property --glass-navy-bg-strong {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(6, 16, 36, .72);
+}
+
+/* Base resets — Tailwind v4 convention: custom CSS should live inside
+   @layer so it merges predictably with Tailwind's own theme/base/
+   components/utilities layers instead of sitting in an ambiguous
+   unlayered scope. This block was previously opened with an @layer base rule
+   but never closed, which silently swallowed the ENTIRE rest of the
+   stylesheet (~975 lines — every component rule, every @media query,
+   the legal-page styles) into one unterminated layer. That is fixed here:
+   only resets live in @layer base; everything else moves to
+   @layer components, each properly closed. */
+@layer base {
+
 :root {
   --navy: #0a1f44;
   --navy-light: #1a3a6e;
@@ -92,6 +156,10 @@ a { color: inherit; }
   outline: 3px solid rgba(201, 168, 76, .72);
   outline-offset: 3px;
 }
+
+}
+
+@layer components {
 
 .site-shell { overflow: clip; }
 .container { width: min(1160px, calc(100% - 48px)); margin: 0 auto; }
@@ -977,4 +1045,6 @@ a { color: inherit; }
   .legal-highlight {
     padding: 12px 14px;
   }
+}
+
 }
