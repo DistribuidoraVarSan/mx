@@ -87,12 +87,12 @@
   --line: #e3ddcd;
 
   /* glass surfaces — light */
-  --glass-bg: rgba(255, 255, 255, .5);
-  --glass-bg-strong: rgba(255, 255, 255, .72);
-  --glass-bg-soft: rgba(255, 255, 255, .32);
+  --glass-bg: rgba(255, 255, 255, .16);
+  --glass-bg-strong: rgba(255, 255, 255, .22);
+  --glass-bg-soft: rgba(255, 255, 255, .10);
   --glass-border: rgba(255, 255, 255, .75);
   --glass-border-soft: rgba(255, 255, 255, .4);
-  --glass-blur: blur(22px);
+  --glass-blur: blur(22px) saturate(180%);
   --glass-blur-sm: blur(12px);
 
   /* glass surfaces — navy (for dark cards on light sections) */
