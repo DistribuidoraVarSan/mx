@@ -11,9 +11,9 @@ const basePath = process.env.BASE_PATH || '/';
 export default defineConfig({
 base: basePath,
 plugins: [
-react(),
-tailwindcss(),
-runtimeErrorOverlay(),
+  react(),
+  tailwindcss(),
+  runtimeErrorOverlay(),
 ...(process.env.NODE_ENV !== 'production' &&
 process.env.REPL_ID !== undefined
 ? [
@@ -42,8 +42,9 @@ dedupe: ['react', 'react-dom'],
 },
 root: path.resolve(import.meta.dirname),
 build: {
-outDir: path.resolve(import.meta.dirname, 'dist/public'),
-emptyOutDir: true,
+  outDir: path.resolve(import.meta.dirname, 'dist/public'),
+  emptyOutDir: true,
+  cssMinify: false,
 },
 server: {
 port,
