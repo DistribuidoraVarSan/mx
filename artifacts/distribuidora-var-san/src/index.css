@@ -142,6 +142,8 @@
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
+img, svg { max-width: 100%; }
+img { height: auto; }
 body {
   margin: 0;
   min-width: 320px;
@@ -864,6 +866,10 @@ a { color: inherit; }
   .form-field--full { grid-column: auto; }
   .footer-grid { grid-template-columns: 1fr; }
   .footer-grid > :first-child { grid-column: auto; }
+  .value-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .value-card { padding: 20px; min-height: auto; }
+  .catalog-meta { flex-wrap: wrap; gap: 6px; }
+  .catalog-info h3 { overflow-wrap: break-word; }
   .footer-bottom { align-items: start; flex-direction: column; gap: 13px; }
   .footer-legal { flex-wrap: wrap; }
   .splash-inner { max-width: min(92vw, 520px); }
@@ -874,6 +880,11 @@ a { color: inherit; }
   .nav-wordmark { display: none; }
   .nav-container { gap: 10px; padding: 9px 10px; }
   .account-button { padding: 9px 11px; }
+}
+@media (max-width: 480px) {
+  .value-grid { grid-template-columns: 1fr; }
+  .chat-window { height: min(430px, calc(100dvh - 110px)); }
+  .modal { padding: 26px 20px; }
 }
 @media (max-width: 380px) {
   .hero-title { font-size: clamp(2.1rem, 9vw, 2.5rem); }
