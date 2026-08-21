@@ -707,8 +707,6 @@ error?.message || "sin mensaje"
           <input
             type="text"
             name="name"
-            value={contactForm.name}
-            onChange={handleContactChange}
             required
           />
         </label>
