@@ -247,7 +247,7 @@ a { color: inherit; }
 }
 .nav-container::before {
   content: '';
-  position: absolute; inset: 0; pointer-events: none;
+  position: absolute; inset: 0; pointer-events: none; border-radius: inherit; overflow: hidden;
   background: linear-gradient(120deg, rgba(255,255,255,.55) 0%, transparent 26%, transparent 74%, rgba(255,255,255,.3) 100%);
   mix-blend-mode: overlay;
 }
@@ -589,6 +589,33 @@ a { color: inherit; }
 .form-submit { margin-top: 4px; position: relative; z-index: 1; }
 .form-note { color: rgba(255,255,255,.5); font-size: .69rem; line-height: 1.5; margin: 12px 0 0; position: relative; z-index: 1; }
 
+/* The actual markup for .contact-form is <form><label>Text<input/></label>...</form>
+   with no .form-grid/.form-field wrappers, so the rules above never apply to it.
+   These rules target the real structure without touching the TSX. */
+.contact-form { display: grid; grid-template-columns: 1fr 1fr; gap: 21px; }
+.contact-form label {
+  display: grid; gap: 8px; position: relative; z-index: 1;
+  color: var(--gold-light); font-family: var(--font-mono); font-size: .62rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+}
+.contact-form label:nth-of-type(4) { grid-column: 1 / -1; }
+.contact-form input, .contact-form textarea {
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); border-radius: var(--radius-sm);
+  color: var(--white); min-height: 48px; outline: 0; padding: 12px 14px; width: 100%;
+  font-family: var(--font-sans); font-size: .85rem; font-weight: 400; letter-spacing: normal; text-transform: none;
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.contact-form textarea { min-height: 124px; resize: vertical; }
+.contact-form input::placeholder, .contact-form textarea::placeholder { color: rgba(255,255,255,.4); opacity: 1; }
+.contact-form input:focus, .contact-form textarea:focus { background: rgba(255,255,255,.13); border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,.18); }
+.contact-form button[type="submit"] {
+  grid-column: 1 / -1; margin-top: 4px; position: relative; z-index: 1; width: fit-content;
+  align-items: center; background: var(--gold); border: 0; border-radius: var(--radius-pill);
+  color: var(--navy); display: inline-flex; font-family: var(--font-sans); font-size: .8rem; font-weight: 700;
+  gap: 8px; justify-content: center; padding: 14px 22px; cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.contact-form button[type="submit"]:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(201,168,76,.35); }
+
 /* modal / account panels sit on light glass, so their inputs stay light-styled */
 .modal .form-field input, .modal .form-field textarea, .account-form .form-field input, .account-form .form-field textarea {
   background: rgba(255,255,255,.7); border: 1px solid var(--line); color: var(--ink);
@@ -765,7 +792,7 @@ a { color: inherit; }
   .nav-toggle { display: inline-flex; }
   .navbar .account-button { margin-left: auto; }
   .navbar { padding-top: 14px; }
-  .nav-container { border-radius: var(--radius-lg); padding: 9px 12px; }
+  .nav-container { border-radius: var(--radius-lg); padding: 9px 12px; overflow: visible; }
   .nav-links {
     align-items: stretch; background: var(--glass-bg-strong); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
     border: 1px solid var(--glass-border); border-radius: var(--radius-md); box-shadow: var(--glass-shadow);
@@ -829,6 +856,8 @@ a { color: inherit; }
   .brands-section::before { opacity: .7; }
   .form-grid { grid-template-columns: 1fr; }
   .form-field--full { grid-column: auto; }
+  .contact-form { grid-template-columns: 1fr; }
+  .contact-form label:nth-of-type(4) { grid-column: auto; }
   .footer-grid { grid-template-columns: 1fr; }
   .footer-grid > :first-child { grid-column: auto; }
   .footer-bottom { align-items: start; flex-direction: column; gap: 13px; }
