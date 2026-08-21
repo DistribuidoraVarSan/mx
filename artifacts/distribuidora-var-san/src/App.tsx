@@ -718,8 +718,6 @@ error?.message || "sin mensaje"
           <input
             type="email"
             name="email"
-            value={contactForm.email}
-            onChange={handleContactChange}
             required
           />
         </label>
@@ -729,8 +727,6 @@ error?.message || "sin mensaje"
           <input
             type="text"
             name="company"
-            value={contactForm.company}
-            onChange={handleContactChange}
           />
         </label>
 
@@ -738,8 +734,6 @@ error?.message || "sin mensaje"
           Mensaje
           <textarea
             name="message"
-            value={contactForm.message}
-            onChange={handleContactChange}
             required
           />
         </label>
