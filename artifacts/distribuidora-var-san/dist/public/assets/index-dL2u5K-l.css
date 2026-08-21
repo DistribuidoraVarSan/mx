@@ -3051,8 +3051,12 @@
       padding: 150px 0 90px;
     }
 
-    .hero-grid, .why-layout, .contact-grid {
+    .hero-grid, .why-layout, .contact-grid, .contact-form {
       grid-template-columns: 1fr;
+    }
+
+    .contact-form label:nth-of-type(4) {
+      grid-column: auto;
     }
 
     .hero-visual {
@@ -3162,7 +3166,7 @@
     }
 
     .hero-title {
-      font-size: clamp(2.7rem, 14vw, 4.2rem);
+      font-size: clamp(2.5rem, 9vw, 3rem);
     }
 
     .hero-actions, .hero-actions .button {
@@ -3263,14 +3267,6 @@
       grid-column: auto;
     }
 
-    .contact-form {
-      grid-template-columns: 1fr;
-    }
-
-    .contact-form label:nth-of-type(4) {
-      grid-column: auto;
-    }
-
     .footer-grid {
       grid-template-columns: 1fr;
     }
@@ -3323,7 +3319,7 @@
 
   @media (max-width: 380px) {
     .hero-title {
-      font-size: clamp(2.15rem, 12vw, 3.6rem);
+      font-size: clamp(2.1rem, 9vw, 2.5rem);
     }
 
     .container {

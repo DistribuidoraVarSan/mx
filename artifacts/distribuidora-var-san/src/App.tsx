@@ -553,7 +553,7 @@ error?.message || "sin mensaje"
       <header className={`navbar${scrolled ? ' scrolled' : ''}`}>
         <div className="container nav-container">
           <a href="#inicio" className="nav-logo" onClick={navigateAndClose} data-testid="link-brand">
-            <img className="nav-logo-image" src={varSanLogo} alt="Logo oficial de Distribuidora Var San" /><span className="nav-wordmark"><strong>Distribuidora Var San</strong><small>Soluciones en limpieza y protección para tu empresa.</small></span>
+            <img className="nav-logo-image" src={varSanLogo} alt="Logo oficial de Distribuidora Var San" />
           </a>
           <nav aria-label="Navegación principal">
             <ul className={`nav-links${mobileMenu ? ' is-open' : ''}`}>
