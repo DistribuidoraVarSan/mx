@@ -1,0 +1,102 @@
+import type { Dictionary } from '../types';
+
+const zhTW: Dictionary = {
+  nav: {
+    inicio: '首頁',
+    esencia: '品牌理念',
+    familia: '我們的團隊',
+    soluciones: '解決方案',
+    eleccion: '為何選擇我們',
+    solicitarCotizacion: '索取報價',
+    portalClientes: '客戶專區',
+    iniciarSesion: '登入',
+    crearCuenta: '建立帳號',
+  },
+
+  languageSelector: {
+    label: '選擇語言',
+  },
+
+  cookies: {
+    text: '親愛的訪客，我們使用 Cookie 來改善您的瀏覽體驗。繼續使用本網站即表示您同意使用 Cookie。您可以查閱我們的{privacidad}與{cookies}。',
+    privacyLink: '隱私權政策',
+    cookiesLink: 'Cookie 政策',
+    accept: '接受',
+    reject: '拒絕',
+  },
+
+  account: {
+    portalTitle: '客戶專區',
+    loginTitle: '登入帳號',
+    registerTitle: '建立您的帳號',
+    loginIntro: '登入您的 Distribuidora Var San 帳號。',
+    registerIntro: '註冊以使用 Var San 客戶專區。',
+    tabLogin: '登入',
+    tabRegister: '建立帳號',
+    fieldName: '姓名',
+    fieldNamePlaceholder: '您的姓名',
+    fieldCompany: '公司',
+    fieldCompanyPlaceholder: '您的公司名稱',
+    fieldEmail: '電子郵件',
+    fieldEmailPlaceholder: 'email@company.com',
+    fieldPassword: '密碼',
+    fieldPasswordPlaceholderLogin: '您的密碼',
+    fieldPasswordPlaceholderRegister: '至少 6 個字元',
+    fieldConfirmPassword: '確認密碼',
+    fieldConfirmPasswordPlaceholder: '再次輸入密碼',
+    submitLogin: '登入',
+    submitRegister: '建立帳號',
+    continueWithGoogle: '使用 Google 繼續',
+    secureAccessNote: 'Var San 客戶透過 Firebase Authentication 與 Firestore 提供安全存取。',
+    passwordMismatch: '兩次輸入的密碼不一致。',
+    accountCreated: '帳號已成功建立。',
+  },
+
+  portal: {
+    eyebrow: '客戶專區',
+    welcome: '歡迎{name}。',
+    intro: '您的登入已連結至 Firebase，客戶資料由 Firestore 載入。',
+    fieldNameLabel: '姓名',
+    fieldEmailLabel: '電子郵件',
+    fieldCompanyLabel: '公司',
+    defaultClientName: 'Var San 客戶',
+    notSpecified: '未提供',
+    notAvailable: '無法取得',
+    myProfile: '我的個人資料',
+    logOut: '登出',
+    closePortal: '關閉客戶專區',
+    profileHeading: '客戶資料',
+    profileIntro: '變更會儲存到您的 Firestore 個人資料中。',
+    saveChanges: '儲存變更',
+  },
+
+  chatbot: {
+    openButtonLabel: '開啟聊天機器人',
+    closeButtonLabel: '關閉聊天機器人',
+    headerTitle: 'Var San 客服助理',
+    headerSubtitle: '產品與聯絡方式諮詢',
+    greeting: '您好，我是 Var San 客服助理。我可以為您介紹我們的產品線、型錄、配送範圍以及聯絡方式。請問需要什麼協助？',
+    inputPlaceholder: '請輸入您的問題（Enter 傳送，Shift+Enter 換行）',
+    inputAriaLabel: '給客服助理的訊息',
+    sendButtonLabel: '傳送訊息',
+    quickProducts: '你們有哪些產品？',
+    quickQuote: '索取報價',
+    quickSupport: '客戶服務',
+    quickContact: '如何與你們聯絡？',
+    loadingMessage: '輸入中...',
+    errorMessage: '無法處理您的訊息，請稍後再試一次。',
+  },
+
+  footer: {
+    navigationHeading: '網站導覽',
+    contactHeading: '聯絡我們',
+    requestQuote: '索取報價',
+    rightsReserved: '© {year} Distribuidora Var San。版權所有，不得轉載。|',
+    tagline: '為您的企業提供清潔與防護解決方案。',
+    privacyNotice: '隱私權政策',
+    cookiesPolicy: 'Cookie 政策',
+    termsAndConditions: '服務條款',
+  },
+};
+
+export default zhTW;

@@ -9,6 +9,8 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider } from './firebase';
+import { useLanguage } from './i18n/LanguageContext';
+import LanguageSelector from './components/LanguageSelector';
 import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import PoliticaCookies from './pages/PoliticaCookies';
 import TerminosCondiciones from './pages/TerminosCondiciones';
@@ -204,6 +206,7 @@ function BrandMark() {
 }
 
 function App() {
+  const { language, t } = useLanguage();
   const [splashVisible, setSplashVisible] = useState(true);
 const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [splashExiting, setSplashExiting] = useState(false);
@@ -221,7 +224,7 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState({ name: '', email: '', company: '' });
   const [chatOpen, setChatOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{ role: 'bot', text: 'Hola. Soy el Asistente Var San. Puedo orientarte sobre nuestras líneas de productos, catálogos, cobertura de entrega y medios de contacto.' }]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{ role: 'bot', text: t.chatbot.greeting }]);
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const [cookies, setCookies] = useState(() => {
@@ -254,6 +257,17 @@ return () => {
 window.removeEventListener('popstate', handlePopState);
 };
 }, []);
+
+// Si el usuario aún no interactuó con el chat (sigue solo el saludo inicial),
+// mantenemos ese saludo traducido al idioma activo. Si ya hay una
+// conversación en curso, no la tocamos.
+useEffect(() => {
+  setChatMessages((messages) =>
+    messages.length === 1 && messages[0].role === 'bot'
+      ? [{ role: 'bot', text: t.chatbot.greeting }]
+      : messages,
+  );
+}, [t]);
 
 
 
@@ -504,7 +518,7 @@ error?.message || "sin mensaje"
       const response = await fetch('https://varsan-api.onrender.com/api/assistant/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, history }),
+        body: JSON.stringify({ message: text, history, language }),
       });
 
       if (!response.ok) {
@@ -519,7 +533,7 @@ error?.message || "sin mensaje"
         ...messages,
         {
           role: 'bot',
-          text: 'No pudimos conectar con el asistente en este momento. Intenta de nuevo en unos segundos o escríbenos directamente al +52 833 218 9032 o a distribuidora.varsan@outlook.com.',
+          text: t.chatbot.errorMessage,
         },
       ]);
     } finally {
@@ -563,7 +577,10 @@ error?.message || "sin mensaje"
               })}
             </ul>
           </nav>
-          <button className="account-button" onClick={() => { if (currentUser) setPortalOpen(true); else { setAccountOpen(true); setAccountMessage(''); } }} data-testid="button-open-account"><User size={15} /><span>Mi cuenta</span></button>
+          <div className="nav-actions">
+            <LanguageSelector />
+            <button className="account-button" onClick={() => { if (currentUser) setPortalOpen(true); else { setAccountOpen(true); setAccountMessage(''); } }} data-testid="button-open-account"><User size={15} /><span>Mi cuenta</span></button>
+          </div>
           <button className="nav-toggle" aria-label={mobileMenu ? 'Cerrar menú' : 'Abrir menú'} aria-expanded={mobileMenu} onClick={() => setMobileMenu(!mobileMenu)} data-testid="button-mobile-menu">{mobileMenu ? <X size={22} /> : <Menu size={22} />}</button>
         </div>
       </header>
@@ -896,8 +913,8 @@ Términos y Condiciones
 </footer>
 
 
-      <button className="chat-trigger" onClick={() => setChatOpen(!chatOpen)} aria-label={chatOpen ? 'Cerrar chatbot' : 'Abrir chatbot'} data-testid="button-open-chat">{chatOpen ? <X size={21} /> : <MessageCircle size={21} />}</button>
-      {chatOpen && <aside className="chat-window" aria-label="Chatbot Var San"><div className="chat-header"><div><strong>Asistente Var San</strong><small>Orientación sobre productos y contacto</small></div><button className="chat-close" onClick={() => setChatOpen(false)} aria-label="Cerrar chatbot" data-testid="button-close-chat"><X size={17} /></button></div><div className="chat-body">{chatMessages.map((message, index) => <div className={`chat-message chat-message--${message.role}`} key={`${message.role}-${index}`} data-testid={`chat-message-${index}`}>{message.text}{message.actions && message.actions.length > 0 && <div className="chat-message-actions">{message.actions.map((action) => action.kind === 'internal' ? <a key={action.key} href={action.href} onClick={navigateAndClose} className="chat-action-button" data-testid={`chat-action-${action.key}`}>{action.label}</a> : <a key={action.key} href={action.href} target="_blank" rel="noopener noreferrer" className="chat-action-button" data-testid={`chat-action-${action.key}`}>{action.label}</a>)}</div>}</div>)}{chatLoading && <div className="chat-message chat-message--bot chat-message--loading" aria-live="polite" data-testid="chat-message-loading"><span className="chat-typing"><span></span><span></span><span></span></span></div>}</div><div className="chat-quick"><button onClick={() => sendChat(undefined, '¿Qué productos manejan?')} disabled={chatLoading} data-testid="button-chat-catalog">Ver productos</button><button onClick={() => sendChat(undefined, '¿Cómo puedo contactarlos?')} disabled={chatLoading} data-testid="button-chat-contact">Contacto</button></div><form className="chat-form" onSubmit={sendChat}><textarea value={chatInput} onChange={(event) => setChatInput(event.target.value)} onKeyDown={handleChatKeyDown} placeholder="Escribe tu consulta (Enter para enviar, Shift+Enter para salto de línea)" aria-label="Consulta para el asistente" rows={1} disabled={chatLoading} data-testid="input-chat" /><button type="submit" aria-label="Enviar consulta" disabled={chatLoading || !chatInput.trim()} data-testid="button-send-chat"><Send size={15} /></button></form></aside>}
+      <button className="chat-trigger" onClick={() => setChatOpen(!chatOpen)} aria-label={chatOpen ? t.chatbot.closeButtonLabel : t.chatbot.openButtonLabel} data-testid="button-open-chat">{chatOpen ? <X size={21} /> : <MessageCircle size={21} />}</button>
+      {chatOpen && <aside className="chat-window" aria-label={t.chatbot.headerTitle}><div className="chat-header"><div><strong>{t.chatbot.headerTitle}</strong><small>{t.chatbot.headerSubtitle}</small></div><button className="chat-close" onClick={() => setChatOpen(false)} aria-label={t.chatbot.closeButtonLabel} data-testid="button-close-chat"><X size={17} /></button></div><div className="chat-body">{chatMessages.map((message, index) => <div className={`chat-message chat-message--${message.role}`} key={`${message.role}-${index}`} data-testid={`chat-message-${index}`}>{message.text}{message.actions && message.actions.length > 0 && <div className="chat-message-actions">{message.actions.map((action) => action.kind === 'internal' ? <a key={action.key} href={action.href} onClick={navigateAndClose} className="chat-action-button" data-testid={`chat-action-${action.key}`}>{action.label}</a> : <a key={action.key} href={action.href} target="_blank" rel="noopener noreferrer" className="chat-action-button" data-testid={`chat-action-${action.key}`}>{action.label}</a>)}</div>}</div>)}{chatLoading && <div className="chat-message chat-message--bot chat-message--loading" aria-live="polite" data-testid="chat-message-loading"><span className="chat-typing"><span></span><span></span><span></span></span></div>}</div><div className="chat-quick"><button onClick={() => sendChat(undefined, t.chatbot.quickProducts)} disabled={chatLoading} data-testid="button-chat-catalog">{t.chatbot.quickProducts}</button><button onClick={() => sendChat(undefined, t.chatbot.quickContact)} disabled={chatLoading} data-testid="button-chat-contact">{t.chatbot.quickContact}</button></div><form className="chat-form" onSubmit={sendChat}><textarea value={chatInput} onChange={(event) => setChatInput(event.target.value)} onKeyDown={handleChatKeyDown} placeholder={t.chatbot.inputPlaceholder} aria-label={t.chatbot.inputAriaLabel} rows={1} disabled={chatLoading} data-testid="input-chat" /><button type="submit" aria-label={t.chatbot.sendButtonLabel} disabled={chatLoading || !chatInput.trim()} data-testid="button-send-chat"><Send size={15} /></button></form></aside>}
 
       {!cookies && <aside className="cookie-banner" aria-label="Preferencias de cookies"><p>Querido usuario, utilizamos cookies para mejorar tu experiencia de navegación. Al continuar usando este sitio, aceptas el uso de cookies. Puedes consultar nuestra <a href="/privacidad" onClick={navigateAndClose}>Política de Privacidad</a> y <a href="/cookies" onClick={navigateAndClose}>Política de Cookies</a>.</p><div className="cookie-actions"><button className="accept" onClick={() => acceptCookies('accepted')} data-testid="button-accept-cookies">Aceptar</button><button className="reject" onClick={() => acceptCookies('rejected')} data-testid="button-reject-cookies">Rechazar</button></div></aside>}
 

@@ -1,0 +1,102 @@
+import type { Dictionary } from '../types';
+
+const pt: Dictionary = {
+  nav: {
+    inicio: 'Início',
+    esencia: 'Nossa essência',
+    familia: 'Família',
+    soluciones: 'Soluções',
+    eleccion: 'Por que nos escolher',
+    solicitarCotizacion: 'Solicitar orçamento',
+    portalClientes: 'Portal do cliente',
+    iniciarSesion: 'Entrar',
+    crearCuenta: 'Criar conta',
+  },
+
+  languageSelector: {
+    label: 'Selecionar idioma',
+  },
+
+  cookies: {
+    text: 'Caro visitante, utilizamos cookies para melhorar sua experiência de navegação. Ao continuar a usar este site, você aceita o uso de cookies. Você pode consultar nossa {privacidad} e nossa {cookies}.',
+    privacyLink: 'Política de Privacidade',
+    cookiesLink: 'Política de Cookies',
+    accept: 'Aceitar',
+    reject: 'Recusar',
+  },
+
+  account: {
+    portalTitle: 'Portal do cliente',
+    loginTitle: 'Entre na sua conta',
+    registerTitle: 'Crie sua conta',
+    loginIntro: 'Acesse sua conta Distribuidora Var San.',
+    registerIntro: 'Cadastre-se para acessar o portal do cliente Var San.',
+    tabLogin: 'Entrar',
+    tabRegister: 'Criar conta',
+    fieldName: 'Nome',
+    fieldNamePlaceholder: 'Seu nome',
+    fieldCompany: 'Empresa',
+    fieldCompanyPlaceholder: 'Nome da sua empresa',
+    fieldEmail: 'E-mail',
+    fieldEmailPlaceholder: 'email@empresa.com',
+    fieldPassword: 'Senha',
+    fieldPasswordPlaceholderLogin: 'Sua senha',
+    fieldPasswordPlaceholderRegister: 'Mínimo de 6 caracteres',
+    fieldConfirmPassword: 'Confirmar senha',
+    fieldConfirmPasswordPlaceholder: 'Repita sua senha',
+    submitLogin: 'Entrar',
+    submitRegister: 'Criar conta',
+    continueWithGoogle: 'Continuar com o Google',
+    secureAccessNote: 'Acesso seguro para clientes Var San via Firebase Authentication e Firestore.',
+    passwordMismatch: 'As senhas não coincidem.',
+    accountCreated: 'Conta criada com sucesso.',
+  },
+
+  portal: {
+    eyebrow: 'Portal do cliente',
+    welcome: 'Bem-vindo{name}.',
+    intro: 'Sua sessão está conectada ao Firebase e seus dados de cliente são carregados do Firestore.',
+    fieldNameLabel: 'Nome',
+    fieldEmailLabel: 'E-mail',
+    fieldCompanyLabel: 'Empresa',
+    defaultClientName: 'Cliente Var San',
+    notSpecified: 'Não especificada',
+    notAvailable: 'Não disponível',
+    myProfile: 'Meu perfil',
+    logOut: 'Sair',
+    closePortal: 'Fechar portal',
+    profileHeading: 'Dados do cliente',
+    profileIntro: 'As alterações são salvas no seu perfil do Firestore.',
+    saveChanges: 'Salvar alterações',
+  },
+
+  chatbot: {
+    openButtonLabel: 'Abrir chatbot',
+    closeButtonLabel: 'Fechar chatbot',
+    headerTitle: 'Assistente Var San',
+    headerSubtitle: 'Orientação sobre produtos e contato',
+    greeting: 'Olá. Sou o Assistente Var San. Posso te orientar sobre nossas linhas de produtos, catálogos, cobertura de entrega e formas de contato. Como podemos ajudar?',
+    inputPlaceholder: 'Escreva sua pergunta (Enter para enviar, Shift+Enter para quebra de linha)',
+    inputAriaLabel: 'Pergunta para o assistente',
+    sendButtonLabel: 'Enviar pergunta',
+    quickProducts: 'Quais produtos vocês oferecem?',
+    quickQuote: 'Solicitar orçamento',
+    quickSupport: 'Atendimento',
+    quickContact: 'Como posso entrar em contato?',
+    loadingMessage: 'Digitando...',
+    errorMessage: 'Não conseguimos processar sua mensagem. Tente novamente em alguns segundos.',
+  },
+
+  footer: {
+    navigationHeading: 'Navegação',
+    contactHeading: 'Contato',
+    requestQuote: 'Solicitar orçamento',
+    rightsReserved: '© {year} Distribuidora Var San. Todos os direitos reservados. |',
+    tagline: 'Soluções de limpeza e proteção para sua empresa.',
+    privacyNotice: 'Aviso de Privacidade',
+    cookiesPolicy: 'Política de Cookies',
+    termsAndConditions: 'Termos e Condições',
+  },
+};
+
+export default pt;

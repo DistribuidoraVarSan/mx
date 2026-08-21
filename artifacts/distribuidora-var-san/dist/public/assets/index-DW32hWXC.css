@@ -1,4 +1,153 @@
-@import "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap";
+@import "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap";/* ==========================================================================
+   LANGUAGE SELECTOR — Liquid Glass (usa los mismos tokens que el navbar)
+   El trigger vive dentro de .nav-container, que es oscuro (navy translúcido),
+   así que usa el mismo tratamiento "vidrio claro sobre fondo oscuro" que
+   .account-button, en vez de texto navy sobre vidrio claro.
+   ========================================================================== */
+
+.lang-selector {
+  position: relative;
+  display: inline-flex;
+}
+
+.lang-selector-trigger {
+  align-items: center;
+  background: rgba(255, 255, 255, .10);
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: var(--radius-pill, 999px);
+  color: var(--white);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: .68rem;
+  font-weight: 700;
+  gap: 8px;
+  letter-spacing: .01em;
+  padding: 10px 14px;
+  transition: background .2s ease, border-color .2s ease, transform .2s ease, color .2s ease;
+  white-space: nowrap;
+}
+
+.lang-selector-trigger:hover {
+  background: var(--white);
+  border-color: var(--gold);
+  color: var(--navy);
+  transform: translateY(-1px);
+}
+
+.lang-selector-trigger:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.lang-selector-current {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Panel flotante — vidrio azul marino, como los modales/portal */
+.lang-selector-panel {
+  background: var(--glass-navy-bg-strong, var(--glass-navy-bg));
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-navy-border);
+  border-radius: 18px;
+  box-shadow: var(--glass-shadow-navy);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: min(60vh, 420px);
+  overflow-y: auto;
+  padding: 8px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  width: max(200px, 100%);
+  z-index: 60;
+  animation: lang-panel-in .22s ease both;
+}
+
+/* reflejo sutil superior, coherente con el resto del sistema Liquid Glass */
+.lang-selector-panel::before {
+  content: '';
+  position: absolute;
+  inset: 1px 1px auto 1px;
+  height: 40%;
+  border-radius: 17px 17px 40px 40px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+@keyframes lang-panel-in {
+  from { opacity: 0; transform: translateY(-6px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.lang-selector-option {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: rgba(255, 255, 255, .88);
+  cursor: pointer;
+  display: flex;
+  font-size: .82rem;
+  justify-content: space-between;
+  padding: 10px 12px;
+  position: relative;
+  text-align: left;
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+  z-index: 1;
+}
+
+.lang-selector-option:hover {
+  background: rgba(255, 255, 255, .08);
+  border-color: var(--glass-navy-border);
+  color: var(--white);
+}
+
+.lang-selector-option.active {
+  background: rgba(201, 168, 76, .16);
+  border-color: var(--gold);
+  color: var(--gold-light);
+  font-weight: 600;
+}
+
+.lang-selector-option svg {
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1060px) {
+  .lang-selector-trigger {
+    padding: 9px 10px;
+  }
+}
+
+@media (max-width: 640px) {
+  .lang-selector-current {
+    max-width: 84px;
+  }
+
+  .lang-selector-panel {
+    left: 0;
+    right: 0;
+    width: auto;
+    max-height: 50vh;
+  }
+}
+
+@media (max-width: 560px) {
+  .lang-selector-current {
+    display: none;
+  }
+
+  .lang-selector-trigger {
+    padding: 9px 11px;
+  }
+}
+
 
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 
@@ -904,6 +1053,12 @@
     border-radius: 10px;
     padding: 8px;
     display: none;
+  }
+
+  .nav-actions {
+    align-items: center;
+    gap: 10px;
+    display: flex;
   }
 
   .hero {
@@ -3012,7 +3167,7 @@
       display: inline-flex;
     }
 
-    .navbar .account-button {
+    .navbar .nav-actions {
       margin-left: auto;
     }
 

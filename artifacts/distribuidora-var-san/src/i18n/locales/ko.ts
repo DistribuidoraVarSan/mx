@@ -1,0 +1,102 @@
+import type { Dictionary } from '../types';
+
+const ko: Dictionary = {
+  nav: {
+    inicio: '홈',
+    esencia: '브랜드 소개',
+    familia: '우리 팀',
+    soluciones: '솔루션',
+    eleccion: '선택 이유',
+    solicitarCotizacion: '견적 요청',
+    portalClientes: '고객 포털',
+    iniciarSesion: '로그인',
+    crearCuenta: '계정 만들기',
+  },
+
+  languageSelector: {
+    label: '언어 선택',
+  },
+
+  cookies: {
+    text: '방문해 주셔서 감사합니다. 저희는 더 나은 이용 경험을 제공하기 위해 쿠키를 사용합니다. 사이트를 계속 이용하시면 쿠키 사용에 동의하는 것으로 간주됩니다. {privacidad} 및 {cookies}를 확인하실 수 있습니다.',
+    privacyLink: '개인정보 처리방침',
+    cookiesLink: '쿠키 정책',
+    accept: '수락',
+    reject: '거부',
+  },
+
+  account: {
+    portalTitle: '고객 포털',
+    loginTitle: '로그인',
+    registerTitle: '계정 만들기',
+    loginIntro: 'Distribuidora Var San 계정에 접속하세요.',
+    registerIntro: 'Var San 고객 포털을 이용하려면 가입하세요.',
+    tabLogin: '로그인',
+    tabRegister: '계정 만들기',
+    fieldName: '이름',
+    fieldNamePlaceholder: '이름을 입력하세요',
+    fieldCompany: '회사',
+    fieldCompanyPlaceholder: '회사명을 입력하세요',
+    fieldEmail: '이메일',
+    fieldEmailPlaceholder: 'email@company.com',
+    fieldPassword: '비밀번호',
+    fieldPasswordPlaceholderLogin: '비밀번호를 입력하세요',
+    fieldPasswordPlaceholderRegister: '최소 6자 이상',
+    fieldConfirmPassword: '비밀번호 확인',
+    fieldConfirmPasswordPlaceholder: '비밀번호를 다시 입력하세요',
+    submitLogin: '로그인',
+    submitRegister: '계정 만들기',
+    continueWithGoogle: 'Google 계정으로 계속하기',
+    secureAccessNote: 'Var San 고객은 Firebase Authentication과 Firestore를 통해 안전하게 접속합니다.',
+    passwordMismatch: '비밀번호가 일치하지 않습니다.',
+    accountCreated: '계정이 성공적으로 생성되었습니다.',
+  },
+
+  portal: {
+    eyebrow: '고객 포털',
+    welcome: '환영합니다{name}.',
+    intro: '현재 세션은 Firebase에 연결되어 있으며, 고객 정보는 Firestore에서 불러옵니다.',
+    fieldNameLabel: '이름',
+    fieldEmailLabel: '이메일',
+    fieldCompanyLabel: '회사',
+    defaultClientName: 'Var San 고객',
+    notSpecified: '미입력',
+    notAvailable: '정보 없음',
+    myProfile: '내 프로필',
+    logOut: '로그아웃',
+    closePortal: '포털 닫기',
+    profileHeading: '고객 정보',
+    profileIntro: '변경 사항은 Firestore 프로필에 저장됩니다.',
+    saveChanges: '변경 사항 저장',
+  },
+
+  chatbot: {
+    openButtonLabel: '챗봇 열기',
+    closeButtonLabel: '챗봇 닫기',
+    headerTitle: 'Var San 어시스턴트',
+    headerSubtitle: '제품 및 문의 안내',
+    greeting: '안녕하세요. Var San 어시스턴트입니다. 제품 라인, 카탈로그, 배송 가능 지역, 문의 방법에 대해 안내해 드릴 수 있습니다. 무엇을 도와드릴까요?',
+    inputPlaceholder: '문의 내용을 입력하세요 (Enter 전송, Shift+Enter 줄바꿈)',
+    inputAriaLabel: '어시스턴트에게 보낼 메시지',
+    sendButtonLabel: '메시지 보내기',
+    quickProducts: '어떤 제품을 취급하시나요?',
+    quickQuote: '견적 요청',
+    quickSupport: '고객 지원',
+    quickContact: '어떻게 연락드릴 수 있나요?',
+    loadingMessage: '입력 중...',
+    errorMessage: '메시지를 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+  },
+
+  footer: {
+    navigationHeading: '메뉴',
+    contactHeading: '문의처',
+    requestQuote: '견적 요청',
+    rightsReserved: '© {year} Distribuidora Var San. All rights reserved. |',
+    tagline: '기업을 위한 청소 및 보호 솔루션.',
+    privacyNotice: '개인정보 처리방침',
+    cookiesPolicy: '쿠키 정책',
+    termsAndConditions: '이용 약관',
+  },
+};
+
+export default ko;

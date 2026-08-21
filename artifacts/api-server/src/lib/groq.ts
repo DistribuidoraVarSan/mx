@@ -1,6 +1,10 @@
 import OpenAI from "openai";
 import { logger } from "./logger";
-import { buildSystemInstruction, ASSISTANT_ACTION_KEYS } from "./assistant-knowledge";
+import {
+  buildSystemInstruction,
+  ASSISTANT_ACTION_KEYS,
+  type AssistantLanguage,
+} from "./assistant-knowledge";
 
 const MODEL = "openai/gpt-oss-120b";
 const GROQ_BASE_URL = "https://api.groq.com/openai/v1";
@@ -44,7 +48,8 @@ const RESPONSE_JSON_SCHEMA = {
   properties: {
     reply: {
       type: "string",
-      description: "Respuesta en texto plano para mostrar al cliente, en español.",
+      description:
+        "Respuesta en texto plano para mostrar al cliente, en el idioma indicado en la instrucción de sistema.",
     },
     actions: {
       type: "array",
@@ -96,14 +101,23 @@ function parseAssistantResponse(rawText: string): AssistantChatResult | null {
   return { reply, actions };
 }
 
+// Instrucción de refuerzo para el reintento (ver bucle más abajo). Se
+// mantiene en español + inglés a propósito: es una instrucción de FORMATO,
+// no de idioma de respuesta — el idioma de "reply" lo sigue decidiendo
+// exclusivamente buildSystemInstruction(language), que ya se envió como
+// primer mensaje "system" y no se pierde en el reintento.
+const JSON_ONLY_REMINDER =
+  'Responde ÚNICAMENTE con un objeto JSON válido con las claves "reply" (string) y "actions" (array de strings). No incluyas texto fuera del JSON. / Respond ONLY with a valid JSON object with keys "reply" (string) and "actions" (array of strings). No text outside the JSON.';
+
 export async function chatWithAssistant(
   message: string,
   history: AssistantChatMessage[],
+  language: AssistantLanguage,
 ): Promise<AssistantChatResult> {
   const ai = getClient();
 
   const baseMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-    { role: "system", content: buildSystemInstruction() },
+    { role: "system", content: buildSystemInstruction(language) },
     ...history.map((entry) => ({
       role: (entry.role === "user" ? "user" : "assistant") as "user" | "assistant",
       content: entry.text,
@@ -138,8 +152,7 @@ export async function chatWithAssistant(
             ...baseMessages,
             {
               role: "system" as const,
-              content:
-                'Responde ÚNICAMENTE con un objeto JSON válido con las claves "reply" (string) y "actions" (array de strings). No incluyas texto fuera del JSON.',
+              content: JSON_ONLY_REMINDER,
             },
           ];
 
@@ -158,9 +171,9 @@ export async function chatWithAssistant(
     const result = parseAssistantResponse(rawText);
     if (result) return result;
 
-    logger.error({ rawText }, "Groq returned a malformed response, retrying");
+    logger.error({ rawText, language }, "Groq returned a malformed response, retrying");
   }
 
-  logger.error({ rawText: lastRawText }, "Groq response missing expected shape after retry");
+  logger.error({ rawText: lastRawText, language }, "Groq response missing expected shape after retry");
   throw new Error("Groq returned a malformed response.");
 }

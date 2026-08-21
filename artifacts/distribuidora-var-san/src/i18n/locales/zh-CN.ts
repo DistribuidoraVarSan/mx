@@ -1,0 +1,102 @@
+import type { Dictionary } from '../types';
+
+const zhCN: Dictionary = {
+  nav: {
+    inicio: '首页',
+    esencia: '品牌理念',
+    familia: '我们的团队',
+    soluciones: '解决方案',
+    eleccion: '为何选择我们',
+    solicitarCotizacion: '索取报价',
+    portalClientes: '客户专区',
+    iniciarSesion: '登录',
+    crearCuenta: '创建账号',
+  },
+
+  languageSelector: {
+    label: '选择语言',
+  },
+
+  cookies: {
+    text: '亲爱的访客，我们使用 Cookie 来改善您的浏览体验。继续使用本网站即表示您同意使用 Cookie。您可以查阅我们的{privacidad}和{cookies}。',
+    privacyLink: '隐私政策',
+    cookiesLink: 'Cookie 政策',
+    accept: '接受',
+    reject: '拒绝',
+  },
+
+  account: {
+    portalTitle: '客户专区',
+    loginTitle: '登录账号',
+    registerTitle: '创建您的账号',
+    loginIntro: '登录您的 Distribuidora Var San 账号。',
+    registerIntro: '注册以使用 Var San 客户专区。',
+    tabLogin: '登录',
+    tabRegister: '创建账号',
+    fieldName: '姓名',
+    fieldNamePlaceholder: '您的姓名',
+    fieldCompany: '公司',
+    fieldCompanyPlaceholder: '您的公司名称',
+    fieldEmail: '电子邮箱',
+    fieldEmailPlaceholder: 'email@company.com',
+    fieldPassword: '密码',
+    fieldPasswordPlaceholderLogin: '您的密码',
+    fieldPasswordPlaceholderRegister: '至少 6 个字符',
+    fieldConfirmPassword: '确认密码',
+    fieldConfirmPasswordPlaceholder: '再次输入密码',
+    submitLogin: '登录',
+    submitRegister: '创建账号',
+    continueWithGoogle: '使用 Google 继续',
+    secureAccessNote: 'Var San 客户通过 Firebase Authentication 与 Firestore 提供安全访问。',
+    passwordMismatch: '两次输入的密码不一致。',
+    accountCreated: '账号已成功创建。',
+  },
+
+  portal: {
+    eyebrow: '客户专区',
+    welcome: '欢迎{name}。',
+    intro: '您的登录已连接至 Firebase，客户数据由 Firestore 加载。',
+    fieldNameLabel: '姓名',
+    fieldEmailLabel: '电子邮箱',
+    fieldCompanyLabel: '公司',
+    defaultClientName: 'Var San 客户',
+    notSpecified: '未提供',
+    notAvailable: '无法获取',
+    myProfile: '我的资料',
+    logOut: '退出登录',
+    closePortal: '关闭客户专区',
+    profileHeading: '客户资料',
+    profileIntro: '更改内容会保存到您的 Firestore 资料中。',
+    saveChanges: '保存更改',
+  },
+
+  chatbot: {
+    openButtonLabel: '打开聊天机器人',
+    closeButtonLabel: '关闭聊天机器人',
+    headerTitle: 'Var San 客服助手',
+    headerSubtitle: '产品与联系方式咨询',
+    greeting: '您好，我是 Var San 客服助手。我可以为您介绍我们的产品线、目录、配送范围以及联系方式。请问需要什么帮助？',
+    inputPlaceholder: '请输入您的问题（Enter 发送，Shift+Enter 换行）',
+    inputAriaLabel: '给客服助手的消息',
+    sendButtonLabel: '发送消息',
+    quickProducts: '你们有哪些产品？',
+    quickQuote: '索取报价',
+    quickSupport: '客户服务',
+    quickContact: '如何联系你们？',
+    loadingMessage: '正在输入...',
+    errorMessage: '无法处理您的消息，请稍后再试。',
+  },
+
+  footer: {
+    navigationHeading: '网站导航',
+    contactHeading: '联系我们',
+    requestQuote: '索取报价',
+    rightsReserved: '© {year} Distribuidora Var San。保留所有权利。|',
+    tagline: '为您的企业提供清洁与防护解决方案。',
+    privacyNotice: '隐私政策',
+    cookiesPolicy: 'Cookie 政策',
+    termsAndConditions: '服务条款',
+  },
+};
+
+export default zhCN;

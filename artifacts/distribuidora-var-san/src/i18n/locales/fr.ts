@@ -1,0 +1,102 @@
+import type { Dictionary } from '../types';
+
+const fr: Dictionary = {
+  nav: {
+    inicio: 'Accueil',
+    esencia: 'Notre essence',
+    familia: 'Famille',
+    soluciones: 'Solutions',
+    eleccion: 'Pourquoi nous choisir',
+    solicitarCotizacion: 'Demander un devis',
+    portalClientes: 'Espace clients',
+    iniciarSesion: 'Se connecter',
+    crearCuenta: 'Créer un compte',
+  },
+
+  languageSelector: {
+    label: 'Choisir la langue',
+  },
+
+  cookies: {
+    text: 'Cher visiteur, nous utilisons des cookies pour améliorer votre expérience de navigation. En continuant à utiliser ce site, vous acceptez l\u2019utilisation de cookies. Vous pouvez consulter notre {privacidad} et notre {cookies}.',
+    privacyLink: 'Politique de confidentialité',
+    cookiesLink: 'Politique de cookies',
+    accept: 'Accepter',
+    reject: 'Refuser',
+  },
+
+  account: {
+    portalTitle: 'Espace clients',
+    loginTitle: 'Connectez-vous',
+    registerTitle: 'Créez votre compte',
+    loginIntro: 'Accédez à votre compte Distribuidora Var San.',
+    registerIntro: 'Inscrivez-vous pour accéder à l\u2019espace clients Var San.',
+    tabLogin: 'Se connecter',
+    tabRegister: 'Créer un compte',
+    fieldName: 'Nom',
+    fieldNamePlaceholder: 'Votre nom',
+    fieldCompany: 'Entreprise',
+    fieldCompanyPlaceholder: 'Nom de votre entreprise',
+    fieldEmail: 'Adresse e-mail',
+    fieldEmailPlaceholder: 'email@entreprise.com',
+    fieldPassword: 'Mot de passe',
+    fieldPasswordPlaceholderLogin: 'Votre mot de passe',
+    fieldPasswordPlaceholderRegister: '6 caractères minimum',
+    fieldConfirmPassword: 'Confirmer le mot de passe',
+    fieldConfirmPasswordPlaceholder: 'Répétez votre mot de passe',
+    submitLogin: 'Se connecter',
+    submitRegister: 'Créer un compte',
+    continueWithGoogle: 'Continuer avec Google',
+    secureAccessNote: 'Accès sécurisé pour les clients Var San via Firebase Authentication et Firestore.',
+    passwordMismatch: 'Les mots de passe ne correspondent pas.',
+    accountCreated: 'Compte créé avec succès.',
+  },
+
+  portal: {
+    eyebrow: 'Espace clients',
+    welcome: 'Bienvenue{name}.',
+    intro: 'Votre session est connectée à Firebase et vos données client sont chargées depuis Firestore.',
+    fieldNameLabel: 'Nom',
+    fieldEmailLabel: 'Adresse e-mail',
+    fieldCompanyLabel: 'Entreprise',
+    defaultClientName: 'Client Var San',
+    notSpecified: 'Non précisée',
+    notAvailable: 'Non disponible',
+    myProfile: 'Mon profil',
+    logOut: 'Se déconnecter',
+    closePortal: 'Fermer l\u2019espace',
+    profileHeading: 'Informations client',
+    profileIntro: 'Les modifications sont enregistrées dans votre profil Firestore.',
+    saveChanges: 'Enregistrer les modifications',
+  },
+
+  chatbot: {
+    openButtonLabel: 'Ouvrir le chatbot',
+    closeButtonLabel: 'Fermer le chatbot',
+    headerTitle: 'Assistant Var San',
+    headerSubtitle: 'Renseignements sur les produits et le contact',
+    greeting: 'Bonjour. Je suis l\u2019Assistant Var San. Je peux vous renseigner sur nos gammes de produits, nos catalogues, notre zone de livraison et nos coordonnées. Comment pouvons-nous vous aider ?',
+    inputPlaceholder: 'Écrivez votre question (Entrée pour envoyer, Maj+Entrée pour un saut de ligne)',
+    inputAriaLabel: 'Question pour l\u2019assistant',
+    sendButtonLabel: 'Envoyer la question',
+    quickProducts: 'Quels produits proposez-vous ?',
+    quickQuote: 'Demander un devis',
+    quickSupport: 'Assistance',
+    quickContact: 'Comment puis-je vous contacter ?',
+    loadingMessage: 'En train d\u2019écrire...',
+    errorMessage: 'Nous n\u2019avons pas pu traiter votre message. Réessayez dans quelques secondes.',
+  },
+
+  footer: {
+    navigationHeading: 'Navigation',
+    contactHeading: 'Contact',
+    requestQuote: 'Demander un devis',
+    rightsReserved: '© {year} Distribuidora Var San. Tous droits réservés. |',
+    tagline: 'Solutions de nettoyage et de protection pour votre entreprise.',
+    privacyNotice: 'Politique de confidentialité',
+    cookiesPolicy: 'Politique de cookies',
+    termsAndConditions: 'Conditions générales',
+  },
+};
+
+export default fr;

@@ -1,7 +1,12 @@
 import { Router, type IRouter } from "express";
 import { z } from "zod";
 import { chatWithAssistant } from "../lib/groq";
-import { ASSISTANT_ACTIONS, type AssistantActionKey } from "../lib/assistant-knowledge";
+import {
+  ASSISTANT_LANGUAGES,
+  DEFAULT_ASSISTANT_LANGUAGE,
+  getAssistantAction,
+  type AssistantActionKey,
+} from "../lib/assistant-knowledge";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -15,6 +20,10 @@ const ChatRequestSchema = z.object({
   message: z.string().min(1, "El mensaje no puede estar vacío.").max(2000),
   // Historial corto de la sesión, para dar contexto sin cargar tokens de más.
   history: z.array(ChatMessageSchema).max(20).optional().default([]),
+  // Idioma activo del sitio (misma fuente de verdad que useLanguage() en el
+  // frontend). Si falta o llega inválido, se usa español por defecto en vez
+  // de rechazar la solicitud.
+  language: z.enum(ASSISTANT_LANGUAGES).optional().default(DEFAULT_ASSISTANT_LANGUAGE),
 });
 
 router.post("/assistant/chat", async (req, res) => {
@@ -28,13 +37,13 @@ router.post("/assistant/chat", async (req, res) => {
     return;
   }
 
-  const { message, history } = parseResult.data;
+  const { message, history, language } = parseResult.data;
 
   try {
-    const result = await chatWithAssistant(message, history);
+    const result = await chatWithAssistant(message, history, language);
 
     const actions = result.actions.map((key) => {
-      const action = ASSISTANT_ACTIONS[key as AssistantActionKey];
+      const action = getAssistantAction(key as AssistantActionKey, language);
       return { key, ...action };
     });
 

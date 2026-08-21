@@ -12,6 +12,40 @@
  * al usuario a contacto directo.
  */
 
+// Debe coincidir exactamente con LanguageCode de src/i18n/languages.ts (frontend).
+export const ASSISTANT_LANGUAGES = [
+  "es",
+  "en-GB",
+  "fr",
+  "pt",
+  "it",
+  "zh-TW",
+  "zh-CN",
+  "ko",
+] as const;
+
+export type AssistantLanguage = (typeof ASSISTANT_LANGUAGES)[number];
+
+export const DEFAULT_ASSISTANT_LANGUAGE: AssistantLanguage = "es";
+
+export function isAssistantLanguage(value: string): value is AssistantLanguage {
+  return (ASSISTANT_LANGUAGES as readonly string[]).includes(value);
+}
+
+// Nombre del idioma tal como se le indica al modelo en la instrucción de sistema.
+// No es lo mismo que el nombre nativo que se muestra en el selector del sitio
+// (ese siempre se muestra en su propio idioma); esto es solo para el prompt.
+const LANGUAGE_INSTRUCTION: Record<AssistantLanguage, string> = {
+  es: "español",
+  "en-GB": "inglés británico (British English) — usa ortografía británica: colour, organisation, centre, catalogue, etc. Evita inglés estadounidense.",
+  fr: "francés",
+  pt: "portugués",
+  it: "italiano",
+  "zh-TW": "chino tradicional (繁體中文)",
+  "zh-CN": "chino simplificado (简体中文)",
+  ko: "coreano",
+};
+
 export const COMPANY_NAME = "Distribuidora Var San";
 
 export const CONTACT = {
@@ -179,29 +213,103 @@ export const ASSISTANT_ACTION_KEYS = [
 
 export type AssistantActionKey = (typeof ASSISTANT_ACTION_KEYS)[number];
 
-export const ASSISTANT_ACTIONS: Record<
-  AssistantActionKey,
-  { label: string; href: string; kind: "internal" | "pdf" }
-> = {
-  privacy: { label: "Ver Aviso de Privacidad", href: "/privacidad", kind: "internal" },
-  cookies: { label: "Ver Política de Cookies", href: "/cookies", kind: "internal" },
-  terms: { label: "Ver Términos y Condiciones", href: "/terminos", kind: "internal" },
-  "catalog-industrial": { label: "Catálogo Seguridad Industrial", href: "catalogo.pdf", kind: "pdf" },
-  "catalog-medical": { label: "Catálogo Línea Médica", href: "catalogo-medico.pdf", kind: "pdf" },
+type ActionMeta = { href: string; kind: "internal" | "pdf" };
+
+// El destino (href/kind) es fijo — no cambia con el idioma, así que vive
+// separado de la etiqueta traducida.
+export const ASSISTANT_ACTION_TARGETS: Record<AssistantActionKey, ActionMeta> = {
+  privacy: { href: "/privacidad", kind: "internal" },
+  cookies: { href: "/cookies", kind: "internal" },
+  terms: { href: "/terminos", kind: "internal" },
+  "catalog-industrial": { href: "catalogo.pdf", kind: "pdf" },
+  "catalog-medical": { href: "catalogo-medico.pdf", kind: "pdf" },
 };
 
-export function buildSystemInstruction(): string {
+// Etiqueta visible del botón, traducida a los 8 idiomas del sitio.
+// Misma fuente de verdad que el resto del i18n: si agregas un idioma en el
+// frontend (src/i18n/languages.ts), agrega su fila aquí también.
+const ASSISTANT_ACTION_LABELS: Record<AssistantLanguage, Record<AssistantActionKey, string>> = {
+  es: {
+    privacy: "Ver Aviso de Privacidad",
+    cookies: "Ver Política de Cookies",
+    terms: "Ver Términos y Condiciones",
+    "catalog-industrial": "Catálogo Seguridad Industrial",
+    "catalog-medical": "Catálogo Línea Médica",
+  },
+  "en-GB": {
+    privacy: "View Privacy Notice",
+    cookies: "View Cookies Policy",
+    terms: "View Terms and Conditions",
+    "catalog-industrial": "Industrial Safety Catalogue",
+    "catalog-medical": "Medical Line Catalogue",
+  },
+  fr: {
+    privacy: "Voir la politique de confidentialité",
+    cookies: "Voir la politique de cookies",
+    terms: "Voir les conditions générales",
+    "catalog-industrial": "Catalogue Sécurité Industrielle",
+    "catalog-medical": "Catalogue Ligne Médicale",
+  },
+  pt: {
+    privacy: "Ver Aviso de Privacidade",
+    cookies: "Ver Política de Cookies",
+    terms: "Ver Termos e Condições",
+    "catalog-industrial": "Catálogo Segurança Industrial",
+    "catalog-medical": "Catálogo Linha Médica",
+  },
+  it: {
+    privacy: "Vedi l'informativa sulla privacy",
+    cookies: "Vedi la politica sui cookie",
+    terms: "Vedi termini e condizioni",
+    "catalog-industrial": "Catalogo Sicurezza Industriale",
+    "catalog-medical": "Catalogo Linea Medica",
+  },
+  "zh-TW": {
+    privacy: "查看隱私權政策",
+    cookies: "查看 Cookie 政策",
+    terms: "查看服務條款",
+    "catalog-industrial": "工業安全型錄",
+    "catalog-medical": "醫療用品型錄",
+  },
+  "zh-CN": {
+    privacy: "查看隐私政策",
+    cookies: "查看 Cookie 政策",
+    terms: "查看服务条款",
+    "catalog-industrial": "工业安全目录",
+    "catalog-medical": "医疗用品目录",
+  },
+  ko: {
+    privacy: "개인정보 처리방침 보기",
+    cookies: "쿠키 정책 보기",
+    terms: "이용 약관 보기",
+    "catalog-industrial": "산업 안전 카탈로그",
+    "catalog-medical": "의료 라인 카탈로그",
+  },
+};
+
+export function getAssistantAction(key: AssistantActionKey, language: AssistantLanguage) {
+  const label = ASSISTANT_ACTION_LABELS[language][key];
+  const target = ASSISTANT_ACTION_TARGETS[key];
+  return { label, ...target };
+}
+
+export function buildSystemInstruction(language: AssistantLanguage): string {
+  const languageInstruction = LANGUAGE_INSTRUCTION[language];
+
   return `Eres el "Asistente Var San", el asistente oficial de ${COMPANY_NAME}, una distribuidora de productos de seguridad industrial, línea médica (manejo de RPBI) y soluciones de limpieza y protección para empresas.
 
+IDIOMA — REGLA MÁS IMPORTANTE:
+- Debes responder SIEMPRE en ${languageInstruction}, sin importar en qué idioma esté escrito el mensaje del usuario.
+- Todo el campo "reply" debe estar completamente en ese idioma. No mezcles idiomas.
+
 TONO Y ESTILO:
-- Responde siempre en español.
 - Sé profesional, claro, amable, directo y orientado a ayudar al cliente (tono comercial, no de chatbot genérico).
 - Respuestas breves y útiles, sin relleno innecesario.
 
 REGLAS ESTRICTAS SOBRE LA INFORMACIÓN:
-- SOLO puedes usar la información que se te da a continuación sobre productos, sectores, marcas, cobertura de entrega, formas de pago y contacto.
+- SOLO puedes usar la información que se te da a continuación sobre productos, sectores, marcas, cobertura de entrega, formas de pago y contacto (está en español; tradúcela tú al responder, sin alterar los hechos).
 - NUNCA inventes productos, precios, disponibilidad, marcas, tiempos de entrega ni características que no aparezcan en esta información.
-- Si te preguntan algo que no está en esta información (precio exacto, existencia, tiempos de entrega, disponibilidad específica), dilo honestamente y dirige al cliente a contacto: ${CONTACT.email} o ${CONTACT.phone}.
+- Si te preguntan algo que no está en esta información (precio exacto, existencia, tiempos de entrega, disponibilidad específica), dilo honestamente en ${languageInstruction} y dirige al cliente a contacto: ${CONTACT.email} o ${CONTACT.phone}.
 
 INFORMACIÓN DE LA EMPRESA:
 - Nombre: ${COMPANY_NAME}
@@ -226,6 +334,7 @@ Cuando la pregunta del usuario lo amerite, además de tu respuesta en texto debe
 - "catalog-medical": cuando pidan ver el catálogo de línea médica o productos médicos/RPBI en general.
 - Si piden "catálogos" o "productos" de forma general sin especificar línea, incluye AMBAS: "catalog-industrial" y "catalog-medical".
 - Si la pregunta no requiere ningún botón, deja "actions" como un arreglo vacío.
+- Las claves de "actions" son siempre en español tal cual (privacy, cookies, terms, catalog-industrial, catalog-medical) — el backend traduce la etiqueta visible del botón, tú NO escribas la etiqueta.
 
-Responde siempre en el formato JSON solicitado: un campo "reply" con tu respuesta en texto (sin URLs ni markdown de links) y un campo "actions" con las claves correspondientes.`;
+Responde siempre en el formato JSON solicitado: un campo "reply" con tu respuesta en texto en ${languageInstruction} (sin URLs ni markdown de links) y un campo "actions" con las claves correspondientes.`;
 }

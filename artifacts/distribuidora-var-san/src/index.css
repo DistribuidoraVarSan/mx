@@ -271,6 +271,10 @@ a { color: inherit; }
 }
 .account-button:hover { background: var(--white); border-color: var(--gold); color: var(--navy); transform: translateY(-1px); }
 .nav-toggle { background: transparent; border: 0; border-radius: 10px; color: var(--white); display: none; padding: 8px; }
+/* Envuelve el selector de idiomas + botón de cuenta como un solo grupo del
+   navbar (necesario porque .nav-container es flex con gap fijo entre sus
+   hijos directos; sin este wrapper el selector rompería ese layout). */
+.nav-actions { align-items: center; display: flex; gap: 10px; }
 
 /* =========================================================
    HERO — light, glass image frame
@@ -797,7 +801,7 @@ a { color: inherit; }
   .container { width: min(100% - 36px, 640px); }
   .section { padding: 82px 0; }
   .nav-toggle { display: inline-flex; }
-  .navbar .account-button { margin-left: auto; }
+  .navbar .nav-actions { margin-left: auto; }
   .navbar { padding-top: 14px; }
   .nav-container { border-radius: var(--radius-lg); padding: 9px 12px; overflow: visible; }
   .nav-links {
