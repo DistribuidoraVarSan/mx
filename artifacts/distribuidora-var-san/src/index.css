@@ -170,7 +170,7 @@ a { color: inherit; }
 
 @layer components {
 
-.site-shell { overflow: clip; }
+.site-shell { overflow-x: clip; }
 .container { width: min(1160px, calc(100% - 48px)); margin: 0 auto; }
 .section { padding: 112px 0; position: relative; }
 .section--paper { background: var(--paper); }

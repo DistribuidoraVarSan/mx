@@ -7,17 +7,31 @@ const ko: Dictionary = {
     familia: '우리 팀',
     soluciones: '솔루션',
     eleccion: '선택 이유',
+    impulsamos: '우리가 추구하는 것',
+    marcas: '브랜드',
+    atencion: '고객 지원',
+    contacto: '문의',
     solicitarCotizacion: '견적 요청',
     portalClientes: '고객 포털',
     iniciarSesion: '로그인',
     crearCuenta: '계정 만들기',
+    miCuenta: '내 계정',
+    abrirMenu: '메뉴 열기',
+    cerrarMenu: '메뉴 닫기',
+    navegacionPrincipal: '주 메뉴',
   },
 
   languageSelector: {
     label: '언어 선택',
   },
 
+  common: {
+    close: '닫기',
+    closeProfileAria: '프로필 닫기',
+  },
+
   cookies: {
+    ariaLabel: '쿠키 환경설정',
     text: '방문해 주셔서 감사합니다. 저희는 더 나은 이용 경험을 제공하기 위해 쿠키를 사용합니다. 사이트를 계속 이용하시면 쿠키 사용에 동의하는 것으로 간주됩니다. {privacidad} 및 {cookies}를 확인하실 수 있습니다.',
     privacyLink: '개인정보 처리방침',
     cookiesLink: '쿠키 정책',
@@ -50,6 +64,15 @@ const ko: Dictionary = {
     secureAccessNote: 'Var San 고객은 Firebase Authentication과 Firestore를 통해 안전하게 접속합니다.',
     passwordMismatch: '비밀번호가 일치하지 않습니다.',
     accountCreated: '계정이 성공적으로 생성되었습니다.',
+    loginSuccess: '로그인되었습니다.',
+    errorEmailInUse: '이미 해당 이메일로 가입된 계정이 있습니다.',
+    errorWeakPassword: '비밀번호는 최소 6자 이상이어야 합니다.',
+    errorInvalidEmail: '유효하지 않은 이메일 주소입니다.',
+    errorInvalidCredential: '이메일 또는 비밀번호가 올바르지 않습니다.',
+    errorTooManyRequests: '시도 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요.',
+    errorGeneric: 'Firebase: {code} — {message}',
+    errorGoogleSignIn: 'Google로 로그인할 수 없습니다.',
+    errorSaveProfile: '프로필을 저장할 수 없습니다.',
   },
 
   portal: {
@@ -68,6 +91,29 @@ const ko: Dictionary = {
     profileHeading: '고객 정보',
     profileIntro: '변경 사항은 Firestore 프로필에 저장됩니다.',
     saveChanges: '변경 사항 저장',
+  },
+
+  hero: {
+    eyebrow: '선도 브랜드 · 품질 보증',
+    titleLead: '귀사를 위한 ',
+    titleHighlight: '청소 및 보호',
+    titleTail: ' 솔루션.',
+    textBefore: '',
+    textAfter: ' 이상 엄선하여 기업, 산업, 상점 및 기관에 제공합니다.',
+    productsHighlight: '1000개 제품',
+    extra: 'Distribuidora Var San은 좋은 공급업체란 단순히 제품을 전달하는 것이 아니라 신뢰, 품질, 그리고 귀사의 성장을 위한 솔루션을 제공하는 것이라고 믿습니다.',
+    exploreSolutions: '솔루션 살펴보기',
+    requestQuote: '견적 요청',
+    imageAlt: '전문 청소 및 보호 용품',
+    captionEyebrow: '믿을 수 있는 파트너',
+    captionText: '청소, 위생 및 보호 분야에서.',
+    statTitle: '1000개 이상 제품',
+    statSubtitle: '한 곳에서 모두 해결.',
+  },
+
+  splash: {
+    ariaLabel: 'Distribuidora Var San 로딩 중',
+    tagline: '모든 공급에 담긴 품질과 신뢰.',
   },
 
   chatbot: {

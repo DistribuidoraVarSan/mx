@@ -285,16 +285,16 @@ useEffect(() => {
         const data = profileSnapshot.exists() ? profileSnapshot.data() : {};
 
         setProfile({
-          name: (data.name as string) || user.displayName || 'Cliente Var San',
+          name: (data.name as string) || user.displayName || t.portal.defaultClientName,
           email: (data.email as string) || user.email || '',
-          company: (data.company as string) || 'No especificada',
+          company: (data.company as string) || t.portal.notSpecified,
         });
       } catch (error) {
         console.error('Error al cargar el perfil de Firebase:', error);
         setProfile({
-          name: user.displayName || 'Cliente Var San',
+          name: user.displayName || t.portal.defaultClientName,
           email: user.email || '',
-          company: 'No especificada',
+          company: t.portal.notSpecified,
         });
       }
     });
@@ -398,7 +398,7 @@ window.scrollTo({ top: 0, behavior: 'smooth' });
         const confirmPassword = String(data.get('confirmPassword') ?? '');
 
         if (password !== confirmPassword) {
-          setAccountMessage('Las contraseñas no coinciden.');
+          setAccountMessage(t.account.passwordMismatch);
           return;
         }
 
@@ -410,15 +410,15 @@ window.scrollTo({ top: 0, behavior: 'smooth' });
           createdAt: serverTimestamp(),
         }, { merge: true });
 
-        setProfile({ name: name || 'Cliente Var San', email, company: company || 'No especificada' });
-        setAccountMessage('Cuenta creada correctamente.');
+        setProfile({ name: name || t.portal.defaultClientName, email, company: company || t.portal.notSpecified });
+        setAccountMessage(t.account.accountCreated);
         setAccountOpen(false);
         setPortalOpen(true);
         return;
       }
 
       await signInWithEmailAndPassword(auth, email, password);
-      setAccountMessage('Sesión iniciada correctamente.');
+      setAccountMessage(t.account.loginSuccess);
       setAccountOpen(false);
       setPortalOpen(true);
     } catch (error: any) {
@@ -427,24 +427,24 @@ console.error("CÓDIGO:", error?.code);
 console.error("MENSAJE:", error?.message);
 
 if (error?.code === "auth/email-already-in-use") {
-setAccountMessage("Este correo electrónico ya tiene una cuenta.");
+setAccountMessage(t.account.errorEmailInUse);
 } else if (error?.code === "auth/weak-password") {
-setAccountMessage("La contraseña debe tener al menos 6 caracteres.");
+setAccountMessage(t.account.errorWeakPassword);
 } else if (error?.code === "auth/invalid-email") {
-setAccountMessage("El correo electrónico no es válido.");
+setAccountMessage(t.account.errorInvalidEmail);
 } else if (
 error?.code === "auth/invalid-credential" ||
 error?.code === "auth/wrong-password" ||
 error?.code === "auth/user-not-found"
 ) {
-setAccountMessage("El correo o la contraseña son incorrectos.");
+setAccountMessage(t.account.errorInvalidCredential);
 } else if (error?.code === "auth/too-many-requests") {
-setAccountMessage("Demasiados intentos. Espera un momento e inténtalo nuevamente.");
+setAccountMessage(t.account.errorTooManyRequests);
 } else {
 setAccountMessage(
-`Firebase: ${error?.code || "error desconocido"} — ${
-error?.message || "sin mensaje"
-}`
+t.account.errorGeneric
+.replace('{code}', error?.code || "unknown")
+.replace('{message}', error?.message || "")
 );
 }
 }
@@ -459,7 +459,7 @@ error?.message || "sin mensaje"
 
       if (!existing.exists()) {
         await setDoc(doc(db, 'users', credential.user.uid), {
-          name: credential.user.displayName || 'Cliente Var San',
+          name: credential.user.displayName || t.portal.defaultClientName,
           company: '',
           email: credential.user.email || '',
           createdAt: serverTimestamp(),
@@ -471,7 +471,7 @@ error?.message || "sin mensaje"
     } catch (error: any) {
       console.error('Error al iniciar con Google:', error);
       if (error?.code !== 'auth/popup-closed-by-user') {
-        setAccountMessage('No se pudo iniciar sesión con Google.');
+        setAccountMessage(t.account.errorGoogleSignIn);
       }
     }
   };
@@ -489,7 +489,7 @@ error?.message || "sin mensaje"
       setPortalOpen(true);
     } catch (error) {
       console.error('Error al guardar el perfil:', error);
-      setAccountMessage('No se pudo guardar el perfil.');
+      setAccountMessage(t.account.errorSaveProfile);
     }
   };
 
@@ -562,26 +562,35 @@ error?.message || "sin mensaje"
 
   return (
     <div className="site-shell">
-      {splashVisible && <div className={`splash${splashExiting ? ' is-exiting' : ''}`} role="status" aria-label="Cargando Distribuidora Var San"><div className="splash-inner"><div className="splash-title-wrap"><span className="splash-kicker">Distribuidora</span><h1 className="splash-title">Var San</h1><span className="splash-rule" /></div></div><p className="splash-tagline">Calidad y confianza en cada suministro.</p></div>}
+      {splashVisible && <div className={`splash${splashExiting ? ' is-exiting' : ''}`} role="status" aria-label={t.splash.ariaLabel}><div className="splash-inner"><div className="splash-title-wrap"><span className="splash-kicker">Distribuidora</span><h1 className="splash-title">Var San</h1><span className="splash-rule" /></div></div><p className="splash-tagline">{t.splash.tagline}</p></div>}
 
       <header className={`navbar${scrolled ? ' scrolled' : ''}`}>
         <div className="container nav-container">
           <a href="#inicio" className="nav-logo" onClick={navigateAndClose} data-testid="link-brand">
             <img className="nav-logo-image" src={varSanLogo} alt="Logo oficial de Distribuidora Var San" />
           </a>
-          <nav aria-label="Navegación principal">
+          <nav aria-label={t.nav.navegacionPrincipal}>
             <ul className={`nav-links${mobileMenu ? ' is-open' : ''}`}>
-              {['inicio:Inicio', 'esencia:Esencia', 'familia:Familia', 'soluciones:Soluciones', 'eleccion:Elección', 'impulsamos:Impulsamos', 'marcas:Marcas', 'proceso:Atención', 'contacto:Contacto'].map((item) => {
-                const [id, label] = item.split(':');
-                return <li key={id}><a href={`#${id}`} onClick={navigateAndClose} data-testid={`link-${id}`}>{label}</a></li>;
-              })}
+              {([
+                ['inicio', t.nav.inicio],
+                ['esencia', t.nav.esencia],
+                ['familia', t.nav.familia],
+                ['soluciones', t.nav.soluciones],
+                ['eleccion', t.nav.eleccion],
+                ['impulsamos', t.nav.impulsamos],
+                ['marcas', t.nav.marcas],
+                ['proceso', t.nav.atencion],
+                ['contacto', t.nav.contacto],
+              ] as const).map(([id, label]) => (
+                <li key={id}><a href={`#${id}`} onClick={navigateAndClose} data-testid={`link-${id}`}>{label}</a></li>
+              ))}
             </ul>
           </nav>
           <div className="nav-actions">
             <LanguageSelector />
-            <button className="account-button" onClick={() => { if (currentUser) setPortalOpen(true); else { setAccountOpen(true); setAccountMessage(''); } }} data-testid="button-open-account"><User size={15} /><span>Mi cuenta</span></button>
+            <button className="account-button" onClick={() => { if (currentUser) setPortalOpen(true); else { setAccountOpen(true); setAccountMessage(''); } }} data-testid="button-open-account"><User size={15} /><span>{t.nav.miCuenta}</span></button>
           </div>
-          <button className="nav-toggle" aria-label={mobileMenu ? 'Cerrar menú' : 'Abrir menú'} aria-expanded={mobileMenu} onClick={() => setMobileMenu(!mobileMenu)} data-testid="button-mobile-menu">{mobileMenu ? <X size={22} /> : <Menu size={22} />}</button>
+          <button className="nav-toggle" aria-label={mobileMenu ? t.nav.cerrarMenu : t.nav.abrirMenu} aria-expanded={mobileMenu} onClick={() => setMobileMenu(!mobileMenu)} data-testid="button-mobile-menu">{mobileMenu ? <X size={22} /> : <Menu size={22} />}</button>
         </div>
       </header>
 
@@ -589,14 +598,14 @@ error?.message || "sin mensaje"
         <section id="inicio" className="hero">
           <div className="container hero-grid">
             <div className="hero-copy">
-              <span className="eyebrow">Marcas líderes · Calidad garantizada</span>
-              <h1 className="hero-title">Soluciones en <span>limpieza y protección</span> para tu empresa.</h1>
-              <p className="hero-text">Más de <strong>1000 productos</strong> cuidadosamente seleccionados para empresas, industrias, comercios e instituciones.<br /><br />En Distribuidora Var San creemos que un buen proveedor no solo entrega productos; brinda confianza, calidad y soluciones para el crecimiento de tu empresa.</p>
-              <div className="hero-actions"><a href="#soluciones" className="button button--gold" onClick={navigateAndClose} data-testid="link-explore-solutions"><Boxes size={16} />Explorar soluciones</a><a href="#formulario" className="button button--outline" onClick={navigateAndClose} data-testid="link-request-quote"><MessageCircle size={16} />Solicitar cotización</a></div>
+              <span className="eyebrow">{t.hero.eyebrow}</span>
+              <h1 className="hero-title">{t.hero.titleLead}<span>{t.hero.titleHighlight}</span>{t.hero.titleTail}</h1>
+              <p className="hero-text">{t.hero.textBefore}<strong>{t.hero.productsHighlight}</strong>{t.hero.textAfter}<br /><br />{t.hero.extra}</p>
+              <div className="hero-actions"><a href="#soluciones" className="button button--gold" onClick={navigateAndClose} data-testid="link-explore-solutions"><Boxes size={16} />{t.hero.exploreSolutions}</a><a href="#formulario" className="button button--outline" onClick={navigateAndClose} data-testid="link-request-quote"><MessageCircle size={16} />{t.hero.requestQuote}</a></div>
             </div>
             <div className="hero-visual">
-              <div className="hero-image-frame"><img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1400&auto=format&fit=crop" alt="Suministros profesionales de limpieza y protección" /><div className="hero-caption"><span>Tu aliado</span><p>en limpieza, higiene y protección.</p></div></div>
-              <div className="float-stat"><ShieldCheck size={20} /><div><strong>1000+ Productos</strong><small>Todo en un solo lugar.</small></div></div>
+              <div className="hero-image-frame"><img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1400&auto=format&fit=crop" alt={t.hero.imageAlt} /><div className="hero-caption"><span>{t.hero.captionEyebrow}</span><p>{t.hero.captionText}</p></div></div>
+              <div className="float-stat"><ShieldCheck size={20} /><div><strong>{t.hero.statTitle}</strong><small>{t.hero.statSubtitle}</small></div></div>
             </div>
           </div>
         </section>
@@ -817,18 +826,15 @@ mantenimiento y protección para empresas, comercios e instituciones.
 </div>
 
 <div>
-<h3>Navegación</h3>
+<h3>{t.footer.navigationHeading}</h3>
 <ul className="footer-links">
-{[
-'inicio:Inicio',
-'esencia:Esencia',
-'familia:Familia',
-'soluciones:Soluciones',
-'eleccion:Elección'
-].map((item) => {
-const [id, label] = item.split(':');
-
-return (
+{([
+['inicio', t.nav.inicio],
+['esencia', t.nav.esencia],
+['familia', t.nav.familia],
+['soluciones', t.nav.soluciones],
+['eleccion', t.nav.eleccion],
+] as const).map(([id, label]) => (
 <li key={id}>
 <a
 href={`#${id}`}
@@ -838,13 +844,12 @@ data-testid={`footer-link-${id}`}
 {label}
 </a>
 </li>
-);
-})}
+))}
 </ul>
 </div>
 
 <div>
-<h3>Contacto</h3>
+<h3>{t.footer.contactHeading}</h3>
 <ul className="footer-links">
 <li>
 <a
@@ -870,7 +875,7 @@ href="#formulario"
 onClick={navigateAndClose}
 data-testid="footer-link-quote"
 >
-Solicitar cotización
+{t.footer.requestQuote}
 </a>
 </li>
 </ul>
@@ -879,8 +884,9 @@ Solicitar cotización
 
 <div className="footer-bottom">
 <span>
-© 2026 Distribuidora Var San. Todos los derechos reservados. |
-Soluciones en limpieza y protección para tu empresa.
+{t.footer.rightsReserved.replace('{year}', '2026')}
+{' '}
+{t.footer.tagline}
 </span>
 
 <span className="footer-legal">
@@ -889,7 +895,7 @@ href="/privacidad"
 onClick={navigateAndClose}
 data-testid="footer-link-privacy"
 >
-Aviso de Privacidad
+{t.footer.privacyNotice}
 </a>
 
 <a
@@ -897,14 +903,14 @@ href="/cookies"
 onClick={navigateAndClose}
 data-testid="footer-link-cookies"
 >
-Política de Cookies
+{t.footer.cookiesPolicy}
 </a>
 
 <a
 href="/terminos"
 onClick={navigateAndClose}
 >
-Términos y Condiciones
+{t.footer.termsAndConditions}
 </a>
 </span>
 
@@ -916,13 +922,31 @@ Términos y Condiciones
       <button className="chat-trigger" onClick={() => setChatOpen(!chatOpen)} aria-label={chatOpen ? t.chatbot.closeButtonLabel : t.chatbot.openButtonLabel} data-testid="button-open-chat">{chatOpen ? <X size={21} /> : <MessageCircle size={21} />}</button>
       {chatOpen && <aside className="chat-window" aria-label={t.chatbot.headerTitle}><div className="chat-header"><div><strong>{t.chatbot.headerTitle}</strong><small>{t.chatbot.headerSubtitle}</small></div><button className="chat-close" onClick={() => setChatOpen(false)} aria-label={t.chatbot.closeButtonLabel} data-testid="button-close-chat"><X size={17} /></button></div><div className="chat-body">{chatMessages.map((message, index) => <div className={`chat-message chat-message--${message.role}`} key={`${message.role}-${index}`} data-testid={`chat-message-${index}`}>{message.text}{message.actions && message.actions.length > 0 && <div className="chat-message-actions">{message.actions.map((action) => action.kind === 'internal' ? <a key={action.key} href={action.href} onClick={navigateAndClose} className="chat-action-button" data-testid={`chat-action-${action.key}`}>{action.label}</a> : <a key={action.key} href={action.href} target="_blank" rel="noopener noreferrer" className="chat-action-button" data-testid={`chat-action-${action.key}`}>{action.label}</a>)}</div>}</div>)}{chatLoading && <div className="chat-message chat-message--bot chat-message--loading" aria-live="polite" data-testid="chat-message-loading"><span className="chat-typing"><span></span><span></span><span></span></span></div>}</div><div className="chat-quick"><button onClick={() => sendChat(undefined, t.chatbot.quickProducts)} disabled={chatLoading} data-testid="button-chat-catalog">{t.chatbot.quickProducts}</button><button onClick={() => sendChat(undefined, t.chatbot.quickContact)} disabled={chatLoading} data-testid="button-chat-contact">{t.chatbot.quickContact}</button></div><form className="chat-form" onSubmit={sendChat}><textarea value={chatInput} onChange={(event) => setChatInput(event.target.value)} onKeyDown={handleChatKeyDown} placeholder={t.chatbot.inputPlaceholder} aria-label={t.chatbot.inputAriaLabel} rows={1} disabled={chatLoading} data-testid="input-chat" /><button type="submit" aria-label={t.chatbot.sendButtonLabel} disabled={chatLoading || !chatInput.trim()} data-testid="button-send-chat"><Send size={15} /></button></form></aside>}
 
-      {!cookies && <aside className="cookie-banner" aria-label="Preferencias de cookies"><p>Querido usuario, utilizamos cookies para mejorar tu experiencia de navegación. Al continuar usando este sitio, aceptas el uso de cookies. Puedes consultar nuestra <a href="/privacidad" onClick={navigateAndClose}>Política de Privacidad</a> y <a href="/cookies" onClick={navigateAndClose}>Política de Cookies</a>.</p><div className="cookie-actions"><button className="accept" onClick={() => acceptCookies('accepted')} data-testid="button-accept-cookies">Aceptar</button><button className="reject" onClick={() => acceptCookies('rejected')} data-testid="button-reject-cookies">Rechazar</button></div></aside>}
+      {!cookies && (() => {
+        const [beforePrivacy, rest1] = t.cookies.text.split('{privacidad}');
+        const [betweenLinks, afterCookies] = (rest1 ?? '').split('{cookies}');
+        return (
+          <aside className="cookie-banner" aria-label={t.cookies.ariaLabel}>
+            <p>
+              {beforePrivacy}
+              <a href="/privacidad" onClick={navigateAndClose}>{t.cookies.privacyLink}</a>
+              {betweenLinks}
+              <a href="/cookies" onClick={navigateAndClose}>{t.cookies.cookiesLink}</a>
+              {afterCookies}
+            </p>
+            <div className="cookie-actions">
+              <button className="accept" onClick={() => acceptCookies('accepted')} data-testid="button-accept-cookies">{t.cookies.accept}</button>
+              <button className="reject" onClick={() => acceptCookies('rejected')} data-testid="button-reject-cookies">{t.cookies.reject}</button>
+            </div>
+          </aside>
+        );
+      })()}
 
-      {accountOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setAccountOpen(false); }}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="account-heading"><button className="modal-close" onClick={() => setAccountOpen(false)} aria-label="Cerrar" data-testid="button-close-account"><X size={18} /></button><div className="modal-brand"><BrandMark /><div><strong>DISTRIBUIDORA VAR SAN</strong><small>Portal de clientes</small></div></div><h2 id="account-heading">{accountTab === 'login' ? 'Inicia sesión' : 'Crea tu cuenta'}</h2><p className="modal-intro">{accountTab === 'login' ? 'Accede a tu cuenta de Distribuidora Var San.' : 'Regístrate para acceder al portal de clientes Var San.'}</p><div className="account-tabs"><button className={`account-tab${accountTab === 'login' ? ' active' : ''}`} onClick={() => { setAccountTab('login'); setAccountMessage(''); }} data-testid="button-tab-login">Iniciar sesión</button><button className={`account-tab${accountTab === 'register' ? ' active' : ''}`} onClick={() => { setAccountTab('register'); setAccountMessage(''); }} data-testid="button-tab-register">Crear cuenta</button></div><form className="account-form" onSubmit={submitAccount}>{accountTab === 'register' && <><div className="form-field"><label htmlFor="account-name">Nombre</label><input id="account-name" name="name" required placeholder="Tu nombre" data-testid="input-account-name" /></div><div className="form-field"><label htmlFor="account-company">Empresa</label><input id="account-company" name="company" placeholder="Nombre de tu empresa" data-testid="input-account-company" /></div></>}<div className="form-field"><label htmlFor="account-email">Correo electrónico</label><input id="account-email" name="email" type="email" required placeholder="correo@empresa.com" data-testid="input-account-email" /></div><div className="form-field"><label htmlFor="account-password">Contraseña</label><input id="account-password" name="password" type="password" required minLength={6} placeholder={accountTab === 'login' ? 'Tu contraseña' : 'Mínimo 6 caracteres'} data-testid="input-account-password" /></div>{accountTab === 'register' && <div className="form-field"><label htmlFor="account-confirm">Confirmar contraseña</label><input id="account-confirm" name="confirmPassword" type="password" required minLength={6} placeholder="Repite tu contraseña" data-testid="input-account-confirm" /></div>}{accountMessage && <div className="account-message account-message--warning" role="status" data-testid="status-account">{accountMessage}</div>}<button className="button button--navy" type="submit" data-testid="button-submit-account">{accountTab === 'login' ? 'Iniciar sesión' : 'Crear cuenta'} <ArrowRight size={15} /></button></form><button className="button button--outline" type="button" onClick={signInWithGoogle} style={{ color: 'var(--navy)', borderColor: 'var(--line)', marginTop: 10 }}><User size={15} /> Continuar con Google</button><div className="account-footer"><LockKeyhole size={13} /> Acceso seguro para clientes Var San mediante Firebase Authentication y Firestore.</div></section></div>}
+      {accountOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setAccountOpen(false); }}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="account-heading"><button className="modal-close" onClick={() => setAccountOpen(false)} aria-label={t.common.close} data-testid="button-close-account"><X size={18} /></button><div className="modal-brand"><BrandMark /><div><strong>DISTRIBUIDORA VAR SAN</strong><small>{t.account.portalTitle}</small></div></div><h2 id="account-heading">{accountTab === 'login' ? t.account.loginTitle : t.account.registerTitle}</h2><p className="modal-intro">{accountTab === 'login' ? t.account.loginIntro : t.account.registerIntro}</p><div className="account-tabs"><button className={`account-tab${accountTab === 'login' ? ' active' : ''}`} onClick={() => { setAccountTab('login'); setAccountMessage(''); }} data-testid="button-tab-login">{t.account.tabLogin}</button><button className={`account-tab${accountTab === 'register' ? ' active' : ''}`} onClick={() => { setAccountTab('register'); setAccountMessage(''); }} data-testid="button-tab-register">{t.account.tabRegister}</button></div><form className="account-form" onSubmit={submitAccount}>{accountTab === 'register' && <><div className="form-field"><label htmlFor="account-name">{t.account.fieldName}</label><input id="account-name" name="name" required placeholder={t.account.fieldNamePlaceholder} data-testid="input-account-name" /></div><div className="form-field"><label htmlFor="account-company">{t.account.fieldCompany}</label><input id="account-company" name="company" placeholder={t.account.fieldCompanyPlaceholder} data-testid="input-account-company" /></div></>}<div className="form-field"><label htmlFor="account-email">{t.account.fieldEmail}</label><input id="account-email" name="email" type="email" required placeholder={t.account.fieldEmailPlaceholder} data-testid="input-account-email" /></div><div className="form-field"><label htmlFor="account-password">{t.account.fieldPassword}</label><input id="account-password" name="password" type="password" required minLength={6} placeholder={accountTab === 'login' ? t.account.fieldPasswordPlaceholderLogin : t.account.fieldPasswordPlaceholderRegister} data-testid="input-account-password" /></div>{accountTab === 'register' && <div className="form-field"><label htmlFor="account-confirm">{t.account.fieldConfirmPassword}</label><input id="account-confirm" name="confirmPassword" type="password" required minLength={6} placeholder={t.account.fieldConfirmPasswordPlaceholder} data-testid="input-account-confirm" /></div>}{accountMessage && <div className="account-message account-message--warning" role="status" data-testid="status-account">{accountMessage}</div>}<button className="button button--navy" type="submit" data-testid="button-submit-account">{accountTab === 'login' ? t.account.submitLogin : t.account.submitRegister} <ArrowRight size={15} /></button></form><button className="button button--outline" type="button" onClick={signInWithGoogle} style={{ color: 'var(--navy)', borderColor: 'var(--line)', marginTop: 10 }}><User size={15} /> {t.account.continueWithGoogle}</button><div className="account-footer"><LockKeyhole size={13} /> {t.account.secureAccessNote}</div></section></div>}
 
-      {portalOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setPortalOpen(false); }}><section className="modal modal--wide" role="dialog" aria-modal="true" aria-labelledby="portal-heading"><button className="modal-close" onClick={() => setPortalOpen(false)} aria-label="Cerrar portal" data-testid="button-close-portal"><X size={18} /></button><div className="portal-header"><span className="eyebrow">Portal de clientes</span><h2 id="portal-heading">Bienvenido{profile.name ? `, ${profile.name}` : ''}.</h2><p className="modal-intro">Tu sesión está conectada a Firebase y tus datos de cliente se cargan desde Firestore.</p></div><div className="profile-summary"><div className="profile-row"><span>Nombre</span><strong>{profile.name || 'Cliente Var San'}</strong></div><div className="profile-row"><span>Correo electrónico</span><strong>{profile.email || currentUser?.email || 'No disponible'}</strong></div><div className="profile-row"><span>Empresa</span><strong>{profile.company || 'No especificada'}</strong></div></div><div className="portal-actions"><button className="button button--navy" onClick={() => { setPortalOpen(false); setProfileOpen(true); }} data-testid="button-open-profile"><UserCheck size={15} />Mi perfil</button><button className="button button--outline" style={{ color: 'var(--navy)', borderColor: 'var(--line)' }} onClick={handleSignOut} data-testid="button-logout"><LockKeyhole size={15} />Cerrar sesión</button><button className="button button--outline" style={{ color: 'var(--navy)', borderColor: 'var(--line)' }} onClick={() => setPortalOpen(false)} data-testid="button-close-portal-action">Cerrar portal</button></div></section></div>}
+      {portalOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setPortalOpen(false); }}><section className="modal modal--wide" role="dialog" aria-modal="true" aria-labelledby="portal-heading"><button className="modal-close" onClick={() => setPortalOpen(false)} aria-label={t.portal.closePortal} data-testid="button-close-portal"><X size={18} /></button><div className="portal-header"><span className="eyebrow">{t.portal.eyebrow}</span><h2 id="portal-heading">{t.portal.welcome.replace('{name}', profile.name ? `, ${profile.name}` : '')}</h2><p className="modal-intro">{t.portal.intro}</p></div><div className="profile-summary"><div className="profile-row"><span>{t.portal.fieldNameLabel}</span><strong>{profile.name || t.portal.defaultClientName}</strong></div><div className="profile-row"><span>{t.portal.fieldEmailLabel}</span><strong>{profile.email || currentUser?.email || t.portal.notAvailable}</strong></div><div className="profile-row"><span>{t.portal.fieldCompanyLabel}</span><strong>{profile.company || t.portal.notSpecified}</strong></div></div><div className="portal-actions"><button className="button button--navy" onClick={() => { setPortalOpen(false); setProfileOpen(true); }} data-testid="button-open-profile"><UserCheck size={15} />{t.portal.myProfile}</button><button className="button button--outline" style={{ color: 'var(--navy)', borderColor: 'var(--line)' }} onClick={handleSignOut} data-testid="button-logout"><LockKeyhole size={15} />{t.portal.logOut}</button><button className="button button--outline" style={{ color: 'var(--navy)', borderColor: 'var(--line)' }} onClick={() => setPortalOpen(false)} data-testid="button-close-portal-action">{t.portal.closePortal}</button></div></section></div>}
 
-      {profileOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setProfileOpen(false); }}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="profile-heading"><button className="modal-close" onClick={() => setProfileOpen(false)} aria-label="Cerrar perfil" data-testid="button-close-profile"><X size={18} /></button><div className="modal-brand"><BrandMark /><div><strong>MI PERFIL</strong><small>Cliente Var San</small></div></div><h2 id="profile-heading">Datos del cliente</h2><p className="modal-intro">Los cambios se guardan en tu perfil de Firestore.</p><div className="account-form"><div className="form-field"><label htmlFor="profile-name">Nombre</label><input id="profile-name" value={profile.name} onChange={(event) => setProfile((value) => ({ ...value, name: event.target.value }))} data-testid="input-profile-name" /></div><div className="form-field"><label htmlFor="profile-email">Correo electrónico</label><input id="profile-email" value={profile.email || currentUser?.email || ''} disabled data-testid="input-profile-email" /></div><div className="form-field"><label htmlFor="profile-company">Empresa</label><input id="profile-company" value={profile.company} onChange={(event) => setProfile((value) => ({ ...value, company: event.target.value }))} placeholder="Nombre de tu empresa" data-testid="input-profile-company" /></div><button className="button button--navy" onClick={saveProfile} data-testid="button-save-profile"><Check size={15} />Guardar cambios</button></div></section></div>}
+      {profileOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setProfileOpen(false); }}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="profile-heading"><button className="modal-close" onClick={() => setProfileOpen(false)} aria-label={t.common.closeProfileAria} data-testid="button-close-profile"><X size={18} /></button><div className="modal-brand"><BrandMark /><div><strong>{t.portal.myProfile.toUpperCase()}</strong><small>{t.portal.defaultClientName}</small></div></div><h2 id="profile-heading">{t.portal.profileHeading}</h2><p className="modal-intro">{t.portal.profileIntro}</p><div className="account-form"><div className="form-field"><label htmlFor="profile-name">{t.portal.fieldNameLabel}</label><input id="profile-name" value={profile.name} onChange={(event) => setProfile((value) => ({ ...value, name: event.target.value }))} data-testid="input-profile-name" /></div><div className="form-field"><label htmlFor="profile-email">{t.portal.fieldEmailLabel}</label><input id="profile-email" value={profile.email || currentUser?.email || ''} disabled data-testid="input-profile-email" /></div><div className="form-field"><label htmlFor="profile-company">{t.portal.fieldCompanyLabel}</label><input id="profile-company" value={profile.company} onChange={(event) => setProfile((value) => ({ ...value, company: event.target.value }))} placeholder={t.account.fieldCompanyPlaceholder} data-testid="input-profile-company" /></div><button className="button button--navy" onClick={saveProfile} data-testid="button-save-profile"><Check size={15} />{t.portal.saveChanges}</button></div></section></div>}
     </div>
   );
 }

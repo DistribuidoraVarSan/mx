@@ -7,17 +7,31 @@ const zhCN: Dictionary = {
     familia: '我们的团队',
     soluciones: '解决方案',
     eleccion: '为何选择我们',
+    impulsamos: '我们的推动力',
+    marcas: '品牌',
+    atencion: '客户服务',
+    contacto: '联系我们',
     solicitarCotizacion: '索取报价',
     portalClientes: '客户专区',
     iniciarSesion: '登录',
     crearCuenta: '创建账号',
+    miCuenta: '我的账户',
+    abrirMenu: '打开菜单',
+    cerrarMenu: '关闭菜单',
+    navegacionPrincipal: '主要导航',
   },
 
   languageSelector: {
     label: '选择语言',
   },
 
+  common: {
+    close: '关闭',
+    closeProfileAria: '关闭个人资料',
+  },
+
   cookies: {
+    ariaLabel: 'Cookie 偏好设置',
     text: '亲爱的访客，我们使用 Cookie 来改善您的浏览体验。继续使用本网站即表示您同意使用 Cookie。您可以查阅我们的{privacidad}和{cookies}。',
     privacyLink: '隐私政策',
     cookiesLink: 'Cookie 政策',
@@ -50,6 +64,15 @@ const zhCN: Dictionary = {
     secureAccessNote: 'Var San 客户通过 Firebase Authentication 与 Firestore 提供安全访问。',
     passwordMismatch: '两次输入的密码不一致。',
     accountCreated: '账号已成功创建。',
+    loginSuccess: '登录成功。',
+    errorEmailInUse: '该电子邮箱已注册账号。',
+    errorWeakPassword: '密码至少需要 6 个字符。',
+    errorInvalidEmail: '电子邮箱格式无效。',
+    errorInvalidCredential: '电子邮箱或密码不正确。',
+    errorTooManyRequests: '尝试次数过多，请稍后再试。',
+    errorGeneric: 'Firebase：{code} — {message}',
+    errorGoogleSignIn: '无法使用 Google 登录。',
+    errorSaveProfile: '无法保存个人资料。',
   },
 
   portal: {
@@ -68,6 +91,29 @@ const zhCN: Dictionary = {
     profileHeading: '客户资料',
     profileIntro: '更改内容会保存到您的 Firestore 资料中。',
     saveChanges: '保存更改',
+  },
+
+  hero: {
+    eyebrow: '领先品牌．品质保证',
+    titleLead: '为您的企业提供',
+    titleHighlight: '清洁与防护',
+    titleTail: '解决方案。',
+    textBefore: '',
+    textAfter: '，精心挑选，适用于企业、工业、商店与机构。',
+    productsHighlight: '1000 款产品',
+    extra: '在 Distribuidora Var San，我们相信优质的供应商不仅是交付产品，更带来信任、品质，以及助力企业成长的解决方案。',
+    exploreSolutions: '探索解决方案',
+    requestQuote: '索取报价',
+    imageAlt: '专业清洁与防护用品',
+    captionEyebrow: '您的合作伙伴',
+    captionText: '在清洁、卫生与防护领域。',
+    statTitle: '1000+ 款产品',
+    statSubtitle: '一站式购齐。',
+  },
+
+  splash: {
+    ariaLabel: '正在加载 Distribuidora Var San',
+    tagline: '每一次供应，都是品质与信任的保证。',
   },
 
   chatbot: {

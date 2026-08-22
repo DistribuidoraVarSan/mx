@@ -7,17 +7,31 @@ const fr: Dictionary = {
     familia: 'Famille',
     soluciones: 'Solutions',
     eleccion: 'Pourquoi nous choisir',
+    impulsamos: 'Nos priorités',
+    marcas: 'Marques',
+    atencion: 'Assistance',
+    contacto: 'Contact',
     solicitarCotizacion: 'Demander un devis',
     portalClientes: 'Espace clients',
     iniciarSesion: 'Se connecter',
     crearCuenta: 'Créer un compte',
+    miCuenta: 'Mon compte',
+    abrirMenu: 'Ouvrir le menu',
+    cerrarMenu: 'Fermer le menu',
+    navegacionPrincipal: 'Navigation principale',
   },
 
   languageSelector: {
     label: 'Choisir la langue',
   },
 
+  common: {
+    close: 'Fermer',
+    closeProfileAria: 'Fermer le profil',
+  },
+
   cookies: {
+    ariaLabel: 'Préférences relatives aux cookies',
     text: 'Cher visiteur, nous utilisons des cookies pour améliorer votre expérience de navigation. En continuant à utiliser ce site, vous acceptez l\u2019utilisation de cookies. Vous pouvez consulter notre {privacidad} et notre {cookies}.',
     privacyLink: 'Politique de confidentialité',
     cookiesLink: 'Politique de cookies',
@@ -50,6 +64,15 @@ const fr: Dictionary = {
     secureAccessNote: 'Accès sécurisé pour les clients Var San via Firebase Authentication et Firestore.',
     passwordMismatch: 'Les mots de passe ne correspondent pas.',
     accountCreated: 'Compte créé avec succès.',
+    loginSuccess: 'Connexion réussie.',
+    errorEmailInUse: 'Cette adresse e-mail possède déjà un compte.',
+    errorWeakPassword: 'Le mot de passe doit contenir au moins 6 caractères.',
+    errorInvalidEmail: 'L’adresse e-mail n’est pas valide.',
+    errorInvalidCredential: 'L’e-mail ou le mot de passe est incorrect.',
+    errorTooManyRequests: 'Trop de tentatives. Attendez un instant puis réessayez.',
+    errorGeneric: 'Firebase : {code} — {message}',
+    errorGoogleSignIn: 'Impossible de se connecter avec Google.',
+    errorSaveProfile: 'Impossible d’enregistrer le profil.',
   },
 
   portal: {
@@ -68,6 +91,29 @@ const fr: Dictionary = {
     profileHeading: 'Informations client',
     profileIntro: 'Les modifications sont enregistrées dans votre profil Firestore.',
     saveChanges: 'Enregistrer les modifications',
+  },
+
+  hero: {
+    eyebrow: 'Marques leaders · Qualité garantie',
+    titleLead: 'Des solutions en ',
+    titleHighlight: 'nettoyage et protection',
+    titleTail: ' pour votre entreprise.',
+    textBefore: 'Plus de ',
+    textAfter: ' soigneusement sélectionnés pour les entreprises, industries, commerces et institutions.',
+    productsHighlight: '1000 produits',
+    extra: 'Chez Distribuidora Var San, nous pensons qu’un bon fournisseur ne se contente pas de livrer des produits ; il apporte confiance, qualité et solutions pour la croissance de votre entreprise.',
+    exploreSolutions: 'Découvrir les solutions',
+    requestQuote: 'Demander un devis',
+    imageAlt: 'Fournitures professionnelles de nettoyage et de protection',
+    captionEyebrow: 'Votre allié',
+    captionText: 'en nettoyage, hygiène et protection.',
+    statTitle: '1000+ produits',
+    statSubtitle: 'Tout au même endroit.',
+  },
+
+  splash: {
+    ariaLabel: 'Chargement de Distribuidora Var San',
+    tagline: 'Qualité et confiance à chaque fourniture.',
   },
 
   chatbot: {

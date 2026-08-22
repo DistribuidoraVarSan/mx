@@ -7,17 +7,31 @@ const enGB: Dictionary = {
     familia: 'Family',
     soluciones: 'Solutions',
     eleccion: 'Why Choose Us',
+    impulsamos: 'What We Drive',
+    marcas: 'Brands',
+    atencion: 'Support',
+    contacto: 'Contact',
     solicitarCotizacion: 'Request a quote',
     portalClientes: 'Customer Portal',
     iniciarSesion: 'Log in',
     crearCuenta: 'Create account',
+    miCuenta: 'My account',
+    abrirMenu: 'Open menu',
+    cerrarMenu: 'Close menu',
+    navegacionPrincipal: 'Main navigation',
   },
 
   languageSelector: {
     label: 'Select language',
   },
 
+  common: {
+    close: 'Close',
+    closeProfileAria: 'Close profile',
+  },
+
   cookies: {
+    ariaLabel: 'Cookie preferences',
     text: 'Dear visitor, we use cookies to improve your browsing experience. By continuing to use this site, you agree to our use of cookies. You can read our {privacidad} and {cookies}.',
     privacyLink: 'Privacy Notice',
     cookiesLink: 'Cookies Policy',
@@ -50,6 +64,15 @@ const enGB: Dictionary = {
     secureAccessNote: 'Secure access for Var San customers via Firebase Authentication and Firestore.',
     passwordMismatch: 'Passwords do not match.',
     accountCreated: 'Account created successfully.',
+    loginSuccess: 'Signed in successfully.',
+    errorEmailInUse: 'This email address already has an account.',
+    errorWeakPassword: 'Password must be at least 6 characters.',
+    errorInvalidEmail: 'The email address is not valid.',
+    errorInvalidCredential: 'Email or password is incorrect.',
+    errorTooManyRequests: 'Too many attempts. Please wait a moment and try again.',
+    errorGeneric: 'Firebase: {code} — {message}',
+    errorGoogleSignIn: 'Could not sign in with Google.',
+    errorSaveProfile: 'Could not save the profile.',
   },
 
   portal: {
@@ -68,6 +91,29 @@ const enGB: Dictionary = {
     profileHeading: 'Customer details',
     profileIntro: 'Changes are saved to your Firestore profile.',
     saveChanges: 'Save changes',
+  },
+
+  hero: {
+    eyebrow: 'Leading brands · Guaranteed quality',
+    titleLead: 'Solutions in ',
+    titleHighlight: 'cleaning and protection',
+    titleTail: ' for your organisation.',
+    textBefore: 'Over ',
+    textAfter: ' carefully selected for businesses, industries, shops and institutions.',
+    productsHighlight: '1,000 products',
+    extra: 'At Distribuidora Var San we believe a good supplier does more than deliver products; it brings trust, quality and solutions for your organisation to grow.',
+    exploreSolutions: 'Explore solutions',
+    requestQuote: 'Request a quote',
+    imageAlt: 'Professional cleaning and protection supplies',
+    captionEyebrow: 'Your partner',
+    captionText: 'in cleaning, hygiene and protection.',
+    statTitle: '1,000+ Products',
+    statSubtitle: 'Everything in one place.',
+  },
+
+  splash: {
+    ariaLabel: 'Loading Distribuidora Var San',
+    tagline: 'Quality and trust in every supply.',
   },
 
   chatbot: {

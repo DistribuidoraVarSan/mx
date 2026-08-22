@@ -7,17 +7,31 @@ const es: Dictionary = {
     familia: 'Familia',
     soluciones: 'Soluciones',
     eleccion: 'Elección',
+    impulsamos: 'Impulsamos',
+    marcas: 'Marcas',
+    atencion: 'Atención',
+    contacto: 'Contacto',
     solicitarCotizacion: 'Solicitar cotización',
     portalClientes: 'Portal de clientes',
     iniciarSesion: 'Iniciar sesión',
     crearCuenta: 'Crear cuenta',
+    miCuenta: 'Mi cuenta',
+    abrirMenu: 'Abrir menú',
+    cerrarMenu: 'Cerrar menú',
+    navegacionPrincipal: 'Navegación principal',
   },
 
   languageSelector: {
     label: 'Seleccionar idioma',
   },
 
+  common: {
+    close: 'Cerrar',
+    closeProfileAria: 'Cerrar perfil',
+  },
+
   cookies: {
+    ariaLabel: 'Preferencias de cookies',
     text: 'Querido usuario, utilizamos cookies para mejorar tu experiencia de navegación. Al continuar usando este sitio, aceptas el uso de cookies. Puedes consultar nuestra {privacidad} y {cookies}.',
     privacyLink: 'Política de Privacidad',
     cookiesLink: 'Política de Cookies',
@@ -50,6 +64,15 @@ const es: Dictionary = {
     secureAccessNote: 'Acceso seguro para clientes Var San mediante Firebase Authentication y Firestore.',
     passwordMismatch: 'Las contraseñas no coinciden.',
     accountCreated: 'Cuenta creada correctamente.',
+    loginSuccess: 'Sesión iniciada correctamente.',
+    errorEmailInUse: 'Este correo electrónico ya tiene una cuenta.',
+    errorWeakPassword: 'La contraseña debe tener al menos 6 caracteres.',
+    errorInvalidEmail: 'El correo electrónico no es válido.',
+    errorInvalidCredential: 'El correo o la contraseña son incorrectos.',
+    errorTooManyRequests: 'Demasiados intentos. Espera un momento e inténtalo nuevamente.',
+    errorGeneric: 'Firebase: {code} — {message}',
+    errorGoogleSignIn: 'No se pudo iniciar sesión con Google.',
+    errorSaveProfile: 'No se pudo guardar el perfil.',
   },
 
   portal: {
@@ -68,6 +91,29 @@ const es: Dictionary = {
     profileHeading: 'Datos del cliente',
     profileIntro: 'Los cambios se guardan en tu perfil de Firestore.',
     saveChanges: 'Guardar cambios',
+  },
+
+  hero: {
+    eyebrow: 'Marcas líderes · Calidad garantizada',
+    titleLead: 'Soluciones en ',
+    titleHighlight: 'limpieza y protección',
+    titleTail: ' para tu empresa.',
+    textBefore: 'Más de ',
+    textAfter: ' cuidadosamente seleccionados para empresas, industrias, comercios e instituciones.',
+    productsHighlight: '1000 productos',
+    extra: 'En Distribuidora Var San creemos que un buen proveedor no solo entrega productos; brinda confianza, calidad y soluciones para el crecimiento de tu empresa.',
+    exploreSolutions: 'Explorar soluciones',
+    requestQuote: 'Solicitar cotización',
+    imageAlt: 'Suministros profesionales de limpieza y protección',
+    captionEyebrow: 'Tu aliado',
+    captionText: 'en limpieza, higiene y protección.',
+    statTitle: '1000+ Productos',
+    statSubtitle: 'Todo en un solo lugar.',
+  },
+
+  splash: {
+    ariaLabel: 'Cargando Distribuidora Var San',
+    tagline: 'Calidad y confianza en cada suministro.',
   },
 
   chatbot: {

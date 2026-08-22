@@ -7,17 +7,31 @@ const zhTW: Dictionary = {
     familia: '我們的團隊',
     soluciones: '解決方案',
     eleccion: '為何選擇我們',
+    impulsamos: '我們的推動力',
+    marcas: '品牌',
+    atencion: '客戶服務',
+    contacto: '聯絡我們',
     solicitarCotizacion: '索取報價',
     portalClientes: '客戶專區',
     iniciarSesion: '登入',
     crearCuenta: '建立帳號',
+    miCuenta: '我的帳戶',
+    abrirMenu: '開啟選單',
+    cerrarMenu: '關閉選單',
+    navegacionPrincipal: '主要導覽',
   },
 
   languageSelector: {
     label: '選擇語言',
   },
 
+  common: {
+    close: '關閉',
+    closeProfileAria: '關閉個人資料',
+  },
+
   cookies: {
+    ariaLabel: 'Cookie 偏好設定',
     text: '親愛的訪客，我們使用 Cookie 來改善您的瀏覽體驗。繼續使用本網站即表示您同意使用 Cookie。您可以查閱我們的{privacidad}與{cookies}。',
     privacyLink: '隱私權政策',
     cookiesLink: 'Cookie 政策',
@@ -50,6 +64,15 @@ const zhTW: Dictionary = {
     secureAccessNote: 'Var San 客戶透過 Firebase Authentication 與 Firestore 提供安全存取。',
     passwordMismatch: '兩次輸入的密碼不一致。',
     accountCreated: '帳號已成功建立。',
+    loginSuccess: '登入成功。',
+    errorEmailInUse: '此電子郵件已有帳號。',
+    errorWeakPassword: '密碼至少需要 6 個字元。',
+    errorInvalidEmail: '電子郵件格式無效。',
+    errorInvalidCredential: '電子郵件或密碼不正確。',
+    errorTooManyRequests: '嘗試次數過多，請稍後再試。',
+    errorGeneric: 'Firebase：{code} — {message}',
+    errorGoogleSignIn: '無法使用 Google 登入。',
+    errorSaveProfile: '無法儲存個人資料。',
   },
 
   portal: {
@@ -68,6 +91,29 @@ const zhTW: Dictionary = {
     profileHeading: '客戶資料',
     profileIntro: '變更會儲存到您的 Firestore 個人資料中。',
     saveChanges: '儲存變更',
+  },
+
+  hero: {
+    eyebrow: '領導品牌．品質保證',
+    titleLead: '為您的企業提供',
+    titleHighlight: '清潔與防護',
+    titleTail: '解決方案。',
+    textBefore: '',
+    textAfter: '，精心挑選，適用於企業、工業、商店與機構。',
+    productsHighlight: '1000 項產品',
+    extra: '在 Distribuidora Var San，我們相信優質的供應商不只是交付產品，更帶來信任、品質，以及協助您企業成長的解決方案。',
+    exploreSolutions: '探索解決方案',
+    requestQuote: '索取報價',
+    imageAlt: '專業清潔與防護用品',
+    captionEyebrow: '您的合作夥伴',
+    captionText: '在清潔、衛生與防護領域。',
+    statTitle: '1000+ 項產品',
+    statSubtitle: '一站購足。',
+  },
+
+  splash: {
+    ariaLabel: '正在載入 Distribuidora Var San',
+    tagline: '每一次供應，都是品質與信任的保證。',
   },
 
   chatbot: {
