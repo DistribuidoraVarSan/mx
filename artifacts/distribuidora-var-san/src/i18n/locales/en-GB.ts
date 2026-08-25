@@ -28,6 +28,9 @@ const enGB: Dictionary = {
   common: {
     close: 'Close',
     closeProfileAria: 'Close profile',
+    previous: 'Previous',
+    next: 'Next',
+    loading: 'Loading...',
   },
 
   cookies: {
@@ -111,9 +114,143 @@ const enGB: Dictionary = {
     statSubtitle: 'Everything in one place.',
   },
 
-  splash: {
-    ariaLabel: 'Loading Distribuidora Var San',
-    tagline: 'Quality and trust in every supply.',
+  essence: {
+    eyebrow: 'Our ethos',
+    title: 'The values that represent us.',
+    lede: 'More than distributing products, we build relationships based on quality, commitment and trust.',
+    values: {
+      quality: {
+        title: 'Quality',
+        description: 'We carefully select each product to offer reliable solutions and outstanding performance.',
+      },
+      closeness: {
+        title: 'Closeness',
+        description: 'We provide personalised attention and support throughout each order.',
+      },
+      commitment: {
+        title: 'Commitment',
+        description: 'We respond with responsibility, punctuality and service designed for your business.',
+      },
+      trust: {
+        title: 'Trust',
+        description: 'We build lasting relationships based on honesty, backing and consistent results.',
+      },
+    },
+  },
+
+  family: {
+    eyebrow: 'Become part of the Var San family',
+    title: 'We grow when our customers grow.',
+    subtitle: 'Var San Experience',
+    label: 'Var San Experience',
+    ariaLabel: 'View {slide} experience',
+    slides: [
+      ['CONFIDENCE', 'Today we serve from small businesses to companies seeking a reliable supplier to help them grow.'],
+      ['BACKING', 'We are present from the first quote through to every delivery.'],
+      ['RELATIONSHIP', 'We do not seek a single sale. We seek to build lasting relationships with each customer.'],
+      ['GROWTH', 'When our customers grow, we know we are doing our job well.'],
+      ['WELCOME', 'Thank you for considering Distribuidora Var San as part of your business.'],
+    ],
+  },
+
+  solutions: {
+    eyebrow: 'Our solutions',
+    title: 'Find the ideal solution for your organisation',
+    lede: 'The "View full catalogue" button will open the PDF for the selected range. Each category (Industrial Safety and Medical Line) has its own independent catalogue.',
+    catalogPart1: 'The "View full catalogue" button will open the PDF for the selected range. Each category (',
+    catalogStrongPart: 'Industrial Safety and Medical Line',
+    catalogPart2: ') has its own independent catalogue.',
+    catalogPart3: '',
+    tabListLabel: 'Product ranges',
+    categoriesLabel: 'Categories',
+    categoriesScreenReader: 'Product categories',
+    previousCategory: 'Previous category',
+    nextCategory: 'Next category',
+    fullCatalog: 'View full catalogue',
+  },
+
+  whyChoose: {
+    eyebrow: 'Why choose us?',
+    title: 'Why choose Distribuidora Var San?',
+    lede: 'More than a supplier, we are the partner that drives your business growth.',
+    ariaLabel: 'Reasons to choose us',
+    reasonLabel: 'View reason {number}',
+    previousReason: 'Previous reason',
+    nextReason: 'Next reason',
+    reasons: [
+      ['Extensive inventory', 'Thousands of products available to respond quickly to the needs of different sectors.'],
+      ['Recognised brands', 'We work with prestigious manufacturers to offer reliable and high-performance solutions.'],
+      ['Personalised attention', 'We listen to each customer\'s needs to provide tailored advice and solutions.'],
+      ['Reliable delivery', 'We coordinate each order with commitment to ensure you receive your products on time.'],
+      ['Comprehensive solutions', 'From industrial safety to medical line, we bring together everything your organisation needs in one place.'],
+      ['Long-term commitment', 'We seek to build lasting relationships based on trust, service and results.'],
+    ],
+  },
+
+  sectors: {
+    eyebrow: 'Sectors we drive',
+    title: 'Specialised solutions for businesses ',
+    titleEmphasis: 'across different sectors.',
+    names: [
+      'Businesses',
+      'Offices',
+      'Retail',
+      'Manufacturing',
+      'Schools',
+      'Hospitals and Clinics',
+      'Restaurants',
+      'Hotels',
+      'Institutions',
+      'Businesses in general',
+    ],
+  },
+
+  brands: {
+    eyebrow: 'Brands',
+    title: 'Brands we work with',
+    lede: 'We distribute genuine products from manufacturers recognised for their quality and safety.',
+    distributed: 'Distributed brand',
+  },
+
+  process: {
+    eyebrow: 'Service Process',
+    title: 'Working with us is this',
+    titleEmphasis: 'simple',
+    steps: [
+      ['1', 'Request your quote', 'Contact us via WhatsApp, phone or email and share the products you need.'],
+      ['2', 'We prepare your proposal', 'We review your request and prepare a personalised quote according to your requirements.'],
+      ['3', 'We coordinate your order', 'Once you accept the quote, we coordinate with you the delivery or collection of products on the agreed date.'],
+    ],
+  },
+
+  contact: {
+    eyebrow: 'Get in touch',
+    title: 'Request information or a ',
+    titleEmphasis: 'quote',
+    lede: 'Leave us your details and we will contact you to handle your request.',
+    email: 'Email address',
+    phone: 'Phone and WhatsApp',
+    attention: 'Support',
+    attentionInfo: 'Businesses, manufacturing, retail and institutions',
+    form: {
+      nameLabel: 'Name',
+      emailLabel: 'Email address',
+      companyLabel: 'Organisation',
+      messageLabel: 'Message',
+      submitButton: 'Send request',
+    },
+  },
+
+  newsletter: {
+    title: 'Subscribe!',
+    lede: 'Sign up to our newsletter and be the first to hear about our launches and promotions',
+    placeholder: 'Email Address',
+    ariaLabelInput: 'Email address to subscribe to our newsletter',
+    ariaLabelButton: 'Subscribe to newsletter',
+    alreadySubscribed: 'This email is already subscribed to our newsletter.',
+    subscriptionSuccess: 'Done! You have subscribed successfully.',
+    subscriptionError: 'We could not complete your subscription. Please try again.',
+    networkError: 'We could not connect to the server. Please try again in a few seconds.',
   },
 
   chatbot: {
@@ -121,7 +258,7 @@ const enGB: Dictionary = {
     closeButtonLabel: 'Close chatbot',
     headerTitle: 'Var San Assistant',
     headerSubtitle: 'Guidance on products and contact',
-    greeting: "Hello. I'm the Var San Assistant. I can help with our product ranges, catalogues, delivery coverage and contact details. How can we help you?",
+    greeting: 'Hello. I\'m the Var San Assistant. I can help with our product ranges, catalogues, delivery coverage and contact details. How can we help you?',
     inputPlaceholder: 'Type your query (Enter to send, Shift+Enter for a new line)',
     inputAriaLabel: 'Query for the assistant',
     sendButtonLabel: 'Send query',
@@ -130,7 +267,7 @@ const enGB: Dictionary = {
     quickSupport: 'Support',
     quickContact: 'How can I contact you?',
     loadingMessage: 'Typing...',
-    errorMessage: "We couldn't process your message. Please try again in a few seconds.",
+    errorMessage: 'We couldn\'t process your message. Please try again in a few seconds.',
   },
 
   footer: {
@@ -142,6 +279,13 @@ const enGB: Dictionary = {
     privacyNotice: 'Privacy Notice',
     cookiesPolicy: 'Cookies Policy',
     termsAndConditions: 'Terms and Conditions',
+    brandDescription: 'Cleaning and protection solutions',
+    footerTagline: 'Cleaning and protection solutions for your organisation. Committed to providing reliable solutions in cleaning, maintenance and protection for businesses, shops and institutions.',
+  },
+
+  splash: {
+    ariaLabel: 'Loading Distribuidora Var San',
+    tagline: 'Quality and trust in every supply.',
   },
 };
 

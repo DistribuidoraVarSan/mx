@@ -28,6 +28,9 @@ const es: Dictionary = {
   common: {
     close: 'Cerrar',
     closeProfileAria: 'Cerrar perfil',
+    previous: 'Anterior',
+    next: 'Siguiente',
+    loading: 'Cargando...',
   },
 
   cookies: {
@@ -111,9 +114,143 @@ const es: Dictionary = {
     statSubtitle: 'Todo en un solo lugar.',
   },
 
-  splash: {
-    ariaLabel: 'Cargando Distribuidora Var San',
-    tagline: 'Calidad y confianza en cada suministro.',
+  essence: {
+    eyebrow: 'Nuestra esencia',
+    title: 'Los valores que nos representan.',
+    lede: 'Más que distribuir productos, construimos relaciones basadas en calidad, compromiso y confianza.',
+    values: {
+      quality: {
+        title: 'Calidad',
+        description: 'Seleccionamos cuidadosamente cada producto para ofrecer soluciones confiables y de alto rendimiento.',
+      },
+      closeness: {
+        title: 'Cercanía',
+        description: 'Brindamos atención personalizada y acompañamiento durante cada pedido.',
+      },
+      commitment: {
+        title: 'Compromiso',
+        description: 'Respondemos con responsabilidad, puntualidad y un servicio pensado para tu empresa.',
+      },
+      trust: {
+        title: 'Confianza',
+        description: 'Construimos relaciones duraderas basadas en honestidad, respaldo y resultados consistentes.',
+      },
+    },
+  },
+
+  family: {
+    eyebrow: 'Forma parte de la familia Var San',
+    title: 'Crecemos cuando nuestros clientes crecen.',
+    subtitle: 'Experiencia Var San',
+    label: 'Experiencia Var San',
+    ariaLabel: 'Ver experiencia {slide}',
+    slides: [
+      ['CONFIANZA', 'Hoy atendemos desde pequeños negocios hasta empresas que buscan un proveedor confiable para crecer.'],
+      ['RESPALDO', 'Estamos presentes desde la primera cotización hasta la entrega de cada pedido.'],
+      ['RELACIÓN', 'No buscamos una sola venta. Buscamos construir relaciones duraderas con cada cliente.'],
+      ['CRECER', 'Cuando nuestros clientes crecen, sabemos que estamos haciendo bien nuestro trabajo.'],
+      ['BIENVENIDO', 'Gracias por considerar a Distribuidora Var San como parte de tu empresa.'],
+    ],
+  },
+
+  solutions: {
+    eyebrow: 'Nuestras soluciones',
+    title: 'Encuentra la solución ideal para tu empresa',
+    lede: 'El botón "Consultar catálogo completo" abrirá el PDF de la línea seleccionada. Cada categoría (Seguridad Industrial y Línea Médica) cuenta con su propio catálogo independiente.',
+    catalogPart1: 'El botón ',
+    catalogStrongPart: '"Consultar catálogo completo"',
+    catalogPart2: ' abrirá el PDF de la línea seleccionada. Cada categoría (',
+    catalogPart3: ') cuenta con su propio catálogo independiente.',
+    tabListLabel: 'Líneas de productos',
+    categoriesLabel: 'Categorías',
+    categoriesScreenReader: 'Categorías de productos',
+    previousCategory: 'Categoría anterior',
+    nextCategory: 'Categoría siguiente',
+    fullCatalog: 'Consultar catálogo completo',
+  },
+
+  whyChoose: {
+    eyebrow: '¿Por qué elegirnos?',
+    title: '¿Por qué elegir Distribuidora Var San?',
+    lede: 'Más que un proveedor, somos el aliado que impulsa el crecimiento de tu empresa.',
+    ariaLabel: 'Razones para elegirnos',
+    reasonLabel: 'Ver razón {number}',
+    previousReason: 'Razón anterior',
+    nextReason: 'Razón siguiente',
+    reasons: [
+      ['Amplio inventario', 'Miles de productos disponibles para responder con rapidez a las necesidades de distintos sectores.'],
+      ['Marcas reconocidas', 'Trabajamos con fabricantes de prestigio para ofrecer soluciones confiables y de alto desempeño.'],
+      ['Atención personalizada', 'Escuchamos las necesidades de cada cliente para brindar asesoría y soluciones a la medida.'],
+      ['Entregas confiables', 'Coordinamos cada pedido con compromiso para que recibas tus productos en tiempo y forma.'],
+      ['Soluciones integrales', 'Desde seguridad industrial hasta línea médica, reunimos todo lo que tu empresa necesita en un solo lugar.'],
+      ['Compromiso a largo plazo', 'Buscamos construir relaciones duraderas basadas en confianza, servicio y resultados.'],
+    ],
+  },
+
+  sectors: {
+    eyebrow: 'Sectores que impulsamos',
+    title: 'Soluciones especializadas para empresas ',
+    titleEmphasis: 'de distintos sectores.',
+    names: [
+      'Empresas',
+      'Oficinas',
+      'Comercios',
+      'Industrias',
+      'Escuelas',
+      'Hospitales y Clínicas',
+      'Restaurantes',
+      'Hoteles',
+      'Instituciones',
+      'Negocios en general',
+    ],
+  },
+
+  brands: {
+    eyebrow: 'Marcas',
+    title: 'Marcas que trabajamos',
+    lede: 'Distribuimos productos originales de fabricantes reconocidos por su calidad y seguridad.',
+    distributed: 'Marca distribuida',
+  },
+
+  process: {
+    eyebrow: 'Proceso de Atención',
+    title: 'Así de sencillo es trabajar con nosotros',
+    titleEmphasis: 'sencillo',
+    steps: [
+      ['1', 'Solicita tu cotización', 'Contáctanos por WhatsApp, teléfono o correo electrónico y comparte los productos que necesitas.'],
+      ['2', 'Elaboramos tu propuesta', 'Revisamos tu solicitud y preparamos una cotización personalizada de acuerdo con tus requerimientos.'],
+      ['3', 'Coordinamos tu pedido', 'Una vez aceptada la cotización, coordinamos contigo la entrega o la recolección de los productos en la fecha acordada.'],
+    ],
+  },
+
+  contact: {
+    eyebrow: 'Contáctenos',
+    title: 'Solicita información o una ',
+    titleEmphasis: 'cotización',
+    lede: 'Déjanos tus datos y nos pondremos en contacto contigo para atender tu solicitud.',
+    email: 'Correo electrónico',
+    phone: 'Teléfono y WhatsApp',
+    attention: 'Atención',
+    attentionInfo: 'Empresas, industrias, comercios e instituciones',
+    form: {
+      nameLabel: 'Nombre',
+      emailLabel: 'Correo electrónico',
+      companyLabel: 'Empresa',
+      messageLabel: 'Mensaje',
+      submitButton: 'Enviar solicitud',
+    },
+  },
+
+  newsletter: {
+    title: '¡Suscríbete!',
+    lede: 'Regístrate en nuestro newsletter y sé el primero en enterarte de nuestros lanzamientos y promociones',
+    placeholder: 'Correo Electrónico',
+    ariaLabelInput: 'Correo electrónico para suscripción al newsletter',
+    ariaLabelButton: 'Suscribirme al newsletter',
+    alreadySubscribed: 'Este correo ya está suscrito a nuestro newsletter.',
+    subscriptionSuccess: '¡Listo! Te suscribiste correctamente.',
+    subscriptionError: 'No pudimos completar tu suscripción. Intenta de nuevo.',
+    networkError: 'No pudimos conectar con el servidor. Intenta de nuevo en unos segundos.',
   },
 
   chatbot: {
@@ -142,6 +279,13 @@ const es: Dictionary = {
     privacyNotice: 'Aviso de Privacidad',
     cookiesPolicy: 'Política de Cookies',
     termsAndConditions: 'Términos y Condiciones',
+    brandDescription: 'Soluciones en limpieza y protección',
+    footerTagline: 'Soluciones en limpieza y protección para tu empresa. Comprometidos con brindar soluciones confiables en limpieza, mantenimiento y protección para empresas, comercios e instituciones.',
+  },
+
+  splash: {
+    ariaLabel: 'Cargando Distribuidora Var San',
+    tagline: 'Calidad y confianza en cada suministro.',
   },
 };
 

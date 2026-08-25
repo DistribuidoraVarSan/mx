@@ -10,18 +10,35 @@ export type Dictionary = {
     familia: string;
     soluciones: string;
     eleccion: string;
+    impulsamos: string;
+    marcas: string;
+    atencion: string;
+    contacto: string;
     solicitarCotizacion: string;
     portalClientes: string;
     iniciarSesion: string;
     crearCuenta: string;
+    miCuenta: string;
+    abrirMenu: string;
+    cerrarMenu: string;
+    navegacionPrincipal: string;
   };
 
   languageSelector: {
-    label: string; // texto accesible del botón, ej. "Seleccionar idioma"
+    label: string;
+  };
+
+  common: {
+    close: string;
+    closeProfileAria: string;
+    previous: string;
+    next: string;
+    loading: string;
   };
 
   cookies: {
-    text: string; // usa {privacidad} y {cookies} como marcadores de los links
+    ariaLabel: string;
+    text: string;
     privacyLink: string;
     cookiesLink: string;
     accept: string;
@@ -53,11 +70,20 @@ export type Dictionary = {
     secureAccessNote: string;
     passwordMismatch: string;
     accountCreated: string;
+    loginSuccess: string;
+    errorEmailInUse: string;
+    errorWeakPassword: string;
+    errorInvalidEmail: string;
+    errorInvalidCredential: string;
+    errorTooManyRequests: string;
+    errorGeneric: string;
+    errorGoogleSignIn: string;
+    errorSaveProfile: string;
   };
 
   portal: {
     eyebrow: string;
-    welcome: string; // usa {name}
+    welcome: string;
     intro: string;
     fieldNameLabel: string;
     fieldEmailLabel: string;
@@ -71,6 +97,123 @@ export type Dictionary = {
     profileHeading: string;
     profileIntro: string;
     saveChanges: string;
+  };
+
+  hero: {
+    eyebrow: string;
+    titleLead: string;
+    titleHighlight: string;
+    titleTail: string;
+    textBefore: string;
+    textAfter: string;
+    productsHighlight: string;
+    extra: string;
+    exploreSolutions: string;
+    requestQuote: string;
+    imageAlt: string;
+    captionEyebrow: string;
+    captionText: string;
+    statTitle: string;
+    statSubtitle: string;
+  };
+
+  essence: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+    values: {
+      quality: { title: string; description: string };
+      closeness: { title: string; description: string };
+      commitment: { title: string; description: string };
+      trust: { title: string; description: string };
+    };
+  };
+
+  family: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    label: string;
+    ariaLabel: string;
+    slides: Array<[string, string]>;
+  };
+
+  solutions: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+    catalogPart1: string;
+    catalogStrongPart: string;
+    catalogPart2: string;
+    catalogPart3: string;
+    tabListLabel: string;
+    categoriesLabel: string;
+    categoriesScreenReader: string;
+    previousCategory: string;
+    nextCategory: string;
+    fullCatalog: string;
+  };
+
+  whyChoose: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+    ariaLabel: string;
+    reasonLabel: string;
+    previousReason: string;
+    nextReason: string;
+    reasons: Array<[string, string]>;
+  };
+
+  sectors: {
+    eyebrow: string;
+    title: string;
+    titleEmphasis: string;
+    names: string[];
+  };
+
+  brands: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+    distributed: string;
+  };
+
+  process: {
+    eyebrow: string;
+    title: string;
+    titleEmphasis: string;
+    steps: Array<[string, string, string]>;
+  };
+
+  contact: {
+    eyebrow: string;
+    title: string;
+    titleEmphasis: string;
+    lede: string;
+    email: string;
+    phone: string;
+    attention: string;
+    attentionInfo: string;
+    form: {
+      nameLabel: string;
+      emailLabel: string;
+      companyLabel: string;
+      messageLabel: string;
+      submitButton: string;
+    };
+  };
+
+  newsletter: {
+    title: string;
+    lede: string;
+    placeholder: string;
+    ariaLabelInput: string;
+    ariaLabelButton: string;
+    alreadySubscribed: string;
+    subscriptionSuccess: string;
+    subscriptionError: string;
+    networkError: string;
   };
 
   chatbot: {
@@ -94,10 +237,17 @@ export type Dictionary = {
     navigationHeading: string;
     contactHeading: string;
     requestQuote: string;
-    rightsReserved: string; // usa {year}
+    rightsReserved: string;
     tagline: string;
     privacyNotice: string;
     cookiesPolicy: string;
     termsAndConditions: string;
+    brandDescription: string;
+    footerTagline: string;
+  };
+
+  splash: {
+    ariaLabel: string;
+    tagline: string;
   };
 };

@@ -28,11 +28,14 @@ const fr: Dictionary = {
   common: {
     close: 'Fermer',
     closeProfileAria: 'Fermer le profil',
+    previous: 'Précédent',
+    next: 'Suivant',
+    loading: 'Chargement...',
   },
 
   cookies: {
     ariaLabel: 'Préférences relatives aux cookies',
-    text: 'Cher visiteur, nous utilisons des cookies pour améliorer votre expérience de navigation. En continuant à utiliser ce site, vous acceptez l\u2019utilisation de cookies. Vous pouvez consulter notre {privacidad} et notre {cookies}.',
+    text: 'Cher visiteur, nous utilisons des cookies pour améliorer votre expérience de navigation. En continuant à utiliser ce site, vous acceptez l\'utilisation de cookies. Vous pouvez consulter notre {privacidad} et notre {cookies}.',
     privacyLink: 'Politique de confidentialité',
     cookiesLink: 'Politique de cookies',
     accept: 'Accepter',
@@ -44,7 +47,7 @@ const fr: Dictionary = {
     loginTitle: 'Connectez-vous',
     registerTitle: 'Créez votre compte',
     loginIntro: 'Accédez à votre compte Distribuidora Var San.',
-    registerIntro: 'Inscrivez-vous pour accéder à l\u2019espace clients Var San.',
+    registerIntro: 'Inscrivez-vous pour accéder à l\'espace clients Var San.',
     tabLogin: 'Se connecter',
     tabRegister: 'Créer un compte',
     fieldName: 'Nom',
@@ -67,12 +70,12 @@ const fr: Dictionary = {
     loginSuccess: 'Connexion réussie.',
     errorEmailInUse: 'Cette adresse e-mail possède déjà un compte.',
     errorWeakPassword: 'Le mot de passe doit contenir au moins 6 caractères.',
-    errorInvalidEmail: 'L’adresse e-mail n’est pas valide.',
-    errorInvalidCredential: 'L’e-mail ou le mot de passe est incorrect.',
+    errorInvalidEmail: 'L\'adresse e-mail n\'est pas valide.',
+    errorInvalidCredential: 'L\'e-mail ou le mot de passe est incorrect.',
     errorTooManyRequests: 'Trop de tentatives. Attendez un instant puis réessayez.',
     errorGeneric: 'Firebase : {code} — {message}',
     errorGoogleSignIn: 'Impossible de se connecter avec Google.',
-    errorSaveProfile: 'Impossible d’enregistrer le profil.',
+    errorSaveProfile: 'Impossible d\'enregistrer le profil.',
   },
 
   portal: {
@@ -87,7 +90,7 @@ const fr: Dictionary = {
     notAvailable: 'Non disponible',
     myProfile: 'Mon profil',
     logOut: 'Se déconnecter',
-    closePortal: 'Fermer l\u2019espace',
+    closePortal: 'Fermer l\'espace',
     profileHeading: 'Informations client',
     profileIntro: 'Les modifications sont enregistrées dans votre profil Firestore.',
     saveChanges: 'Enregistrer les modifications',
@@ -101,7 +104,7 @@ const fr: Dictionary = {
     textBefore: 'Plus de ',
     textAfter: ' soigneusement sélectionnés pour les entreprises, industries, commerces et institutions.',
     productsHighlight: '1000 produits',
-    extra: 'Chez Distribuidora Var San, nous pensons qu’un bon fournisseur ne se contente pas de livrer des produits ; il apporte confiance, qualité et solutions pour la croissance de votre entreprise.',
+    extra: 'Chez Distribuidora Var San, nous pensons qu\'un bon fournisseur ne se contente pas de livrer des produits ; il apporte confiance, qualité et solutions pour la croissance de votre entreprise.',
     exploreSolutions: 'Découvrir les solutions',
     requestQuote: 'Demander un devis',
     imageAlt: 'Fournitures professionnelles de nettoyage et de protection',
@@ -111,9 +114,143 @@ const fr: Dictionary = {
     statSubtitle: 'Tout au même endroit.',
   },
 
-  splash: {
-    ariaLabel: 'Chargement de Distribuidora Var San',
-    tagline: 'Qualité et confiance à chaque fourniture.',
+  essence: {
+    eyebrow: 'Notre essence',
+    title: 'Les valeurs qui nous représentent.',
+    lede: 'Plus que de distribuer des produits, nous construisons des relations basées sur la qualité, l\'engagement et la confiance.',
+    values: {
+      quality: {
+        title: 'Qualité',
+        description: 'Nous sélectionnons soigneusement chaque produit pour offrir des solutions fiables et de haute performance.',
+      },
+      closeness: {
+        title: 'Proximité',
+        description: 'Nous fournissons une attention personnalisée et un accompagnement tout au long de chaque commande.',
+      },
+      commitment: {
+        title: 'Engagement',
+        description: 'Nous répondons avec responsabilité, ponctualité et un service pensé pour votre entreprise.',
+      },
+      trust: {
+        title: 'Confiance',
+        description: 'Nous construisons des relations durables basées sur l\'honnêteté, le soutien et des résultats constants.',
+      },
+    },
+  },
+
+  family: {
+    eyebrow: 'Faites partie de la famille Var San',
+    title: 'Nous grandissons quand nos clients grandissent.',
+    subtitle: 'Expérience Var San',
+    label: 'Expérience Var San',
+    ariaLabel: 'Voir l\'expérience {slide}',
+    slides: [
+      ['CONFIANCE', 'Aujourd\'hui, nous servons des petits commerces à des entreprises qui cherchent un fournisseur fiable pour croître.'],
+      ['APPUI', 'Nous sommes présents dès le premier devis jusqu\'à la livraison de chaque commande.'],
+      ['RELATION', 'Nous ne recherchons pas une seule vente. Nous cherchons à construire des relations durables avec chaque client.'],
+      ['CROISSANCE', 'Quand nos clients grandissent, nous savons que nous faisons bien notre travail.'],
+      ['BIENVENUE', 'Merci d\'avoir considéré Distribuidora Var San comme partie de votre entreprise.'],
+    ],
+  },
+
+  solutions: {
+    eyebrow: 'Nos solutions',
+    title: 'Trouvez la solution idéale pour votre entreprise',
+    lede: 'Le bouton « Consulter le catalogue complet » ouvrira le PDF de la gamme sélectionnée. Chaque catégorie (Sécurité industrielle et Gamme médicale) dispose de son propre catalogue indépendant.',
+    catalogPart1: 'Le bouton « Consulter le catalogue complet » ouvrira le PDF de la gamme sélectionnée. Chaque catégorie (',
+    catalogStrongPart: 'Sécurité industrielle et Gamme médicale',
+    catalogPart2: ') dispose de son propre catalogue indépendant.',
+    catalogPart3: '',
+    tabListLabel: 'Gammes de produits',
+    categoriesLabel: 'Catégories',
+    categoriesScreenReader: 'Catégories de produits',
+    previousCategory: 'Catégorie précédente',
+    nextCategory: 'Catégorie suivante',
+    fullCatalog: 'Consulter le catalogue complet',
+  },
+
+  whyChoose: {
+    eyebrow: 'Pourquoi nous choisir ?',
+    title: 'Pourquoi choisir Distribuidora Var San ?',
+    lede: 'Plus qu\'un fournisseur, nous sommes l\'allié qui impulse la croissance de votre entreprise.',
+    ariaLabel: 'Raisons de nous choisir',
+    reasonLabel: 'Voir la raison {number}',
+    previousReason: 'Raison précédente',
+    nextReason: 'Raison suivante',
+    reasons: [
+      ['Inventaire étendu', 'Des milliers de produits disponibles pour répondre rapidement aux besoins de différents secteurs.'],
+      ['Marques reconnues', 'Nous travaillons avec des fabricants prestigieux pour offrir des solutions fiables et haute performance.'],
+      ['Attention personnalisée', 'Nous écoutons les besoins de chaque client pour fournir des conseils et solutions adaptés.'],
+      ['Livraisons fiables', 'Nous coordonnons chaque commande avec engagement pour que vous receviez vos produits en temps voulu.'],
+      ['Solutions intégrales', 'De la sécurité industrielle à la gamme médicale, nous réunissons tout ce dont votre entreprise a besoin en un seul endroit.'],
+      ['Engagement à long terme', 'Nous cherchons à construire des relations durables basées sur la confiance, le service et les résultats.'],
+    ],
+  },
+
+  sectors: {
+    eyebrow: 'Secteurs que nous impulsons',
+    title: 'Solutions spécialisées pour les entreprises ',
+    titleEmphasis: 'de différents secteurs.',
+    names: [
+      'Entreprises',
+      'Bureaux',
+      'Commerces',
+      'Industries',
+      'Écoles',
+      'Hôpitaux et Cliniques',
+      'Restaurants',
+      'Hôtels',
+      'Institutions',
+      'Entreprises en général',
+    ],
+  },
+
+  brands: {
+    eyebrow: 'Marques',
+    title: 'Marques avec lesquelles nous travaillons',
+    lede: 'Nous distribuons des produits authentiques de fabricants reconnus pour leur qualité et sécurité.',
+    distributed: 'Marque distribuée',
+  },
+
+  process: {
+    eyebrow: 'Processus de Service',
+    title: 'Travailler avec nous est aussi',
+    titleEmphasis: 'simple',
+    steps: [
+      ['1', 'Demandez votre devis', 'Contactez-nous par WhatsApp, téléphone ou e-mail et partagez les produits dont vous avez besoin.'],
+      ['2', 'Nous préparons votre proposition', 'Nous examinons votre demande et préparons un devis personnalisé selon vos exigences.'],
+      ['3', 'Nous coordonnons votre commande', 'Une fois le devis accepté, nous coordonnons avec vous la livraison ou la collecte des produits à la date convenue.'],
+    ],
+  },
+
+  contact: {
+    eyebrow: 'Nous contacter',
+    title: 'Demandez des informations ou un ',
+    titleEmphasis: 'devis',
+    lede: 'Laissez-nous vos données et nous vous contacterons pour traiter votre demande.',
+    email: 'Adresse e-mail',
+    phone: 'Téléphone et WhatsApp',
+    attention: 'Assistance',
+    attentionInfo: 'Entreprises, industries, commerces et institutions',
+    form: {
+      nameLabel: 'Nom',
+      emailLabel: 'Adresse e-mail',
+      companyLabel: 'Entreprise',
+      messageLabel: 'Message',
+      submitButton: 'Envoyer la demande',
+    },
+  },
+
+  newsletter: {
+    title: 'Abonnez-vous !',
+    lede: 'Inscrivez-vous à notre newsletter et soyez le premier à connaître nos lancements et promotions',
+    placeholder: 'Adresse E-mail',
+    ariaLabelInput: 'Adresse e-mail pour s\'abonner à notre newsletter',
+    ariaLabelButton: 'S\'abonner à la newsletter',
+    alreadySubscribed: 'Cet e-mail est déjà abonné à notre newsletter.',
+    subscriptionSuccess: 'Prêt ! Vous vous êtes abonné avec succès.',
+    subscriptionError: 'Nous n\'avons pas pu terminer votre abonnement. Veuillez réessayer.',
+    networkError: 'Nous n\'avons pas pu nous connecter au serveur. Veuillez réessayer dans quelques secondes.',
   },
 
   chatbot: {
@@ -121,16 +258,16 @@ const fr: Dictionary = {
     closeButtonLabel: 'Fermer le chatbot',
     headerTitle: 'Assistant Var San',
     headerSubtitle: 'Renseignements sur les produits et le contact',
-    greeting: 'Bonjour. Je suis l\u2019Assistant Var San. Je peux vous renseigner sur nos gammes de produits, nos catalogues, notre zone de livraison et nos coordonnées. Comment pouvons-nous vous aider ?',
+    greeting: 'Bonjour. Je suis l\'Assistant Var San. Je peux vous renseigner sur nos gammes de produits, nos catalogues, notre zone de livraison et nos coordonnées. Comment pouvons-nous vous aider ?',
     inputPlaceholder: 'Écrivez votre question (Entrée pour envoyer, Maj+Entrée pour un saut de ligne)',
-    inputAriaLabel: 'Question pour l\u2019assistant',
+    inputAriaLabel: 'Question pour l\'assistant',
     sendButtonLabel: 'Envoyer la question',
     quickProducts: 'Quels produits proposez-vous ?',
     quickQuote: 'Demander un devis',
     quickSupport: 'Assistance',
     quickContact: 'Comment puis-je vous contacter ?',
-    loadingMessage: 'En train d\u2019écrire...',
-    errorMessage: 'Nous n\u2019avons pas pu traiter votre message. Réessayez dans quelques secondes.',
+    loadingMessage: 'En train d\'écrire...',
+    errorMessage: 'Nous n\'avons pas pu traiter votre message. Réessayez dans quelques secondes.',
   },
 
   footer: {
@@ -142,6 +279,13 @@ const fr: Dictionary = {
     privacyNotice: 'Politique de confidentialité',
     cookiesPolicy: 'Politique de cookies',
     termsAndConditions: 'Conditions générales',
+    brandDescription: 'Solutions de nettoyage et de protection',
+    footerTagline: 'Solutions de nettoyage et de protection pour votre entreprise. Engagés à fournir des solutions fiables en nettoyage, entretien et protection pour les entreprises, commerces et institutions.',
+  },
+
+  splash: {
+    ariaLabel: 'Chargement de Distribuidora Var San',
+    tagline: 'Qualité et confiance à chaque fourniture.',
   },
 };
 

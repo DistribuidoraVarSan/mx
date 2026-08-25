@@ -611,7 +611,7 @@ t.account.errorGeneric
         </section>
 
         <section id="esencia" className="section section--paper">
-          <div className="container"><div className="section-heading section-heading--center"><span className="eyebrow">Nuestra esencia</span><h2 className="section-title">Los valores que nos representan.</h2><p className="section-lede">Más que distribuir productos, construimos relaciones basadas en calidad, compromiso y confianza.</p></div>
+          <div className="container"><div className="section-heading section-heading--center"><span className="eyebrow">Nuestra esencia</span><h2 className="section-title">Los valores que nos representan.</h2><p className="section-lede">{t.essence.lede}</p></div>
             <div className="value-grid">
               {[['01', 'Calidad', 'Seleccionamos cuidadosamente cada producto para ofrecer soluciones confiables y de alto rendimiento.', Award], ['02', 'Cercanía', 'Brindamos atención personalizada y acompañamiento durante cada pedido.', Handshake], ['03', 'Compromiso', 'Respondemos con responsabilidad, puntualidad y un servicio pensado para tu empresa.', ShieldCheck], ['04', 'Confianza', 'Construimos relaciones duraderas basadas en honestidad, respaldo y resultados consistentes.', CircleCheck]].map(([number, title, text, Icon]) => <article className="value-card" data-number={number} key={title as string} data-testid={`card-value-${number}`}><span className="value-icon"><Icon size={20} /></span><h3>{title as string}</h3><p>{text as string}</p></article>)}
             </div>
@@ -619,7 +619,7 @@ t.account.errorGeneric
         </section>
 
         <section id="familia" className="family-section">
-          <div className="container"><div className="family-layout"><div><span className="eyebrow">Forma parte de la familia Var San</span><h2 className="section-title">Crecemos cuando nuestros clientes crecen.</h2></div><div className="slider-controls"><button className="icon-button" onClick={() => setFamilyIndex((familyIndex - 1 + familySlides.length) % familySlides.length)} aria-label="Anterior" data-testid="button-family-previous"><ChevronLeft size={18} /></button><button className="icon-button" onClick={() => setFamilyIndex((familyIndex + 1) % familySlides.length)} aria-label="Siguiente" data-testid="button-family-next"><ChevronRight size={18} /></button></div></div>
+          <div className="container"><div className="family-layout"><div><span className="eyebrow">Forma parte de la familia Var San</span><h2 className="section-title">{t.family.title}</h2></div><div className="slider-controls"><button className="icon-button" onClick={() => setFamilyIndex((familyIndex - 1 + familySlides.length) % familySlides.length)} aria-label="Anterior" data-testid="button-family-previous"><ChevronLeft size={18} /></button><button className="icon-button" onClick={() => setFamilyIndex((familyIndex + 1) % familySlides.length)} aria-label="Siguiente" data-testid="button-family-next"><ChevronRight size={18} /></button></div></div>
             <article className="family-card" aria-live="polite" data-testid="content-family-slide"><div className="family-card-content"><span className="family-label">Experiencia Var San</span><h3>{familySlides[familyIndex][0]}</h3><p>{familySlides[familyIndex][1]}</p></div></article><div className="family-dots">{familySlides.map((slide, index) => <button className={`dot${index === familyIndex ? ' active' : ''}`} key={slide[0]} onClick={() => setFamilyIndex(index)} aria-label={`Ver experiencia ${slide[0].toLowerCase()}`} data-testid={`button-family-dot-${index}`} />)}</div>
           </div>
         </section>
@@ -633,17 +633,17 @@ t.account.errorGeneric
         </section>
 
         <section id="eleccion" className="section section--white">
-          <div className="container why-layout"><div className="why-intro"><span className="eyebrow">¿Por qué elegirnos?</span><h2 className="section-title">¿Por qué elegir Distribuidora Var San?</h2><p className="section-lede">Más que un proveedor, somos el aliado que impulsa el crecimiento de tu empresa.</p><div className="why-dots">{whySlides.map((slide, index) => <button className={`dot${index === whyIndex ? ' active' : ''}`} key={slide[0]} onClick={() => setWhyIndex(index)} aria-label={`Ver razón ${index + 1}`} data-testid={`button-why-dot-${index}`} />)}</div></div><div className="why-slider"><button className="icon-button" onClick={() => setWhyIndex((whyIndex - 1 + whySlides.length) % whySlides.length)} aria-label="Razón anterior" data-testid="button-why-previous"><ChevronLeft size={19} /></button><article className="why-card" data-testid="content-why-slide"><span className="why-icon"><WhyIcon size={23} /></span><h3>{whySlides[whyIndex][0]}</h3><p>{whySlides[whyIndex][1]}</p></article><button className="icon-button" onClick={() => setWhyIndex((whyIndex + 1) % whySlides.length)} aria-label="Razón siguiente" data-testid="button-why-next"><ChevronRight size={19} /></button></div></div>
+          <div className="container why-layout"><div className="why-intro"><span className="eyebrow">¿Por qué elegirnos?</span><h2 className="section-title">¿Por qué elegir Distribuidora Var San?</h2><p className="section-lede">{t.whyChoose.lede}</p><div className="why-dots">{whySlides.map((slide, index) => <button className={`dot${index === whyIndex ? ' active' : ''}`} key={slide[0]} onClick={() => setWhyIndex(index)} aria-label={`Ver razón ${index + 1}`} data-testid={`button-why-dot-${index}`} />)}</div></div><div className="why-slider"><button className="icon-button" onClick={() => setWhyIndex((whyIndex - 1 + whySlides.length) % whySlides.length)} aria-label="Razón anterior" data-testid="button-why-previous"><ChevronLeft size={19} /></button><article className="why-card" data-testid="content-why-slide"><span className="why-icon"><WhyIcon size={23} /></span><h3>{whySlides[whyIndex][0]}</h3><p>{whySlides[whyIndex][1]}</p></article><button className="icon-button" onClick={() => setWhyIndex((whyIndex + 1) % whySlides.length)} aria-label="Razón siguiente" data-testid="button-why-next"><ChevronRight size={19} /></button></div></div>
         </section>
 
-        <section id="impulsamos" className="section section--paper"><div className="container"><div className="section-heading"><span className="eyebrow">Sectores que impulsamos</span><h2 className="section-title">Soluciones especializadas para empresas <em>de distintos sectores.</em></h2></div><div className="sectors-grid">{sectors.map(([name, Icon]) => <article className="sector-item" key={name} data-testid={`card-sector-${name}`}><Icon size={23} /><h3>{name}</h3></article>)}</div></div></section>
+        <section id="impulsamos" className="section section--paper"><div className="container"><div className="section-heading"><span className="eyebrow">Sectores que impulsamos</span><h2 className="section-title">Soluciones especializadas para empresas <em>{t.sectors.titleEmphasis}</em></h2></div><div className="sectors-grid">{sectors.map(([name, Icon]) => <article className="sector-item" key={name} data-testid={`card-sector-${name}`}><Icon size={23} /><h3>{name}</h3></article>)}</div></div></section>
 
-        <section id="marcas" className="section brands-section"><div className="container"><div className="section-heading section-heading--center"><span className="eyebrow">Marcas</span><h2 className="section-title">Marcas que trabajamos</h2><p className="section-lede">Distribuimos productos originales de fabricantes reconocidos por su calidad y seguridad.</p></div><div className="brands-grid">{brands.map((brand) => <div className="brand-card" key={brand} data-testid={`card-brand-${brand}`}><div><strong>{brand}</strong><small>Marca distribuida</small></div></div>)}</div></div></section>
+        <section id="marcas" className="section brands-section"><div className="container"><div className="section-heading section-heading--center"><span className="eyebrow">Marcas</span><h2 className="section-title">Marcas que trabajamos</h2><p className="section-lede">Distribuimos productos originales de fabricantes reconocidos por su calidad y seguridad.</p></div><div className="brands-grid">{brands.map((brand) => <div className="brand-card" key={brand} data-testid={`card-brand-${brand}`}><div><strong>{brand}</strong><small>{t.brands.distributed}</small></div></div>)}</div></div></section>
 
         <section id="proceso" className="section section--paper">
   <div className="container">
     <div className="section-heading section-heading--center">
-      <span className="eyebrow">Proceso de Atención</span>
+      <span className="eyebrow">{t.process.eyebrow}</span>
       <h2 className="section-title">
         Así de <em>sencillo</em> es trabajar con nosotros
       </h2>
@@ -680,14 +680,14 @@ t.account.errorGeneric
 <section id="contacto" className="section contact-section">
   <div className="container contact-grid">
     <div>
-      <span className="eyebrow">Contáctenos</span>
+      <span className="eyebrow">{t.contact.eyebrow}</span>
 
       <h2 className="section-title">
-        Solicita información o una <em>cotización</em>
+        {t.contact.title}<em>{t.contact.titleEmphasis}</em>
       </h2>
 
       <p className="section-lede">
-        Déjanos tus datos y nos pondremos en contacto contigo para atender tu solicitud.
+        {t.contact.lede}
       </p>
 
       <div className="contact-details">
@@ -773,15 +773,15 @@ t.account.errorGeneric
 
         <section id="newsletter" className="section newsletter-section">
           <div className="container newsletter-inner">
-            <h2 className="section-title">¡Suscríbete!</h2>
-            <p className="section-lede">Regístrate en nuestro newsletter y sé el primero en enterarte de nuestros lanzamientos y promociones</p>
+            <h2 className="section-title">{t.newsletter.title}</h2>
+            <p className="section-lede">{t.newsletter.lede}</p>
             <form className="newsletter-form" onSubmit={submitNewsletter} noValidate>
               <input
                 type="email"
                 name="email"
                 value={newsletterEmail}
                 onChange={(event) => { setNewsletterEmail(event.target.value); if (newsletterStatus !== 'idle') { setNewsletterStatus('idle'); setNewsletterMessage(''); } }}
-                placeholder="Correo Electrónico"
+                placeholder={t.newsletter.placeholder}
                 required
                 aria-label="Correo electrónico para suscripción al newsletter"
                 disabled={newsletterStatus === 'loading'}
