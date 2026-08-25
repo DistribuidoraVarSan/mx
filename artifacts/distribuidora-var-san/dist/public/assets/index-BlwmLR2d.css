@@ -1,150 +1,173 @@
-@import "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap";/* ==========================================================================
-   LANGUAGE SELECTOR — Liquid Glass (usa los mismos tokens que el navbar)
-   El trigger vive dentro de .nav-container, que es oscuro (navy translúcido),
-   así que usa el mismo tratamiento "vidrio claro sobre fondo oscuro" que
-   .account-button, en vez de texto navy sobre vidrio claro.
-   ========================================================================== */
+@import "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap";/* =========================================================
+   LANGUAGE SELECTOR — Responsive dropdown (position: fixed)
+   ========================================================= */
 
-.lang-selector {
+.language-selector-wrapper {
   position: relative;
-  display: inline-flex;
+  display: inline-block;
 }
 
-.lang-selector-trigger {
+.language-selector-button {
   align-items: center;
-  background: rgba(255, 255, 255, .10);
-  border: 1px solid rgba(255, 255, 255, .22);
-  border-radius: var(--radius-pill, 999px);
-  color: var(--white);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.75);
   cursor: pointer;
   display: inline-flex;
-  font-size: .68rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  gap: 8px;
-  letter-spacing: .01em;
-  padding: 10px 14px;
-  transition: background .2s ease, border-color .2s ease, transform .2s ease, color .2s ease;
+  gap: 6px;
+  justify-content: center;
+  letter-spacing: 0.03em;
+  padding: 8px 10px;
+  position: relative;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
   white-space: nowrap;
 }
 
-.lang-selector-trigger:hover {
-  background: var(--white);
-  border-color: var(--gold);
-  color: var(--navy);
+.language-selector-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--white);
   transform: translateY(-1px);
 }
 
-.lang-selector-trigger:focus-visible {
-  outline: 2px solid var(--gold);
+.language-selector-button:focus-visible {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--white);
+  outline: 2px solid rgba(201, 168, 76, 0.5);
   outline-offset: 2px;
 }
 
-.lang-selector-current {
-  max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.language-selector-label {
+  display: block;
+  font-size: inherit;
+  white-space: nowrap;
 }
 
-/* Panel flotante — vidrio azul marino, como los modales/portal */
-.lang-selector-panel {
-  background: var(--glass-navy-bg-strong, var(--glass-navy-bg));
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-navy-border);
-  border-radius: 18px;
-  box-shadow: var(--glass-shadow-navy);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  max-height: min(60vh, 420px);
-  overflow-y: auto;
-  padding: 8px;
-  position: absolute;
-  right: 0;
-  top: calc(100% + 10px);
-  width: max(200px, 100%);
-  z-index: 60;
-  animation: lang-panel-in .22s ease both;
+/* Dropdown menu — position: fixed soluciona el clipping de overflow:hidden en .nav-container */
+.language-selector-menu {
+  background: rgba(9, 20, 46, 0.95);
+  border: 1px solid rgba(160, 190, 235, 0.28);
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  box-sizing: border-box;
+  list-style: none;
+  margin: 0;
+  /* position: fixed escapa del clipping de overflow:hidden */
+  position: fixed;
+  z-index: 2000;
+  /* min-width suficiente para todos los 8 idiomas */
+  min-width: 200px;
+  max-width: calc(100vw - 20px);
+  /* Backdrop blur para glass effect */
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  /* Padding interno */
+  padding: 8px 0;
+  overflow: visible;
 }
 
-/* reflejo sutil superior, coherente con el resto del sistema Liquid Glass */
-.lang-selector-panel::before {
-  content: '';
-  position: absolute;
-  inset: 1px 1px auto 1px;
-  height: 40%;
-  border-radius: 17px 17px 40px 40px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, 0));
-  pointer-events: none;
+.language-selector-menu li {
+  display: block;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-@keyframes lang-panel-in {
-  from { opacity: 0; transform: translateY(-6px) scale(.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.lang-selector-option {
+.language-selector-option {
   align-items: center;
   background: transparent;
-  border: 1px solid transparent;
-  border-radius: 12px;
-  color: rgba(255, 255, 255, .88);
+  border: 0;
+  border-left: 3px solid transparent;
+  box-sizing: border-box;
+  color: rgba(255, 255, 255, 0.75);
   cursor: pointer;
-  display: flex;
-  font-size: .82rem;
-  justify-content: space-between;
-  padding: 10px 12px;
-  position: relative;
+  display: block;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  min-height: 40px;
+  padding: 0 16px;
   text-align: left;
-  transition: background .18s ease, border-color .18s ease, color .18s ease;
-  z-index: 1;
+  transition: all 0.15s ease;
+  width: 100%;
+  white-space: nowrap;
 }
 
-.lang-selector-option:hover {
-  background: rgba(255, 255, 255, .08);
-  border-color: var(--glass-navy-border);
+.language-selector-option:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-left-color: var(--gold);
   color: var(--white);
 }
 
-.lang-selector-option.active {
-  background: rgba(201, 168, 76, .16);
-  border-color: var(--gold);
+.language-selector-option:focus {
+  background: rgba(255, 255, 255, 0.08);
+  border-left-color: var(--gold-light);
+  color: var(--white);
+  outline: 0;
+}
+
+.language-selector-option.active {
+  background: rgba(201, 168, 76, 0.12);
+  border-left-color: var(--gold);
   color: var(--gold-light);
-  font-weight: 600;
+  font-weight: 700;
 }
 
-.lang-selector-option svg {
-  color: var(--gold);
-  flex-shrink: 0;
-}
+/* =========================================================
+   RESPONSIVE: Tablet and up (768px+)
+   ========================================================= */
+@media (min-width: 768px) {
+  .language-selector-menu {
+    min-width: 220px;
+  }
 
-/* ================= RESPONSIVE ================= */
-@media (max-width: 1060px) {
-  .lang-selector-trigger {
-    padding: 9px 10px;
+  .language-selector-option {
+    font-size: 0.72rem;
+    min-height: 42px;
+    padding: 0 18px;
   }
 }
 
-@media (max-width: 640px) {
-  .lang-selector-current {
-    max-width: 84px;
+/* =========================================================
+   RESPONSIVE: Desktop (1024px+)
+   ========================================================= */
+@media (min-width: 1024px) {
+  .language-selector-menu {
+    min-width: 240px;
   }
 
-  .lang-selector-panel {
-    left: 0;
-    right: 0;
-    width: auto;
-    max-height: 50vh;
+  .language-selector-option {
+    font-size: 0.73rem;
+    min-height: 44px;
+    padding: 0 20px;
   }
 }
 
-@media (max-width: 560px) {
-  .lang-selector-current {
-    display: none;
+/* =========================================================
+   Accessibility: High contrast mode
+   ========================================================= */
+@media (prefers-contrast: more) {
+  .language-selector-menu {
+    border-color: rgba(201, 168, 76, 0.6);
+    background: rgba(9, 20, 46, 0.98);
   }
 
-  .lang-selector-trigger {
-    padding: 9px 11px;
+  .language-selector-option.active {
+    background: rgba(201, 168, 76, 0.25);
+  }
+}
+
+/* =========================================================
+   Accessibility: Reduced motion
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .language-selector-button,
+  .language-selector-option {
+    transition: none;
   }
 }
 
@@ -911,8 +934,6 @@
   }
 
   .nav-container {
-    -webkit-backdrop-filter: var(--glass-blur);
-    backdrop-filter: var(--glass-blur);
     border-radius: var(--radius-xl);
     box-shadow: var(--glass-shadow);
     background: #09142edb;
@@ -924,7 +945,6 @@
     transition: box-shadow .3s, background .3s;
     display: flex;
     position: relative;
-    overflow: hidden;
   }
 
   .nav-container:before {
@@ -932,6 +952,8 @@
     pointer-events: none;
     border-radius: inherit;
     mix-blend-mode: overlay;
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
     background: linear-gradient(120deg, #ffffff8c 0%, #0000 26% 74%, #ffffff4d 100%);
     position: absolute;
     inset: 0;
@@ -2325,6 +2347,33 @@
   .contact-form button[type="submit"]:hover {
     transform: translateY(-1px);
     box-shadow: 0 10px 24px #c9a84c59;
+  }
+
+  .contact-form button[type="submit"]:disabled {
+    cursor: not-allowed;
+    opacity: .7;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .contact-form input:disabled, .contact-form textarea:disabled {
+    opacity: .6;
+  }
+
+  .contact-message {
+    align-items: center;
+    gap: 7px;
+    margin: 14px 0 0;
+    font-size: .78rem;
+    display: inline-flex;
+  }
+
+  .contact-message--success {
+    color: var(--gold-light);
+  }
+
+  .contact-message--error {
+    color: #f2a3a3;
   }
 
   .modal .form-field input, .modal .form-field textarea, .account-form .form-field input, .account-form .form-field textarea {

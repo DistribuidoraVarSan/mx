@@ -237,21 +237,27 @@ a { color: inherit; }
 .nav-container {
   align-items: center; display: flex; gap: 22px; justify-content: space-between;
   background: rgba(9, 20, 46, .86);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
   border: 1px solid rgba(160, 190, 235, .28);
   border-radius: var(--radius-xl);
   box-shadow: var(--glass-shadow);
   padding: 11px 14px 11px 16px;
   position: relative;
-  overflow: hidden;
   transition: box-shadow .3s ease, background .3s ease;
 }
+/* El desenfoque de cristal vive en ::before (no en .nav-container) a propósito:
+   backdrop-filter en el propio .nav-container crea un nuevo "containing block"
+   para cualquier descendiente con position:fixed (como el menú del selector de
+   idiomas), y ese descendiente queda atrapado dentro de esta caja aunque use
+   position:fixed. Al aplicar el blur solo en el pseudo-elemento, .nav-container
+   deja de crear ese containing block y el dropdown puede posicionarse respecto
+   al viewport real, sin quedar recortado por overflow ni por el tamaño del navbar. */
 .nav-container::before {
   content: '';
   position: absolute; inset: 0; pointer-events: none; border-radius: inherit; overflow: hidden;
   background: linear-gradient(120deg, rgba(255,255,255,.55) 0%, transparent 26%, transparent 74%, rgba(255,255,255,.3) 100%);
   mix-blend-mode: overlay;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
 }
 .navbar.scrolled .nav-container { box-shadow: 0 16px 46px rgba(10,31,68,.16); background: rgba(7, 16, 38, .90); }
 .nav-logo { align-items: center; display: inline-flex; gap: 11px; text-decoration: none; padding: 4px 6px 4px 4px; }
@@ -621,6 +627,11 @@ a { color: inherit; }
   transition: transform .2s ease, box-shadow .2s ease;
 }
 .contact-form button[type="submit"]:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(201,168,76,.35); }
+.contact-form button[type="submit"]:disabled { cursor: not-allowed; opacity: .7; transform: none; box-shadow: none; }
+.contact-form input:disabled, .contact-form textarea:disabled { opacity: .6; }
+.contact-message { align-items: center; display: inline-flex; gap: 7px; font-size: .78rem; margin: 14px 0 0; }
+.contact-message--success { color: var(--gold-light); }
+.contact-message--error { color: #f2a3a3; }
 
 /* modal / account panels sit on light glass, so their inputs stay light-styled */
 .modal .form-field input, .modal .form-field textarea, .account-form .form-field input, .account-form .form-field textarea {

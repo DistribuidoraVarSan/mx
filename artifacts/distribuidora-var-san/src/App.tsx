@@ -233,6 +233,8 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [newsletterMessage, setNewsletterMessage] = useState('');
+  const [contactStatus, setContactStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [contactMessage, setContactMessage] = useState('');
 
   useEffect(() => {
     const exitTimer = window.setTimeout(() => setSplashExiting(true), 1150);
@@ -335,11 +337,36 @@ window.scrollTo({ top: 0, behavior: 'smooth' });
     setCookies(true);
   };
 
-  const submitContact = (event: FormEvent<HTMLFormElement>) => {
+  const submitContact = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const message = `Hola, Distribuidora Var San. Me gustaría solicitar información.\n\nNombre: ${data.get('name')}\nCorreo: ${data.get('email')}\nTeléfono: ${data.get('phone')}\n\nComentarios:\n${data.get('comments')}`;
-    window.open(`https://wa.me/528332189032?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
+    if (contactStatus === 'loading') return;
+
+    const form = event.currentTarget;
+    const data = new FormData(form);
+
+    setContactStatus('loading');
+    setContactMessage('');
+
+    try {
+      const response = await fetch('https://formspree.io/f/myegwrd', {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: data,
+      });
+
+      if (response.ok) {
+        setContactStatus('success');
+        setContactMessage('Solicitud enviada correctamente. Gracias por contactar con Distribuidora Var San.');
+        form.reset();
+      } else {
+        setContactStatus('error');
+        setContactMessage('No pudimos enviar tu solicitud. Por favor, inténtalo nuevamente.');
+      }
+    } catch (error) {
+      console.error('Error al enviar el formulario de contacto:', error);
+      setContactStatus('error');
+      setContactMessage('No pudimos enviar tu solicitud. Por favor, inténtalo nuevamente.');
+    }
   };
 
   const submitNewsletter = async (event: FormEvent<HTMLFormElement>) => {
@@ -726,7 +753,6 @@ t.account.errorGeneric
       <form
         className="contact-form"
         onSubmit={submitContact}
-        noValidate
       >
         <label>
           Nombre
@@ -734,6 +760,7 @@ t.account.errorGeneric
             type="text"
             name="name"
             required
+            disabled={contactStatus === 'loading'}
           />
         </label>
 
@@ -743,6 +770,7 @@ t.account.errorGeneric
             type="email"
             name="email"
             required
+            disabled={contactStatus === 'loading'}
           />
         </label>
 
@@ -751,6 +779,7 @@ t.account.errorGeneric
           <input
             type="text"
             name="company"
+            disabled={contactStatus === 'loading'}
           />
         </label>
 
@@ -759,14 +788,30 @@ t.account.errorGeneric
           <textarea
             name="message"
             required
+            disabled={contactStatus === 'loading'}
           />
         </label>
 
-        <button type="submit">
-          Enviar solicitud
-          <ArrowRight size={17} />
+        <button type="submit" disabled={contactStatus === 'loading'} data-testid="button-submit-contact">
+          {contactStatus === 'loading' ? 'Enviando...' : 'Enviar solicitud'}
+          {contactStatus === 'loading' ? (
+            <Loader2 size={17} className="newsletter-spinner" />
+          ) : (
+            <ArrowRight size={17} />
+          )}
         </button>
       </form>
+
+      {contactMessage && (
+        <p
+          className={`contact-message contact-message--${contactStatus}`}
+          role="status"
+          data-testid="status-contact"
+        >
+          {contactStatus === 'success' && <CircleCheck size={15} />}
+          {contactMessage}
+        </p>
+      )}
     </div>
   </div>
 </section>
