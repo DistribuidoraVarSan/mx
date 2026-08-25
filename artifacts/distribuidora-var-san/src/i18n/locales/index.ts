@@ -1,5 +1,5 @@
-import type { LanguageCode } from '../languages';
 import type { Dictionary } from '../types';
+import type { LanguageCode } from '../languages';
 
 import es from './es';
 import enGB from './en-GB';
@@ -10,11 +10,7 @@ import zhTW from './zh-TW';
 import zhCN from './zh-CN';
 import ko from './ko';
 
-// Para agregar un 9º idioma:
-// 1) agrégalo a LANGUAGES en /i18n/languages.ts
-// 2) crea /i18n/locales/<codigo>.ts implementando Dictionary
-// 3) impórtalo y regístralo aquí abajo
-export const DICTIONARIES: Record<LanguageCode, Dictionary> = {
+export const dictionaries: Record<LanguageCode, Dictionary> = {
   es,
   'en-GB': enGB,
   fr,
@@ -24,3 +20,5 @@ export const DICTIONARIES: Record<LanguageCode, Dictionary> = {
   'zh-CN': zhCN,
   ko,
 };
+
+export default dictionaries;
