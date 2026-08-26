@@ -1,4 +1,5 @@
-import { useEffect, useState, type FormEvent, type KeyboardEvent, type MouseEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type MouseEvent } from 'react';
+import { initForm } from '@formspree/ajax';
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
@@ -78,6 +79,30 @@ type ChatMessage = {
 };
 
 const queryClient = new QueryClient();
+
+// Extrae errores por campo de la respuesta de Formspree (@formspree/core
+// SubmissionError expone getAllFieldErrors()). Se hace de forma defensiva:
+// si la forma del error cambia entre versiones, simplemente no se listan
+// errores por campo y se conserva el mensaje genérico de contactMessage.
+function extractContactFieldErrors(error: unknown): Record<string, string> {
+  const result: Record<string, string> = {};
+  const maybeSubmissionError = error as
+    | { getAllFieldErrors?: () => Array<[string, Array<{ message: string }>]> }
+    | null
+    | undefined;
+
+  if (maybeSubmissionError && typeof maybeSubmissionError.getAllFieldErrors === 'function') {
+    try {
+      for (const [field, fieldErrors] of maybeSubmissionError.getAllFieldErrors()) {
+        result[field] = fieldErrors.map((fieldError) => fieldError.message).join(', ');
+      }
+    } catch {
+      /* si la forma del error no es la esperada, no se muestran errores por campo */
+    }
+  }
+
+  return result;
+}
 
 const familySlides = [
   ['CONFIANZA', 'Hoy atendemos desde pequeños negocios hasta empresas que buscan un proveedor confiable para crecer.'],
@@ -235,6 +260,8 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [newsletterMessage, setNewsletterMessage] = useState('');
   const [contactStatus, setContactStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [contactMessage, setContactMessage] = useState('');
+  const [contactFieldErrors, setContactFieldErrors] = useState<Record<string, string>>({});
+  const contactFormRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     const exitTimer = window.setTimeout(() => setSplashExiting(true), 1150);
@@ -337,37 +364,66 @@ window.scrollTo({ top: 0, behavior: 'smooth' });
     setCookies(true);
   };
 
-  const submitContact = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (contactStatus === 'loading') return;
+  // Integración oficial de Formspree (@formspree/ajax). Se inicializa una sola
+  // vez sobre el nodo real del <form> (vía ref, no selector), lo que evita
+  // condiciones de carrera: el formulario ya existe en el DOM cuando el efecto
+  // corre. El handle se destruye en el cleanup, así que si React StrictMode
+  // ejecuta el efecto dos veces en desarrollo, nunca queda más de un listener
+  // activo ni se duplica la inicialización.
+  // Los "render" (enable/disable/renderFieldErrors/renderSuccess/renderFormError)
+  // se sobreescriben como no-ops porque la UI (campos deshabilitados, spinner,
+  // mensaje de éxito/error, errores por campo) ya la controla React mediante
+  // contactStatus/contactMessage/contactFieldErrors — así evitamos que la
+  // librería manipule el DOM del formulario por su cuenta y choque con React.
+  useEffect(() => {
+    const formEl = contactFormRef.current;
+    if (!formEl) return undefined;
 
-    const form = event.currentTarget;
-    const data = new FormData(form);
+    let active = true;
 
-    setContactStatus('loading');
-    setContactMessage('');
-
-    try {
-      const response = await fetch('https://formspree.io/f/myegwrd', {
-        method: 'POST',
-        headers: { Accept: 'application/json' },
-        body: data,
-      });
-
-      if (response.ok) {
+    const handle = initForm({
+      formElement: formEl,
+      formId: 'myegwrd',
+      onSubmit: () => {
+        if (!active) return;
+        setContactStatus('loading');
+        setContactMessage('');
+        setContactFieldErrors({});
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onSuccess: (context: any) => {
+        if (!active) return;
         setContactStatus('success');
-        setContactMessage('Solicitud enviada correctamente. Gracias por contactar con Distribuidora Var San.');
-        form.reset();
-      } else {
+        setContactMessage('¡Solicitud enviada correctamente! Nos pondremos en contacto contigo a la brevedad.');
+        setContactFieldErrors({});
+        context?.form?.reset?.();
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onError: (_context: any, error: unknown) => {
+        if (!active) return;
         setContactStatus('error');
         setContactMessage('No pudimos enviar tu solicitud. Por favor, inténtalo nuevamente.');
-      }
-    } catch (error) {
-      console.error('Error al enviar el formulario de contacto:', error);
-      setContactStatus('error');
-      setContactMessage('No pudimos enviar tu solicitud. Por favor, inténtalo nuevamente.');
-    }
-  };
+        setContactFieldErrors(extractContactFieldErrors(error));
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onFailure: (_context: any, error: unknown) => {
+        if (!active) return;
+        setContactStatus('error');
+        setContactMessage('No pudimos enviar tu solicitud. Por favor, inténtalo nuevamente.');
+        setContactFieldErrors(extractContactFieldErrors(error));
+      },
+      enable: () => {},
+      disable: () => {},
+      renderFieldErrors: () => {},
+      renderSuccess: () => {},
+      renderFormError: () => {},
+    });
+
+    return () => {
+      active = false;
+      handle.destroy();
+    };
+  }, []);
 
   const submitNewsletter = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -752,7 +808,7 @@ t.account.errorGeneric
     <div className="contact-form-wrap">
       <form
         className="contact-form"
-        onSubmit={submitContact}
+        ref={contactFormRef}
       >
         <label>
           Nombre
@@ -761,7 +817,9 @@ t.account.errorGeneric
             name="name"
             required
             disabled={contactStatus === 'loading'}
+            data-fs-field
           />
+          {contactFieldErrors.name && <span className="field-error">{contactFieldErrors.name}</span>}
         </label>
 
         <label>
@@ -771,7 +829,9 @@ t.account.errorGeneric
             name="email"
             required
             disabled={contactStatus === 'loading'}
+            data-fs-field
           />
+          {contactFieldErrors.email && <span className="field-error">{contactFieldErrors.email}</span>}
         </label>
 
         <label>
@@ -780,7 +840,9 @@ t.account.errorGeneric
             type="text"
             name="company"
             disabled={contactStatus === 'loading'}
+            data-fs-field
           />
+          {contactFieldErrors.company && <span className="field-error">{contactFieldErrors.company}</span>}
         </label>
 
         <label>
@@ -789,7 +851,9 @@ t.account.errorGeneric
             name="message"
             required
             disabled={contactStatus === 'loading'}
+            data-fs-field
           />
+          {contactFieldErrors.message && <span className="field-error">{contactFieldErrors.message}</span>}
         </label>
 
         <button type="submit" disabled={contactStatus === 'loading'} data-testid="button-submit-contact">

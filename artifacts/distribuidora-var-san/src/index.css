@@ -239,7 +239,7 @@ a { color: inherit; }
   background: rgba(9, 20, 46, .86);
   border: 1px solid rgba(160, 190, 235, .28);
   border-radius: var(--radius-xl);
-  box-shadow: var(--glass-shadow);
+  box-shadow: var(--glass-shadow-navy);
   padding: 11px 14px 11px 16px;
   position: relative;
   transition: box-shadow .3s ease, background .3s ease;
@@ -250,12 +250,14 @@ a { color: inherit; }
    idiomas), y ese descendiente queda atrapado dentro de esta caja aunque use
    position:fixed. Al aplicar el blur solo en el pseudo-elemento, .nav-container
    deja de crear ese containing block y el dropdown puede posicionarse respecto
-   al viewport real, sin quedar recortado por overflow ni por el tamaño del navbar. */
+   al viewport real, sin quedar recortado por overflow ni por el tamaño del navbar.
+   El brillo del degradado se mantiene deliberadamente sutil (alphas bajos +
+   soft-light en vez de overlay) para no producir un halo blanco sobre el logo. */
 .nav-container::before {
   content: '';
   position: absolute; inset: 0; pointer-events: none; border-radius: inherit; overflow: hidden;
-  background: linear-gradient(120deg, rgba(255,255,255,.55) 0%, transparent 26%, transparent 74%, rgba(255,255,255,.3) 100%);
-  mix-blend-mode: overlay;
+  background: linear-gradient(120deg, rgba(255,255,255,.16) 0%, transparent 26%, transparent 74%, rgba(255,255,255,.08) 100%);
+  mix-blend-mode: soft-light;
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
 }
@@ -632,6 +634,10 @@ a { color: inherit; }
 .contact-message { align-items: center; display: inline-flex; gap: 7px; font-size: .78rem; margin: 14px 0 0; }
 .contact-message--success { color: var(--gold-light); }
 .contact-message--error { color: #f2a3a3; }
+.contact-form .field-error {
+  color: #f2a3a3; display: block; font-family: var(--font-sans); font-size: .68rem;
+  font-weight: 500; letter-spacing: normal; text-transform: none;
+}
 
 /* modal / account panels sit on light glass, so their inputs stay light-styled */
 .modal .form-field input, .modal .form-field textarea, .account-form .form-field input, .account-form .form-field textarea {

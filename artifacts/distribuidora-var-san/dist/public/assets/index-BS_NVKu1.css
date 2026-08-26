@@ -935,7 +935,7 @@
 
   .nav-container {
     border-radius: var(--radius-xl);
-    box-shadow: var(--glass-shadow);
+    box-shadow: var(--glass-shadow-navy);
     background: #09142edb;
     border: 1px solid #a0beeb47;
     justify-content: space-between;
@@ -951,10 +951,10 @@
     content: "";
     pointer-events: none;
     border-radius: inherit;
-    mix-blend-mode: overlay;
+    mix-blend-mode: soft-light;
     -webkit-backdrop-filter: var(--glass-blur);
     backdrop-filter: var(--glass-blur);
-    background: linear-gradient(120deg, #ffffff8c 0%, #0000 26% 74%, #ffffff4d 100%);
+    background: linear-gradient(120deg, #ffffff29 0%, #0000 26% 74%, #ffffff14 100%);
     position: absolute;
     inset: 0;
     overflow: hidden;
@@ -2374,6 +2374,16 @@
 
   .contact-message--error {
     color: #f2a3a3;
+  }
+
+  .contact-form .field-error {
+    color: #f2a3a3;
+    font-family: var(--font-sans);
+    letter-spacing: normal;
+    text-transform: none;
+    font-size: .68rem;
+    font-weight: 500;
+    display: block;
   }
 
   .modal .form-field input, .modal .form-field textarea, .account-form .form-field input, .account-form .form-field textarea {
