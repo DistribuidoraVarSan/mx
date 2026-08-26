@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type MouseEvent } from 'react';
+import { useEffect, useState, type FormEvent, type KeyboardEvent, type MouseEvent } from 'react';
 import { initForm } from '@formspree/ajax';
 import {
   createUserWithEmailAndPassword,
@@ -102,6 +102,40 @@ function extractContactFieldErrors(error: unknown): Record<string, string> {
   }
 
   return result;
+}
+
+// Extrae el mensaje de error REAL devuelto por Formspree (no uno genérico
+// inventado), para poder mostrarlo tal cual en pantalla mientras se depura
+// el 404 reportado. Intenta, en orden: getFormErrors() de @formspree/core
+// (errores a nivel de formulario), luego error.message (fetch/network),
+// y solo si no hay nada aprovechable cae en un texto genérico como último
+// recurso.
+function extractContactFormError(error: unknown): string {
+  const maybeSubmissionError = error as
+    | { getFormErrors?: () => Array<{ message: string }> }
+    | null
+    | undefined;
+
+  if (maybeSubmissionError && typeof maybeSubmissionError.getFormErrors === 'function') {
+    try {
+      const formErrors = maybeSubmissionError.getFormErrors();
+      if (formErrors && formErrors.length > 0) {
+        return formErrors.map((formError) => formError.message).join(' ');
+      }
+    } catch {
+      /* si la forma del error no es la esperada, se intenta con error.message */
+    }
+  }
+
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  if (typeof error === 'string' && error.trim()) {
+    return error;
+  }
+
+  return 'No pudimos enviar tu solicitud. Por favor, inténtalo nuevamente.';
 }
 
 const familySlides = [
@@ -261,7 +295,6 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [contactStatus, setContactStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [contactMessage, setContactMessage] = useState('');
   const [contactFieldErrors, setContactFieldErrors] = useState<Record<string, string>>({});
-  const contactFormRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     const exitTimer = window.setTimeout(() => setSplashExiting(true), 1150);
@@ -364,25 +397,35 @@ window.scrollTo({ top: 0, behavior: 'smooth' });
     setCookies(true);
   };
 
-  // Integración oficial de Formspree (@formspree/ajax). Se inicializa una sola
-  // vez sobre el nodo real del <form> (vía ref, no selector), lo que evita
-  // condiciones de carrera: el formulario ya existe en el DOM cuando el efecto
-  // corre. El handle se destruye en el cleanup, así que si React StrictMode
-  // ejecuta el efecto dos veces en desarrollo, nunca queda más de un listener
-  // activo ni se duplica la inicialización.
-  // Los "render" (enable/disable/renderFieldErrors/renderSuccess/renderFormError)
-  // se sobreescriben como no-ops porque la UI (campos deshabilitados, spinner,
-  // mensaje de éxito/error, errores por campo) ya la controla React mediante
-  // contactStatus/contactMessage/contactFieldErrors — así evitamos que la
-  // librería manipule el DOM del formulario por su cuenta y choque con React.
+  // Integración oficial de Formspree (@formspree/ajax), tal como la documenta
+  // Formspree para proyectos con bundler: formElement por selector de ID
+  // ('#contact-form', que coincide con el id="contact-form" del <form> más
+  // abajo) y formId: 'myegwrd'. Se inicializa UNA sola vez (dependencias []).
+  // El handle se destruye en el cleanup, así que si React StrictMode ejecuta
+  // el efecto dos veces en desarrollo, nunca queda más de un listener activo
+  // ni se duplica la inicialización. No existe ningún otro onSubmit ni fetch
+  // manual en el formulario: esta es la ÚNICA integración de envío.
+  //
+  // Se agregan en el JSX los contenedores oficiales data-fs-success/
+  // data-fs-error y data-fs-submit-btn que pide la documentación, pero se
+  // mantienen ocultos (atributo `hidden`) y las funciones enable/disable/
+  // renderFieldErrors/renderSuccess/renderFormError se sobreescriben para
+  // seguir centralizando la UI en el estado de React (contactStatus/
+  // contactMessage/contactFieldErrors). Motivo: App.tsx es un único
+  // componente con mucho estado (chat, cookies, menú móvil, etc.), así que
+  // cualquier cambio de estado en cualquier parte del componente vuelve a
+  // renderizar este JSX; si dejáramos que la librería escriba texto
+  // directamente dentro de los <span data-fs-error="..."> que React también
+  // renderiza (vacíos en el JSX), React los volvería a vaciar en el
+  // siguiente render ajeno al formulario, borrando el mensaje. Por eso el
+  // mensaje real de Formspree se extrae en el propio callback (ver
+  // extractContactFormError) y se muestra vía contactMessage, que si es
+  // React quien lo controla de punta a punta.
   useEffect(() => {
-    const formEl = contactFormRef.current;
-    if (!formEl) return undefined;
-
     let active = true;
 
     const handle = initForm({
-      formElement: formEl,
+      formElement: '#contact-form',
       formId: 'myegwrd',
       onSubmit: () => {
         if (!active) return;
@@ -401,15 +444,17 @@ window.scrollTo({ top: 0, behavior: 'smooth' });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (_context: any, error: unknown) => {
         if (!active) return;
+        console.error('Formspree onError:', error);
         setContactStatus('error');
-        setContactMessage('No pudimos enviar tu solicitud. Por favor, inténtalo nuevamente.');
+        setContactMessage(extractContactFormError(error));
         setContactFieldErrors(extractContactFieldErrors(error));
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onFailure: (_context: any, error: unknown) => {
         if (!active) return;
+        console.error('Formspree onFailure:', error);
         setContactStatus('error');
-        setContactMessage('No pudimos enviar tu solicitud. Por favor, inténtalo nuevamente.');
+        setContactMessage(extractContactFormError(error));
         setContactFieldErrors(extractContactFieldErrors(error));
       },
       enable: () => {},
@@ -806,9 +851,15 @@ t.account.errorGeneric
     </div>
 
     <div className="contact-form-wrap">
+      {/* Contenedores oficiales exigidos por la doc de @formspree/ajax. Se
+          dejan ocultos (`hidden`) porque el mensaje visible real lo controla
+          React vía contactMessage/contactFieldErrors (ver comentario en el
+          useEffect de initForm más arriba). */}
+      <div data-fs-success hidden />
+      <div data-fs-error hidden />
       <form
+        id="contact-form"
         className="contact-form"
-        ref={contactFormRef}
       >
         <label>
           Nombre
@@ -819,7 +870,9 @@ t.account.errorGeneric
             disabled={contactStatus === 'loading'}
             data-fs-field
           />
-          {contactFieldErrors.name && <span className="field-error">{contactFieldErrors.name}</span>}
+          {contactFieldErrors.name && (
+            <span className="field-error" data-fs-error="name">{contactFieldErrors.name}</span>
+          )}
         </label>
 
         <label>
@@ -831,7 +884,9 @@ t.account.errorGeneric
             disabled={contactStatus === 'loading'}
             data-fs-field
           />
-          {contactFieldErrors.email && <span className="field-error">{contactFieldErrors.email}</span>}
+          {contactFieldErrors.email && (
+            <span className="field-error" data-fs-error="email">{contactFieldErrors.email}</span>
+          )}
         </label>
 
         <label>
@@ -842,7 +897,9 @@ t.account.errorGeneric
             disabled={contactStatus === 'loading'}
             data-fs-field
           />
-          {contactFieldErrors.company && <span className="field-error">{contactFieldErrors.company}</span>}
+          {contactFieldErrors.company && (
+            <span className="field-error" data-fs-error="company">{contactFieldErrors.company}</span>
+          )}
         </label>
 
         <label>
@@ -853,10 +910,12 @@ t.account.errorGeneric
             disabled={contactStatus === 'loading'}
             data-fs-field
           />
-          {contactFieldErrors.message && <span className="field-error">{contactFieldErrors.message}</span>}
+          {contactFieldErrors.message && (
+            <span className="field-error" data-fs-error="message">{contactFieldErrors.message}</span>
+          )}
         </label>
 
-        <button type="submit" disabled={contactStatus === 'loading'} data-testid="button-submit-contact">
+        <button type="submit" disabled={contactStatus === 'loading'} data-fs-submit-btn data-testid="button-submit-contact">
           {contactStatus === 'loading' ? 'Enviando...' : 'Enviar solicitud'}
           {contactStatus === 'loading' ? (
             <Loader2 size={17} className="newsletter-spinner" />
@@ -865,6 +924,7 @@ t.account.errorGeneric
           )}
         </button>
       </form>
+
 
       {contactMessage && (
         <p
