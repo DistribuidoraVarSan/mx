@@ -935,7 +935,6 @@
 
   .nav-container {
     border-radius: var(--radius-xl);
-    box-shadow: var(--glass-shadow-navy);
     background: #09142edb;
     border: 1px solid #a0beeb47;
     justify-content: space-between;
@@ -945,16 +944,15 @@
     transition: box-shadow .3s, background .3s;
     display: flex;
     position: relative;
+    box-shadow: 0 30px 90px #02081473;
   }
 
   .nav-container:before {
     content: "";
     pointer-events: none;
     border-radius: inherit;
-    mix-blend-mode: soft-light;
     -webkit-backdrop-filter: var(--glass-blur);
     backdrop-filter: var(--glass-blur);
-    background: linear-gradient(120deg, #ffffff29 0%, #0000 26% 74%, #ffffff14 100%);
     position: absolute;
     inset: 0;
     overflow: hidden;

@@ -609,7 +609,7 @@ t.account.errorGeneric
               <span className="eyebrow">{t.hero.eyebrow}</span>
               <h1 className="hero-title">{t.hero.titleLead}<span>{t.hero.titleHighlight}</span>{t.hero.titleTail}</h1>
               <p className="hero-text">{t.hero.textBefore}<strong>{t.hero.productsHighlight}</strong>{t.hero.textAfter}<br /><br />{t.hero.extra}</p>
-              <div className="hero-actions"><a href="#soluciones" className="button button--gold" onClick={navigateAndClose} data-testid="link-explore-solutions"><Boxes size={16} />{t.hero.exploreSolutions}</a><a href="#formulario" className="button button--outline" onClick={navigateAndClose} data-testid="link-request-quote"><MessageCircle size={16} />{t.hero.requestQuote}</a></div>
+              <div className="hero-actions"><a href="#soluciones" className="button button--gold" onClick={navigateAndClose} data-testid="link-explore-solutions"><Boxes size={16} />{t.hero.exploreSolutions}</a><a href="#contacto" className="button button--outline" onClick={navigateAndClose} data-testid="link-request-quote"><MessageCircle size={16} />{t.hero.requestQuote}</a></div>
             </div>
             <div className="hero-visual">
               <div className="hero-image-frame"><img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1400&auto=format&fit=crop" alt={t.hero.imageAlt} /><div className="hero-caption"><span>{t.hero.captionEyebrow}</span><p>{t.hero.captionText}</p></div></div>
@@ -820,6 +820,17 @@ t.account.errorGeneric
           ¡Solicitud enviada correctamente! Nos pondremos en contacto contigo a la brevedad.
         </p>
       )}
+
+      {/* Errores generales (no atados a un campo puntual) que devuelve
+          Formspree, por ejemplo "Form not found" en un 404: sin field, este
+          ValidationError reporta esos errores generales tal cual los envía
+          Formspree, en lugar de un mensaje genérico inventado. */}
+      <ValidationError
+        errors={contactState.errors}
+        className="contact-message contact-message--error"
+        role="status"
+        data-testid="status-contact-error"
+      />
     </div>
   </div>
 </section>
@@ -924,7 +935,7 @@ data-testid="footer-link-phone"
 
 <li>
 <a
-href="#formulario"
+href="#contacto"
 onClick={navigateAndClose}
 data-testid="footer-link-quote"
 >

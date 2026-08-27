@@ -239,7 +239,16 @@ a { color: inherit; }
   background: rgba(9, 20, 46, .86);
   border: 1px solid rgba(160, 190, 235, .28);
   border-radius: var(--radius-xl);
-  box-shadow: var(--glass-shadow-navy);
+  /* Antes: box-shadow: var(--glass-shadow-navy);
+     --glass-shadow-navy incluye "inset 0 1px 0 rgba(255,255,255,.08)", un
+     highlight interior blanco pensado para tarjetas de vidrio sueltas sobre
+     fondo claro. En el navbar (pill fija sobre contenido con blur detrás)
+     ese inset, combinado con el radio grande de las esquinas, se percibía
+     como un borde/halo blanco en las esquinas. Se define aquí el mismo drop
+     shadow SIN el inset, en vez de tocar --glass-shadow-navy (usado también
+     por .value-card--navy, .family-card y otras tarjetas que si necesitan
+     ese highlight). */
+  box-shadow: 0 30px 90px rgba(2, 8, 20, .45);
   padding: 11px 14px 11px 16px;
   position: relative;
   transition: box-shadow .3s ease, background .3s ease;
@@ -251,13 +260,18 @@ a { color: inherit; }
    position:fixed. Al aplicar el blur solo en el pseudo-elemento, .nav-container
    deja de crear ese containing block y el dropdown puede posicionarse respecto
    al viewport real, sin quedar recortado por overflow ni por el tamaño del navbar.
-   El brillo del degradado se mantiene deliberadamente sutil (alphas bajos +
-   soft-light en vez de overlay) para no producir un halo blanco sobre el logo. */
+   Antes este pseudo-elemento también pintaba un degradado blanco
+   (linear-gradient(120deg, rgba(255,255,255,.16) ... rgba(255,255,255,.08)))
+   con mix-blend-mode: soft-light encima del blur. Ese degradado es la causa
+   exacta del halo blanco: su primer stop (.16 de alpha) cae justo sobre la
+   esquina donde está el logo, y soft-light aclara aún más lo que hay detrás
+   (el fondo claro de las secciones al hacer scroll), generando el brillo
+   visible en las esquinas y sobre el logo. Se elimina ese background y el
+   blend mode; el pseudo-elemento ahora solo aporta el blur, sin teñir de
+   blanco lo que hay detrás. */
 .nav-container::before {
   content: '';
   position: absolute; inset: 0; pointer-events: none; border-radius: inherit; overflow: hidden;
-  background: linear-gradient(120deg, rgba(255,255,255,.16) 0%, transparent 26%, transparent 74%, rgba(255,255,255,.08) 100%);
-  mix-blend-mode: soft-light;
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
 }
