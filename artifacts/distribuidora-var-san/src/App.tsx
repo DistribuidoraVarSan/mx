@@ -570,7 +570,7 @@ t.account.errorGeneric
 
   return (
     <div className="site-shell">
-      {splashVisible && <div className={`splash${splashExiting ? ' is-exiting' : ''}`} role="status" aria-label={t.splash.ariaLabel}><div className="splash-inner"><div className="splash-title-wrap"><span className="splash-kicker">Distribuidora</span><h1 className="splash-title">Var San</h1><span className="splash-rule" /></div></div><p className="splash-tagline">{t.splash.tagline}</p></div>}
+      {splashVisible && <div className={`splash${splashExiting ? ' is-exiting' : ''}`} role="status" aria-label={t.splash.ariaLabel}><div className="splash-inner"><div className="splash-title-wrap"><span className="splash-kicker">Distribuidora</span><span className="splash-title">Var San</span><span className="splash-rule" /></div></div><p className="splash-tagline">{t.splash.tagline}</p></div>}
 
       <header className={`navbar${scrolled ? ' scrolled' : ''}`}>
         <div className="container nav-container">
@@ -925,12 +925,9 @@ distribuidora.varsan@outlook.com
 </li>
 
 <li>
-<a
-href="tel:+528332189032"
-data-testid="footer-link-phone"
->
-+52 (833) 218 9032
-</a>
+<span data-testid="footer-link-phone">
+Número (Próximamente)
+</span>
 </li>
 
 <li>
