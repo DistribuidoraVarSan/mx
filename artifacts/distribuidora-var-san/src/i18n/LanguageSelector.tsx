@@ -12,39 +12,41 @@ export default function LanguageSelector() {
 
   // Cerrar al hacer click fuera
   useEffect(() => {
+    if (!isOpen) return;
+
     function handleClickOutside(event: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
 
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
   // Cerrar con ESC
   useEffect(() => {
+    if (!isOpen) return;
+
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape' && isOpen) {
+      if (event.key === 'Escape') {
         setIsOpen(false);
       }
     }
 
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      return () => document.removeEventListener('keydown', handleKeyDown);
-    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
   // Calcular posición del dropdown para que no quede recortado
   useEffect(() => {
     if (isOpen && buttonRef.current && menuRef.current) {
       const buttonRect = buttonRef.current.getBoundingClientRect();
+      const menuWidth = Math.min(200, window.innerWidth - 32);
+      const left = Math.max(16, Math.min(buttonRect.right - menuWidth, window.innerWidth - menuWidth - 16));
       menuRef.current.style.top = `${buttonRect.bottom + 8}px`;
-      menuRef.current.style.left = `${buttonRect.right - 200}px`;
-      menuRef.current.style.minWidth = '200px';
+      menuRef.current.style.left = `${left}px`;
+      menuRef.current.style.width = `${menuWidth}px`;
     }
   }, [isOpen]);
 

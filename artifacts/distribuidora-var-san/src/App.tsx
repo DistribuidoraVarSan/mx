@@ -31,6 +31,7 @@ import {
   ClipboardList,
   Clock3,
   Factory,
+  Globe,
   Handshake,
   Headphones,
   Hospital,
@@ -40,17 +41,29 @@ import {
   Mail,
   Menu,
   MessageCircle,
+  Monitor,
   Package,
   Phone,
+  RefreshCw,
   Send,
   ShieldCheck,
   ShoppingBag,
+  Smartphone,
   Store,
+  Tablet,
+  Trash2,
   Truck,
   User,
   UserCheck,
   X,
 } from 'lucide-react';
+import {
+  registerDeviceSession,
+  fetchUserSessions,
+  revokeUserSession,
+  revokeAllOtherSessions,
+  type DeviceSession,
+} from './lib/session-client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -224,6 +237,10 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [accountMessage, setAccountMessage] = useState('');
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState({ name: '', email: '', company: '' });
+  const [sessions, setSessions] = useState<DeviceSession[]>([]);
+  const [loadingSessions, setLoadingSessions] = useState(false);
+  const [sessionActionLoading, setSessionActionLoading] = useState<string | null>(null);
+  const [sessionFeedback, setSessionFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{ role: 'bot', text: t.chatbot.greeting }]);
   const [chatInput, setChatInput] = useState('');
@@ -249,30 +266,28 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
     };
   }, []);
 
-useEffect(() => {
-const handlePopState = () => {
-setCurrentPath(window.location.pathname);
-};
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
 
-window.addEventListener('popstate', handlePopState);
+    window.addEventListener('popstate', handlePopState);
 
-return () => {
-window.removeEventListener('popstate', handlePopState);
-};
-}, []);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
 
-// Si el usuario aún no interactuó con el chat (sigue solo el saludo inicial),
-// mantenemos ese saludo traducido al idioma activo. Si ya hay una
-// conversación en curso, no la tocamos.
-useEffect(() => {
-  setChatMessages((messages) =>
-    messages.length === 1 && messages[0].role === 'bot'
-      ? [{ role: 'bot', text: t.chatbot.greeting }]
-      : messages,
-  );
-}, [t]);
-
-
+  // Si el usuario aún no interactuó con el chat (sigue solo el saludo inicial),
+  // mantenemos ese saludo traducido al idioma activo. Si ya hay una
+  // conversación en curso, no la tocamos.
+  useEffect(() => {
+    setChatMessages((messages) =>
+      messages.length === 1 && messages[0].role === 'bot'
+        ? [{ role: 'bot', text: t.chatbot.greeting }]
+        : messages,
+    );
+  }, [t]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -280,8 +295,14 @@ useEffect(() => {
 
       if (!user) {
         setProfile({ name: '', email: '', company: '' });
+        setSessions([]);
         return;
       }
+
+      // Registrar dispositivo / sesión en segundo plano al autenticarse
+      registerDeviceSession(user).catch((err) => {
+        console.warn('No se pudo registrar la sesión del dispositivo:', err);
+      });
 
       try {
         const profileSnapshot = await getDoc(doc(db, 'users', user.uid));
@@ -504,10 +525,103 @@ t.account.errorGeneric
   const handleSignOut = async () => {
     try {
       await signOut(auth);
+      setSessions([]);
+      setSessionFeedback(null);
       setPortalOpen(false);
       setProfileOpen(false);
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
+    }
+  };
+
+  const loadSessions = async (user = currentUser) => {
+    if (!user) return;
+    setLoadingSessions(true);
+    setSessionFeedback(null);
+    try {
+      const userSessions = await fetchUserSessions(user);
+      setSessions(userSessions);
+    } catch (err: any) {
+      console.error('Error al obtener sesiones:', err);
+      if (err?.message?.includes('SESSION_REVOKED')) {
+        await handleSignOut();
+      } else {
+        setSessionFeedback({ type: 'error', text: err.message || 'No se pudieron cargar las sesiones.' });
+      }
+    } finally {
+      setLoadingSessions(false);
+    }
+  };
+
+  useEffect(() => {
+    if ((portalOpen || profileOpen) && currentUser) {
+      loadSessions(currentUser);
+    }
+  }, [portalOpen, profileOpen, currentUser]);
+
+  const handleRevokeSession = async (sessionId: string) => {
+    if (!currentUser) return;
+    setSessionActionLoading(sessionId);
+    setSessionFeedback(null);
+    try {
+      const success = await revokeUserSession(currentUser, sessionId);
+      if (success) {
+        setSessions((prev) => prev.filter((s) => s.sessionId !== sessionId));
+        setSessionFeedback({ type: 'success', text: t.portal.sessionRevokedSuccess });
+      }
+    } catch (err: any) {
+      console.error('Error al revocar sesión:', err);
+      if (err?.message?.includes('SESSION_REVOKED')) {
+        await handleSignOut();
+      } else {
+        setSessionFeedback({ type: 'error', text: err.message || 'Error al revocar la sesión' });
+      }
+    } finally {
+      setSessionActionLoading(null);
+    }
+  };
+
+  const handleRevokeAllOthers = async () => {
+    if (!currentUser) return;
+    if (!window.confirm(t.portal.confirmRevokeAll)) return;
+    setSessionActionLoading('all-others');
+    setSessionFeedback(null);
+    try {
+      const res = await revokeAllOtherSessions(currentUser);
+      if (res.success) {
+        setSessions((prev) => prev.filter((s) => s.isCurrent));
+        setSessionFeedback({ type: 'success', text: t.portal.sessionsRevokedAllSuccess });
+      }
+    } catch (err: any) {
+      console.error('Error al revocar otras sesiones:', err);
+      if (err?.message?.includes('SESSION_REVOKED')) {
+        await handleSignOut();
+      } else {
+        setSessionFeedback({ type: 'error', text: err.message || 'Error al revocar sesiones' });
+      }
+    } finally {
+      setSessionActionLoading(null);
+    }
+  };
+
+  const renderDeviceIcon = (deviceType: string) => {
+    if (deviceType === 'mobile') return <Smartphone size={17} />;
+    if (deviceType === 'tablet') return <Tablet size={17} />;
+    return <Monitor size={17} />;
+  };
+
+  const formatSessionDate = (isoStr: string) => {
+    try {
+      const date = new Date(isoStr);
+      return date.toLocaleDateString(undefined, {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return isoStr;
     }
   };
 
@@ -1005,7 +1119,144 @@ onClick={navigateAndClose}
 
       {accountOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setAccountOpen(false); }}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="account-heading"><button className="modal-close" onClick={() => setAccountOpen(false)} aria-label={t.common.close} data-testid="button-close-account"><X size={18} /></button><div className="modal-brand"><BrandMark /><div><strong>DISTRIBUIDORA VAR SAN</strong><small>{t.account.portalTitle}</small></div></div><h2 id="account-heading">{accountTab === 'login' ? t.account.loginTitle : t.account.registerTitle}</h2><p className="modal-intro">{accountTab === 'login' ? t.account.loginIntro : t.account.registerIntro}</p><div className="account-tabs"><button className={`account-tab${accountTab === 'login' ? ' active' : ''}`} onClick={() => { setAccountTab('login'); setAccountMessage(''); }} data-testid="button-tab-login">{t.account.tabLogin}</button><button className={`account-tab${accountTab === 'register' ? ' active' : ''}`} onClick={() => { setAccountTab('register'); setAccountMessage(''); }} data-testid="button-tab-register">{t.account.tabRegister}</button></div><form className="account-form" onSubmit={submitAccount}>{accountTab === 'register' && <><div className="form-field"><label htmlFor="account-name">{t.account.fieldName}</label><input id="account-name" name="name" required placeholder={t.account.fieldNamePlaceholder} data-testid="input-account-name" /></div><div className="form-field"><label htmlFor="account-company">{t.account.fieldCompany}</label><input id="account-company" name="company" placeholder={t.account.fieldCompanyPlaceholder} data-testid="input-account-company" /></div></>}<div className="form-field"><label htmlFor="account-email">{t.account.fieldEmail}</label><input id="account-email" name="email" type="email" required placeholder={t.account.fieldEmailPlaceholder} data-testid="input-account-email" /></div><div className="form-field"><label htmlFor="account-password">{t.account.fieldPassword}</label><input id="account-password" name="password" type="password" required minLength={6} placeholder={accountTab === 'login' ? t.account.fieldPasswordPlaceholderLogin : t.account.fieldPasswordPlaceholderRegister} data-testid="input-account-password" /></div>{accountTab === 'register' && <div className="form-field"><label htmlFor="account-confirm">{t.account.fieldConfirmPassword}</label><input id="account-confirm" name="confirmPassword" type="password" required minLength={6} placeholder={t.account.fieldConfirmPasswordPlaceholder} data-testid="input-account-confirm" /></div>}{accountMessage && <div className="account-message account-message--warning" role="status" data-testid="status-account">{accountMessage}</div>}<button className="button button--navy" type="submit" data-testid="button-submit-account">{accountTab === 'login' ? t.account.submitLogin : t.account.submitRegister} <ArrowRight size={15} /></button></form><button className="button button--outline" type="button" onClick={signInWithGoogle} style={{ color: 'var(--navy)', borderColor: 'var(--line)', marginTop: 10 }}><User size={15} /> {t.account.continueWithGoogle}</button><div className="account-footer"><LockKeyhole size={13} /> {t.account.secureAccessNote}</div></section></div>}
 
-      {portalOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setPortalOpen(false); }}><section className="modal modal--wide" role="dialog" aria-modal="true" aria-labelledby="portal-heading"><button className="modal-close" onClick={() => setPortalOpen(false)} aria-label={t.portal.closePortal} data-testid="button-close-portal"><X size={18} /></button><div className="portal-header"><span className="eyebrow">{t.portal.eyebrow}</span><h2 id="portal-heading">{t.portal.welcome.replace('{name}', profile.name ? `, ${profile.name}` : '')}</h2><p className="modal-intro">{t.portal.intro}</p></div><div className="profile-summary"><div className="profile-row"><span>{t.portal.fieldNameLabel}</span><strong>{profile.name || t.portal.defaultClientName}</strong></div><div className="profile-row"><span>{t.portal.fieldEmailLabel}</span><strong>{profile.email || currentUser?.email || t.portal.notAvailable}</strong></div><div className="profile-row"><span>{t.portal.fieldCompanyLabel}</span><strong>{profile.company || t.portal.notSpecified}</strong></div></div><div className="portal-actions"><button className="button button--navy" onClick={() => { setPortalOpen(false); setProfileOpen(true); }} data-testid="button-open-profile"><UserCheck size={15} />{t.portal.myProfile}</button><button className="button button--outline" style={{ color: 'var(--navy)', borderColor: 'var(--line)' }} onClick={handleSignOut} data-testid="button-logout"><LockKeyhole size={15} />{t.portal.logOut}</button><button className="button button--outline" style={{ color: 'var(--navy)', borderColor: 'var(--line)' }} onClick={() => setPortalOpen(false)} data-testid="button-close-portal-action">{t.portal.closePortal}</button></div></section></div>}
+      {portalOpen && (
+        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setPortalOpen(false); }}>
+          <section className="modal modal--wide" role="dialog" aria-modal="true" aria-labelledby="portal-heading">
+            <button className="modal-close" onClick={() => setPortalOpen(false)} aria-label={t.portal.closePortal} data-testid="button-close-portal">
+              <X size={18} />
+            </button>
+            <div className="portal-header">
+              <span className="eyebrow">{t.portal.eyebrow}</span>
+              <h2 id="portal-heading">{t.portal.welcome.replace('{name}', profile.name ? `, ${profile.name}` : '')}</h2>
+              <p className="modal-intro">{t.portal.intro}</p>
+            </div>
+            <div className="profile-summary">
+              <div className="profile-row">
+                <span>{t.portal.fieldNameLabel}</span>
+                <strong>{profile.name || t.portal.defaultClientName}</strong>
+              </div>
+              <div className="profile-row">
+                <span>{t.portal.fieldEmailLabel}</span>
+                <strong>{profile.email || currentUser?.email || t.portal.notAvailable}</strong>
+              </div>
+              <div className="profile-row">
+                <span>{t.portal.fieldCompanyLabel}</span>
+                <strong>{profile.company || t.portal.notSpecified}</strong>
+              </div>
+            </div>
+
+            {/* Gestión de sesiones y dispositivos */}
+            <div className="sessions-section">
+              <div className="sessions-header">
+                <div>
+                  <h3 className="sessions-title">{t.portal.sessionsTitle}</h3>
+                  <p className="sessions-subtitle">{t.portal.sessionsSubtitle}</p>
+                </div>
+                <button
+                  type="button"
+                  className="sessions-refresh-btn"
+                  onClick={() => loadSessions(currentUser)}
+                  disabled={loadingSessions}
+                  aria-label={t.portal.refreshSessions}
+                  title={t.portal.refreshSessions}
+                >
+                  <RefreshCw size={14} className={loadingSessions ? 'animate-spin' : ''} />
+                </button>
+              </div>
+
+              {sessionFeedback && (
+                <div className={`account-message account-message--${sessionFeedback.type === 'success' ? 'success' : 'warning'}`} role="status" style={{ marginBottom: 12 }}>
+                  {sessionFeedback.text}
+                </div>
+              )}
+
+              {loadingSessions && sessions.length === 0 ? (
+                <div className="sessions-loading">
+                  <Loader2 size={16} className="animate-spin" />
+                  <span>{t.portal.loadingSessions}</span>
+                </div>
+              ) : sessions.length === 0 ? (
+                <div className="sessions-empty">
+                  <span>{t.portal.noActiveSessions}</span>
+                </div>
+              ) : (
+                <div className="sessions-list">
+                  {sessions.map((sess) => (
+                    <div key={sess.sessionId} className={`session-item${sess.isCurrent ? ' session-item--current' : ''}`}>
+                      <div className="session-icon-wrap">
+                        {renderDeviceIcon(sess.deviceType)}
+                      </div>
+                      <div className="session-info">
+                        <div className="session-title-row">
+                          <strong className="session-device-name">
+                            {sess.os || 'Dispositivo'} • {sess.browser || 'Navegador'}
+                          </strong>
+                          {sess.isCurrent && (
+                            <span className="session-badge">{t.portal.currentDeviceBadge}</span>
+                          )}
+                        </div>
+                        <div className="session-meta">
+                          {sess.country && (
+                            <span><Globe size={11} /> {sess.country === 'MX' ? 'México' : sess.country}</span>
+                          )}
+                          {sess.ip && <span>IP: {sess.ip}</span>}
+                          <span>{t.portal.lastActiveLabel}: {formatSessionDate(sess.lastActiveAt)}</span>
+                        </div>
+                      </div>
+                      {!sess.isCurrent && (
+                        <button
+                          type="button"
+                          className="session-revoke-btn"
+                          onClick={() => handleRevokeSession(sess.sessionId)}
+                          disabled={sessionActionLoading === sess.sessionId}
+                          aria-label={t.portal.revokeSession}
+                        >
+                          {sessionActionLoading === sess.sessionId ? (
+                            <Loader2 size={13} className="animate-spin" />
+                          ) : (
+                            <Trash2 size={13} />
+                          )}
+                          <span>{t.portal.revokeSession}</span>
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {sessions.filter((s) => !s.isCurrent).length > 0 && (
+                <div className="sessions-footer-action">
+                  <button
+                    type="button"
+                    className="button button--outline revoke-others-btn"
+                    onClick={handleRevokeAllOthers}
+                    disabled={sessionActionLoading === 'all-others'}
+                  >
+                    {sessionActionLoading === 'all-others' ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <LockKeyhole size={14} />
+                    )}
+                    <span>{t.portal.revokeAllOthers}</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="portal-actions">
+              <button className="button button--navy" onClick={() => { setPortalOpen(false); setProfileOpen(true); }} data-testid="button-open-profile">
+                <UserCheck size={15} />{t.portal.myProfile}
+              </button>
+              <button className="button button--outline" style={{ color: 'var(--navy)', borderColor: 'var(--line)' }} onClick={handleSignOut} data-testid="button-logout">
+                <LockKeyhole size={15} />{t.portal.logOut}
+              </button>
+              <button className="button button--outline" style={{ color: 'var(--navy)', borderColor: 'var(--line)' }} onClick={() => setPortalOpen(false)} data-testid="button-close-portal-action">
+                {t.portal.closePortal}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
 
       {profileOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setProfileOpen(false); }}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="profile-heading"><button className="modal-close" onClick={() => setProfileOpen(false)} aria-label={t.common.closeProfileAria} data-testid="button-close-profile"><X size={18} /></button><div className="modal-brand"><BrandMark /><div><strong>{t.portal.myProfile.toUpperCase()}</strong><small>{t.portal.defaultClientName}</small></div></div><h2 id="profile-heading">{t.portal.profileHeading}</h2><p className="modal-intro">{t.portal.profileIntro}</p><div className="account-form"><div className="form-field"><label htmlFor="profile-name">{t.portal.fieldNameLabel}</label><input id="profile-name" value={profile.name} onChange={(event) => setProfile((value) => ({ ...value, name: event.target.value }))} data-testid="input-profile-name" /></div><div className="form-field"><label htmlFor="profile-email">{t.portal.fieldEmailLabel}</label><input id="profile-email" value={profile.email || currentUser?.email || ''} disabled data-testid="input-profile-email" /></div><div className="form-field"><label htmlFor="profile-company">{t.portal.fieldCompanyLabel}</label><input id="profile-company" value={profile.company} onChange={(event) => setProfile((value) => ({ ...value, company: event.target.value }))} placeholder={t.account.fieldCompanyPlaceholder} data-testid="input-profile-company" /></div><button className="button button--navy" onClick={saveProfile} data-testid="button-save-profile"><Check size={15} />{t.portal.saveChanges}</button></div></section></div>}
     </div>

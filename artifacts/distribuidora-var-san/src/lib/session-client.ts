@@ -14,6 +14,8 @@ export interface SessionRecord {
   isCurrent?: boolean;
 }
 
+export type DeviceSession = SessionRecord;
+
 const STORAGE_SESSION_KEY = "varsan_session_id";
 const API_BASE_URL = "https://varsan-api.onrender.com/api";
 

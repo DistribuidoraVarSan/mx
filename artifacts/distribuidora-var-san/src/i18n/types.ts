@@ -97,6 +97,19 @@ export type Dictionary = {
     profileHeading: string;
     profileIntro: string;
     saveChanges: string;
+    sessionsTitle: string;
+    sessionsSubtitle: string;
+    currentDeviceBadge: string;
+    lastActiveLabel: string;
+    locationLabel: string;
+    revokeSession: string;
+    revokeAllOthers: string;
+    confirmRevokeAll: string;
+    noActiveSessions: string;
+    sessionRevokedSuccess: string;
+    sessionsRevokedAllSuccess: string;
+    loadingSessions: string;
+    refreshSessions: string;
   };
 
   hero: {
