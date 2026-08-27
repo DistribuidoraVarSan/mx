@@ -234,7 +234,7 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [newsletterMessage, setNewsletterMessage] = useState('');
-  const [contactState, handleContactSubmit] = useForm('myegwrd');
+  const [contactState, handleContactSubmit] = useForm("myegrwrd");
   const contactFormRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -339,7 +339,7 @@ window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Integración oficial de Formspree para React (@formspree/react): el hook
-  // useForm('myegwrd') se encarga de enviar el formulario, exponer el estado
+  // useForm("myegrwrd") se encarga de enviar el formulario, exponer el estado
   // (submitting/succeeded/errors) y no requiere ningún fetch manual ni
   // listener sobre el DOM. Aquí solo limpiamos los campos del <form> (que
   // permanece sin controlar, igual que antes) cuando el envío tiene éxito,
