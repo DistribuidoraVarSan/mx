@@ -1,0 +1,51 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Funciones auxiliares de seguridad
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function hasValidUserFields() {
+      return request.resource.data.keys().hasOnly(['name', 'company', 'email', 'createdAt'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 150
+        && request.resource.data.company is string
+        && request.resource.data.company.size() <= 150
+        && request.resource.data.email is string
+        && request.resource.data.email == request.auth.token.email;
+    }
+
+    // Regla para la colección de usuarios
+    match /users/{userId} {
+      // 1. Lectura: solo el dueño puede leer su propio perfil individual
+      allow get: if isOwner(userId);
+      allow list: if false; // Prohíbe listar toda la colección de usuarios
+
+      // 2. Creación: registro inicial (Email/Password o Google)
+      allow create: if isOwner(userId)
+                    && hasValidUserFields()
+                    && request.resource.data.createdAt is timestamp
+                    && request.resource.data.createdAt == request.time;
+
+      // 3. Actualización: guardar cambios desde "Mi Perfil" (saveProfile)
+      allow update: if isOwner(userId)
+                    && hasValidUserFields()
+                    && request.resource.data.createdAt == resource.data.createdAt;
+
+      // 4. Eliminación: bloqueada desde el cliente
+      allow delete: if false;
+    }
+
+    // Bloqueo total por defecto para cualquier otra colección no declarada
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
