@@ -29,3 +29,33 @@ export const strictActionRateLimit = rateLimit({
     code: "TOO_MANY_REQUESTS",
   },
 });
+
+/**
+ * Limitador de tasa para el asistente virtual (Emilia).
+ * Permite hasta 20 peticiones por minuto por IP para proteger Groq y prevenir abusos.
+ */
+export const assistantRateLimit = rateLimit({
+  windowMs: 60 * 1000, // 1 minuto
+  limit: 20,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: {
+    error: "Has enviado demasiados mensajes seguidos al asistente. Por favor, espera un momento.",
+    code: "TOO_MANY_REQUESTS",
+  },
+});
+
+/**
+ * Limitador de tasa para suscripciones al newsletter.
+ * Permite hasta 10 peticiones por ventana de 15 minutos por IP para proteger Resend y la base de datos.
+ */
+export const newsletterRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  limit: 10,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: {
+    error: "Demasiadas solicitudes de suscripción desde esta dirección IP. Intenta de nuevo más tarde.",
+    code: "TOO_MANY_REQUESTS",
+  },
+});

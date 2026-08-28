@@ -1,4 +1,4 @@
-import type { EmailContent, EmailLanguage, WelcomeEmailParams } from "./types";
+import { type EmailContent, type EmailLanguage, type WelcomeEmailParams, escapeHtml } from "./types";
 
 interface EmiliaTranslation {
   subject: string;
@@ -333,7 +333,7 @@ distribuidora.varsan@outlook.com
 ${tr.footerNotice}
 </p>
 <p style="margin:0;">
-<a href="${params.unsubscribeUrl}" style="color:#c9a84c;font-size:12px;text-decoration:underline;">
+<a href="${escapeHtml(params.unsubscribeUrl)}" style="color:#c9a84c;font-size:12px;text-decoration:underline;">
 ${tr.unsubscribeLink}
 </a>
 </p>

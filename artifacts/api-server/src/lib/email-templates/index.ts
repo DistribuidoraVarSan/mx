@@ -27,3 +27,16 @@ export function resolveEmailLanguage(
   }
   return DEFAULT_EMAIL_LANGUAGE;
 }
+
+/**
+ * Escapa caracteres especiales de HTML para prevenir inyección de código y marcado en correos.
+ */
+export function escapeHtml(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}

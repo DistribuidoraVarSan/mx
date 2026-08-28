@@ -193,15 +193,32 @@ export function generateRescueCode(): string {
   return crypto.randomInt(100000, 1000000).toString();
 }
 
+let devMasterKeyBuffer: Buffer | null = null;
+
 /**
- * Clave interna derivada para el cifrado de secretos TOTP en reposo.
+ * Clave interna derivada para el cifrado autenticado AES-256-GCM de secretos TOTP en reposo.
+ * En producción (NODE_ENV === 'production'), TWO_FACTOR_MASTER_KEY es estrictamente obligatoria.
  */
 function getEncryptionKey(): Buffer {
-  const masterSecret =
-    process.env.TWO_FACTOR_MASTER_KEY ||
-    process.env.FIREBASE_PROJECT_ID ||
-    "distribuidora-var-san-2fa-master-secret-key-2026";
-  return crypto.createHash("sha256").update(masterSecret).digest();
+  const masterSecret = process.env.TWO_FACTOR_MASTER_KEY;
+
+  if (masterSecret && masterSecret.trim().length > 0) {
+    return crypto.createHash("sha256").update(masterSecret.trim()).digest();
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "[FATAL SECURITY CONFIGURATION] La variable de entorno TWO_FACTOR_MASTER_KEY es requerida en producción para el cifrado de secretos 2FA pero no fue provista.",
+    );
+  }
+
+  // En entorno de desarrollo / pruebas locales sin master key explícita,
+  // generamos una clave efímera segura en memoria para la sesión actual del proceso,
+  // impidiendo el uso de contraseñas estáticas o hardcodeadas en el código fuente.
+  if (!devMasterKeyBuffer) {
+    devMasterKeyBuffer = crypto.randomBytes(32);
+  }
+  return devMasterKeyBuffer;
 }
 
 /**

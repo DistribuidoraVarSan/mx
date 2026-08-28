@@ -24,10 +24,44 @@ const SendVerificationSchema = z.object({
   language: z.string().optional(),
 });
 
+const ALLOWED_RESET_ORIGINS_PROD = [
+  "https://distribuidoravarsan.com.mx",
+  "https://www.distribuidoravarsan.com.mx",
+  "https://distribuidora-var-san.firebaseapp.com",
+  "https://distribuidora-var-san.web.app",
+];
+
+const ALLOWED_RESET_ORIGINS_DEV = [
+  ...ALLOWED_RESET_ORIGINS_PROD,
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:3000",
+];
+
+export function isValidResetUrl(urlStr?: string): boolean {
+  if (!urlStr) return true;
+  try {
+    const parsed = new URL(urlStr);
+    const isDev = process.env.NODE_ENV !== "production";
+    const allowedOrigins = isDev ? ALLOWED_RESET_ORIGINS_DEV : ALLOWED_RESET_ORIGINS_PROD;
+    return allowedOrigins.includes(parsed.origin);
+  } catch {
+    return false;
+  }
+}
+
 const SendPasswordResetSchema = z.object({
   email: z.string().trim().toLowerCase().email("Correo electrónico inválido."),
   resetCode: z.string().trim().min(4).max(12).optional(),
-  resetUrl: z.string().url().optional(),
+  resetUrl: z
+    .string()
+    .trim()
+    .url("URL de restablecimiento inválida.")
+    .refine((val) => isValidResetUrl(val), {
+      message: "La URL de restablecimiento debe pertenecer a un dominio oficial autorizado.",
+    })
+    .optional(),
   recipientName: z.string().trim().max(100).optional(),
   language: z.string().optional(),
 });
@@ -35,7 +69,14 @@ const SendPasswordResetSchema = z.object({
 const SendSecurityAlertSchema = z.object({
   alertTitle: z.string().trim().min(3).max(200),
   alertDetails: z.string().trim().min(5).max(2000),
-  actionUrl: z.string().url().optional(),
+  actionUrl: z
+    .string()
+    .trim()
+    .url("URL de acción no válida.")
+    .refine((val) => isValidResetUrl(val), {
+      message: "La URL de acción debe pertenecer a un dominio oficial autorizado.",
+    })
+    .optional(),
   language: z.string().optional(),
 });
 

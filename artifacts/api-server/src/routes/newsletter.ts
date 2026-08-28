@@ -6,8 +6,18 @@ import { sendEmail } from "../lib/mailer";
 import { buildWelcomeEmail } from "../lib/newsletter-email-templates";
 import { resolveEmailLanguage } from "../lib/email-templates";
 import { logger } from "../lib/logger";
+import { newsletterRateLimit } from "../middlewares/rate-limit";
 
 const router: IRouter = Router();
+
+const ALLOWED_NEWSLETTER_ORIGINS = [
+  "https://distribuidoravarsan.com.mx",
+  "https://www.distribuidoravarsan.com.mx",
+  "https://distribuidora-var-san.firebaseapp.com",
+  "https://distribuidora-var-san.web.app",
+];
+
+const DEFAULT_PUBLIC_APP_URL = "https://distribuidoravarsan.com.mx";
 
 const SubscribeRequestSchema = z.object({
   email: z
@@ -20,18 +30,40 @@ const SubscribeRequestSchema = z.object({
 });
 
 /**
- * Resuelve el origen público del sitio para construir el enlace de
- * cancelación que va dentro del correo de bienvenida. Usa PUBLIC_APP_URL si
- * está definida (recomendado en producción); si no, la deriva de los
- * encabezados de la petición.
+ * Resuelve de forma segura el origen público oficial para construir el enlace de
+ * cancelación del newsletter.
+ * Prioridad:
+ * 1. PUBLIC_APP_URL si está configurada y pertenece a la lista de orígenes permitidos.
+ * 2. Fallback estricto a https://distribuidoravarsan.com.mx.
+ * En ningún caso se construye a partir de cabeceras Host o X-Forwarded-Host del cliente en producción.
  */
-function getPublicOrigin(req: Request): string {
-  if (process.env.PUBLIC_APP_URL) {
-    return process.env.PUBLIC_APP_URL.replace(/\/+$/, "");
+function getPublicOrigin(req?: Request): string {
+  const envUrl = process.env.PUBLIC_APP_URL?.trim();
+  if (envUrl) {
+    try {
+      const parsed = new URL(envUrl);
+      const isDev = process.env.NODE_ENV !== "production";
+      const isAllowed =
+        ALLOWED_NEWSLETTER_ORIGINS.includes(parsed.origin) ||
+        (isDev && (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1"));
+      if (isAllowed) {
+        return parsed.origin;
+      }
+    } catch {
+      // Usar fallback seguro
+    }
   }
-  const proto = (req.headers["x-forwarded-proto"] as string | undefined) ?? req.protocol;
-  const host = (req.headers["x-forwarded-host"] as string | undefined) ?? req.get("host");
-  return `${proto}://${host}`;
+
+  // En entorno de desarrollo permitimos localhost exclusivamente para pruebas locales
+  if (process.env.NODE_ENV !== "production" && req) {
+    const host = req.get("host");
+    if (host && (host.startsWith("localhost:") || host.startsWith("127.0.0.1:"))) {
+      const proto = req.protocol || "http";
+      return `${proto}://${host}`;
+    }
+  }
+
+  return DEFAULT_PUBLIC_APP_URL;
 }
 
 function renderUnsubscribePage(title: string, message: string): string {
@@ -59,7 +91,7 @@ function renderUnsubscribePage(title: string, message: string): string {
 </html>`;
 }
 
-router.post("/newsletter/subscribe", async (req, res) => {
+router.post("/newsletter/subscribe", newsletterRateLimit, async (req, res) => {
   const parseResult = SubscribeRequestSchema.safeParse(req.body);
 
   if (!parseResult.success) {

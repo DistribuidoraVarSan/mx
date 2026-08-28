@@ -9,6 +9,19 @@ export function isSupportedEmailLanguage(value: unknown): value is EmailLanguage
   return typeof value === "string" && (SUPPORTED_EMAIL_LANGUAGES as readonly string[]).includes(value);
 }
 
+/**
+ * Escapa caracteres especiales de HTML para prevenir inyección de código y marcado en correos.
+ */
+export function escapeHtml(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export interface EmailContent {
   subject: string;
   html: string;

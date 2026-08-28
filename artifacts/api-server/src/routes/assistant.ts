@@ -8,6 +8,7 @@ import {
   type AssistantActionKey,
 } from "../lib/assistant-knowledge";
 import { logger } from "../lib/logger";
+import { assistantRateLimit } from "../middlewares/rate-limit";
 
 const router: IRouter = Router();
 
@@ -26,7 +27,7 @@ const ChatRequestSchema = z.object({
   language: z.enum(ASSISTANT_LANGUAGES).optional().default(DEFAULT_ASSISTANT_LANGUAGE),
 });
 
-router.post("/assistant/chat", async (req, res) => {
+router.post("/assistant/chat", assistantRateLimit, async (req, res) => {
   const parseResult = ChatRequestSchema.safeParse(req.body);
 
   if (!parseResult.success) {

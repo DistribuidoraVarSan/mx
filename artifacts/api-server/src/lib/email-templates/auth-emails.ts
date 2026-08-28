@@ -1,14 +1,15 @@
-import type {
-  AccountDeletionEmailParams,
-  EmailChangeNotificationParams,
-  EmailContent,
-  EmailLanguage,
-  NewDeviceLoginEmailParams,
-  PasswordChangedEmailParams,
-  PasswordResetEmailParams,
-  SecurityAlertEmailParams,
-  TwoFactorStatusEmailParams,
-  VerificationCodeEmailParams,
+import {
+  type AccountDeletionEmailParams,
+  type EmailChangeNotificationParams,
+  type EmailContent,
+  type EmailLanguage,
+  type NewDeviceLoginEmailParams,
+  type PasswordChangedEmailParams,
+  type PasswordResetEmailParams,
+  type SecurityAlertEmailParams,
+  type TwoFactorStatusEmailParams,
+  type VerificationCodeEmailParams,
+  escapeHtml,
 } from "./types";
 
 interface AuthTranslations {
@@ -993,7 +994,8 @@ export function buildVerificationCodeEmail(
 ): EmailContent {
   const tr = AUTH_TRANSLATIONS[language]?.verification || AUTH_TRANSLATIONS.es.verification;
   const expiry = (params.expiresInMinutes || 10).toString();
-  const greeting = params.recipientName ? `${tr.greeting} ${params.recipientName}:` : tr.greeting;
+  const greeting = params.recipientName ? `${tr.greeting} ${escapeHtml(params.recipientName)}:` : tr.greeting;
+  const safeCode = escapeHtml(params.code);
 
   const bodyHtml = `
 <p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
@@ -1011,7 +1013,7 @@ ${tr.intro}
 ${tr.codeLabel}
 </p>
 <div style="font-family:Consolas,'Courier New',monospace;font-size:32px;font-weight:800;letter-spacing:8px;color:#0a1f44;">
-${params.code}
+${safeCode}
 </div>
 <p style="margin:8px 0 0;color:#94a3b8;font-size:12px;">
 ${tr.expiryNotice.replace("{min}", expiry)}
@@ -1054,7 +1056,9 @@ export function buildPasswordResetEmail(
 ): EmailContent {
   const tr = AUTH_TRANSLATIONS[language]?.passwordReset || AUTH_TRANSLATIONS.es.passwordReset;
   const expiry = (params.expiresInMinutes || 15).toString();
-  const greeting = params.recipientName ? `${tr.greeting} ${params.recipientName}:` : tr.greeting;
+  const greeting = params.recipientName ? `${tr.greeting} ${escapeHtml(params.recipientName)}:` : tr.greeting;
+  const safeResetCode = escapeHtml(params.resetCode);
+  const safeResetUrl = escapeHtml(params.resetUrl);
 
   let codeBlock = "";
   if (params.resetCode) {
@@ -1066,7 +1070,7 @@ export function buildPasswordResetEmail(
 ${tr.codeLabel}
 </p>
 <div style="font-family:Consolas,'Courier New',monospace;font-size:28px;font-weight:800;letter-spacing:6px;color:#0a1f44;">
-${params.resetCode}
+${safeResetCode}
 </div>
 </td>
 </tr>
@@ -1079,7 +1083,7 @@ ${params.resetCode}
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:22px 0;">
 <tr>
 <td align="center">
-<a href="${params.resetUrl}" style="background:#0a1f44;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:14px 28px;border-radius:6px;display:inline-block;border-bottom:3px solid #c9a84c;">
+<a href="${safeResetUrl}" style="background:#0a1f44;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:14px 28px;border-radius:6px;display:inline-block;border-bottom:3px solid #c9a84c;">
 ${tr.buttonLabel}
 </a>
 </td>
@@ -1131,8 +1135,9 @@ export function buildPasswordChangedEmail(
   params: PasswordChangedEmailParams,
 ): EmailContent {
   const tr = AUTH_TRANSLATIONS[language]?.passwordChanged || AUTH_TRANSLATIONS.es.passwordChanged;
-  const greeting = params.recipientName ? `${tr.greeting} ${params.recipientName}:` : tr.greeting;
-  const time = params.changedAt || new Date().toLocaleString(language === "en-GB" ? "en-GB" : "es-MX");
+  const greeting = params.recipientName ? `${tr.greeting} ${escapeHtml(params.recipientName)}:` : tr.greeting;
+  const rawTime = params.changedAt || new Date().toLocaleString(language === "en-GB" ? "en-GB" : "es-MX");
+  const safeTime = escapeHtml(rawTime);
 
   const bodyHtml = `
 <p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
@@ -1142,7 +1147,7 @@ export function buildPasswordChangedEmail(
 ${tr.message}
 </p>
 <p style="margin:0 0 24px;color:#64748b;font-size:13px;">
-<strong>${tr.timeLabel}</strong> ${time}
+<strong>${tr.timeLabel}</strong> ${safeTime}
 </p>
 <div style="background:#fff7ed;border-left:4px solid #f97316;padding:16px 18px;border-radius:0 4px 4px 0;margin:20px 0;">
 <p style="margin:0;color:#9a3412;font-size:13px;line-height:1.5;font-weight:600;">
@@ -1154,7 +1159,7 @@ ${tr.alertWarning}
 
 ${tr.message}
 
-${tr.timeLabel} ${time}
+${tr.timeLabel} ${rawTime}
 
 ${tr.alertWarning}`;
 
@@ -1176,10 +1181,16 @@ export function buildNewDeviceLoginEmail(
   params: NewDeviceLoginEmailParams,
 ): EmailContent {
   const tr = AUTH_TRANSLATIONS[language]?.newDevice || AUTH_TRANSLATIONS.es.newDevice;
-  const greeting = params.recipientName ? `${tr.greeting} ${params.recipientName}:` : tr.greeting;
-  const time = params.loginTime || new Date().toLocaleString(language === "en-GB" ? "en-GB" : "es-MX");
-
+  const greeting = params.recipientName ? `${tr.greeting} ${escapeHtml(params.recipientName)}:` : tr.greeting;
+  const rawTime = params.loginTime || new Date().toLocaleString(language === "en-GB" ? "en-GB" : "es-MX");
+  const safeTime = escapeHtml(rawTime);
   const location = [params.region, params.country].filter(Boolean).join(", ") || "No disponible";
+  const safeLocation = escapeHtml(location);
+  const safeDevice = escapeHtml(params.deviceType || "Desktop");
+  const safeOs = escapeHtml(params.os || "Desconocido");
+  const safeBrowser = escapeHtml(params.browser || "Desconocido");
+  const safeIp = escapeHtml(params.ip || "No registrada");
+  const safeRevokeUrl = escapeHtml(params.revokeUrl);
 
   const bodyHtml = `
 <p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
@@ -1197,12 +1208,12 @@ ${tr.intro}
 ${tr.detailsHeader}
 </p>
 <table width="100%" style="font-size:13px;color:#475569;line-height:1.7;">
-<tr><td style="width:40%;font-weight:600;color:#64748b;">${tr.deviceLabel}</td><td>${params.deviceType || "Desktop"}</td></tr>
-<tr><td style="font-weight:600;color:#64748b;">${tr.osLabel}</td><td>${params.os || "Desconocido"}</td></tr>
-<tr><td style="font-weight:600;color:#64748b;">${tr.browserLabel}</td><td>${params.browser || "Desconocido"}</td></tr>
-<tr><td style="font-weight:600;color:#64748b;">${tr.ipLabel}</td><td>${params.ip || "No registrada"}</td></tr>
-<tr><td style="font-weight:600;color:#64748b;">${tr.locationLabel}</td><td>${location}</td></tr>
-<tr><td style="font-weight:600;color:#64748b;">${tr.timeLabel}</td><td>${time}</td></tr>
+<tr><td style="width:40%;font-weight:600;color:#64748b;">${tr.deviceLabel}</td><td>${safeDevice}</td></tr>
+<tr><td style="font-weight:600;color:#64748b;">${tr.osLabel}</td><td>${safeOs}</td></tr>
+<tr><td style="font-weight:600;color:#64748b;">${tr.browserLabel}</td><td>${safeBrowser}</td></tr>
+<tr><td style="font-weight:600;color:#64748b;">${tr.ipLabel}</td><td>${safeIp}</td></tr>
+<tr><td style="font-weight:600;color:#64748b;">${tr.locationLabel}</td><td>${safeLocation}</td></tr>
+<tr><td style="font-weight:600;color:#64748b;">${tr.timeLabel}</td><td>${safeTime}</td></tr>
 </table>
 </td>
 </tr>
@@ -1215,7 +1226,7 @@ ${tr.revokePrompt}
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
 <tr>
 <td>
-<a href="${params.revokeUrl}" style="background:#dc2626;color:#ffffff;text-decoration:none;font-weight:700;font-size:13px;padding:12px 24px;border-radius:6px;display:inline-block;">
+<a href="${safeRevokeUrl}" style="background:#dc2626;color:#ffffff;text-decoration:none;font-weight:700;font-size:13px;padding:12px 24px;border-radius:6px;display:inline-block;">
 ${tr.revokeButton}
 </a>
 </td>
@@ -1237,7 +1248,7 @@ ${tr.osLabel} ${params.os || "Desconocido"}
 ${tr.browserLabel} ${params.browser || "Desconocido"}
 ${tr.ipLabel} ${params.ip || "No registrada"}
 ${tr.locationLabel} ${location}
-${tr.timeLabel} ${time}
+${tr.timeLabel} ${rawTime}
 
 ${params.revokeUrl ? `${tr.revokePrompt}\n${params.revokeUrl}` : ""}
 
@@ -1261,26 +1272,30 @@ export function buildSecurityAlertEmail(
   params: SecurityAlertEmailParams,
 ): EmailContent {
   const tr = AUTH_TRANSLATIONS[language]?.securityAlert || AUTH_TRANSLATIONS.es.securityAlert;
-  const greeting = params.recipientName ? `${tr.greeting} ${params.recipientName}:` : tr.greeting;
-  const time = params.timestamp || new Date().toLocaleString(language === "en-GB" ? "en-GB" : "es-MX");
+  const greeting = params.recipientName ? `${tr.greeting} ${escapeHtml(params.recipientName)}:` : tr.greeting;
+  const rawTime = params.timestamp || new Date().toLocaleString(language === "en-GB" ? "en-GB" : "es-MX");
+  const safeTime = escapeHtml(rawTime);
+  const safeTitle = escapeHtml(params.alertTitle);
+  const safeDetails = escapeHtml(params.alertDetails);
+  const safeActionUrl = escapeHtml(params.actionUrl);
 
   const bodyHtml = `
 <p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
 <strong>${greeting}</strong>
 </p>
 <p style="margin:0 0 16px;color:#0a1f44;font-size:16px;font-weight:700;">
-${params.alertTitle}
+${safeTitle}
 </p>
 <div style="background:#fef2f2;border-left:4px solid #ef4444;padding:16px 18px;border-radius:0 4px 4px 0;margin:18px 0;">
 <p style="margin:0;color:#991b1b;font-size:14px;line-height:1.6;">
-${params.alertDetails}
+${safeDetails}
 </p>
 </div>
 <p style="margin:0 0 20px;color:#64748b;font-size:12px;">
-<strong>${tr.timeLabel}</strong> ${time}
+<strong>${tr.timeLabel}</strong> ${safeTime}
 </p>
 ${params.actionUrl ? `
-<a href="${params.actionUrl}" style="background:#0a1f44;color:#ffffff;text-decoration:none;font-weight:700;font-size:13px;padding:12px 24px;border-radius:6px;display:inline-block;border-bottom:3px solid #c9a84c;">
+<a href="${safeActionUrl}" style="background:#0a1f44;color:#ffffff;text-decoration:none;font-weight:700;font-size:13px;padding:12px 24px;border-radius:6px;display:inline-block;border-bottom:3px solid #c9a84c;">
 ${tr.actionButton}
 </a>
 ` : ""}`;
@@ -1291,7 +1306,7 @@ ${params.alertTitle}
 
 ${params.alertDetails}
 
-${tr.timeLabel} ${time}
+${tr.timeLabel} ${rawTime}
 ${params.actionUrl ? `${tr.actionButton}: ${params.actionUrl}` : ""}`;
 
   return renderBaseEmail({
@@ -1312,8 +1327,11 @@ export function buildEmailChangedEmail(
   params: EmailChangeNotificationParams,
 ): EmailContent {
   const tr = AUTH_TRANSLATIONS[language]?.emailChange || AUTH_TRANSLATIONS.es.emailChange;
-  const greeting = params.recipientName ? `${tr.greeting} ${params.recipientName}:` : tr.greeting;
-  const time = params.timestamp || new Date().toLocaleString(language === "en-GB" ? "en-GB" : "es-MX");
+  const greeting = params.recipientName ? `${tr.greeting} ${escapeHtml(params.recipientName)}:` : tr.greeting;
+  const rawTime = params.timestamp || new Date().toLocaleString(language === "en-GB" ? "en-GB" : "es-MX");
+  const safeTime = escapeHtml(rawTime);
+  const safeOldEmail = escapeHtml(params.oldEmail);
+  const safeNewEmail = escapeHtml(params.newEmail);
 
   const bodyHtml = `
 <p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
@@ -1323,9 +1341,9 @@ export function buildEmailChangedEmail(
 ${tr.intro}
 </p>
 <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:18px;margin:20px 0;">
-  <p style="margin:0 0 8px;color:#64748b;font-size:13px;"><strong>${tr.oldEmailLabel}</strong> ${params.oldEmail}</p>
-  <p style="margin:0 0 8px;color:#0a1f44;font-size:13px;font-weight:700;"><strong>${tr.newEmailLabel}</strong> ${params.newEmail}</p>
-  <p style="margin:0;color:#64748b;font-size:12px;"><strong>${tr.timeLabel}</strong> ${time}</p>
+  <p style="margin:0 0 8px;color:#64748b;font-size:13px;"><strong>${tr.oldEmailLabel}</strong> ${safeOldEmail}</p>
+  <p style="margin:0 0 8px;color:#0a1f44;font-size:13px;font-weight:700;"><strong>${tr.newEmailLabel}</strong> ${safeNewEmail}</p>
+  <p style="margin:0;color:#64748b;font-size:12px;"><strong>${tr.timeLabel}</strong> ${safeTime}</p>
 </div>
 <div style="background:#fff7ed;border-left:4px solid #f97316;padding:14px 16px;border-radius:0 4px 4px 0;margin:18px 0;">
   <p style="margin:0;color:#9a3412;font-size:13px;line-height:1.5;">${tr.warning}</p>
@@ -1337,7 +1355,7 @@ ${tr.intro}
 
 ${tr.oldEmailLabel} ${params.oldEmail}
 ${tr.newEmailLabel} ${params.newEmail}
-${tr.timeLabel} ${time}
+${tr.timeLabel} ${rawTime}
 
 ${tr.warning}`;
 
@@ -1359,8 +1377,9 @@ export function buildAccountDeactivatedEmail(
   params: { recipientName?: string; deactivationDate?: string },
 ): EmailContent {
   const tr = AUTH_TRANSLATIONS[language]?.accountDeletion || AUTH_TRANSLATIONS.es.accountDeletion;
-  const greeting = params.recipientName ? `${tr.greeting} ${params.recipientName}:` : tr.greeting;
-  const time = params.deactivationDate || new Date().toLocaleString(language === "en-GB" ? "en-GB" : "es-MX");
+  const greeting = params.recipientName ? `${tr.greeting} ${escapeHtml(params.recipientName)}:` : tr.greeting;
+  const rawTime = params.deactivationDate || new Date().toLocaleString(language === "en-GB" ? "en-GB" : "es-MX");
+  const safeTime = escapeHtml(rawTime);
 
   const deactivationSubject = language === "en-GB"
     ? "Account deactivated — Distribuidora Var San"
@@ -1380,14 +1399,14 @@ export function buildAccountDeactivatedEmail(
 ${deactivationMessage}
 </p>
 <p style="margin:0 0 20px;color:#64748b;font-size:13px;">
-<strong>Fecha / Date:</strong> ${time}
+<strong>Fecha / Date:</strong> ${safeTime}
 </p>`;
 
   const textBody = `${greeting}
 
 ${deactivationMessage}
 
-Fecha / Date: ${time}`;
+Fecha / Date: ${rawTime}`;
 
   return renderBaseEmail({
     language,
@@ -1407,8 +1426,9 @@ export function buildAccountDeletedEmail(
   params: { recipientName?: string; deletionDate?: string },
 ): EmailContent {
   const tr = AUTH_TRANSLATIONS[language]?.accountDeletion || AUTH_TRANSLATIONS.es.accountDeletion;
-  const greeting = params.recipientName ? `${tr.greeting} ${params.recipientName}:` : tr.greeting;
-  const time = params.deletionDate || new Date().toLocaleString(language === "en-GB" ? "en-GB" : "es-MX");
+  const greeting = params.recipientName ? `${tr.greeting} ${escapeHtml(params.recipientName)}:` : tr.greeting;
+  const rawTime = params.deletionDate || new Date().toLocaleString(language === "en-GB" ? "en-GB" : "es-MX");
+  const safeTime = escapeHtml(rawTime);
 
   const deletionSubject = language === "en-GB"
     ? "Account deleted permanently — Distribuidora Var San"
@@ -1428,14 +1448,14 @@ export function buildAccountDeletedEmail(
 ${deletionMessage}
 </p>
 <p style="margin:0 0 20px;color:#64748b;font-size:13px;">
-<strong>Fecha / Date:</strong> ${time}
+<strong>Fecha / Date:</strong> ${safeTime}
 </p>`;
 
   const textBody = `${greeting}
 
 ${deletionMessage}
 
-Fecha / Date: ${time}`;
+Fecha / Date: ${rawTime}`;
 
   return renderBaseEmail({
     language,
