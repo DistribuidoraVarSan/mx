@@ -25,16 +25,17 @@ export function parseUserAgent(ua: string): { os: string; browser: string; devic
   else if (/windows nt 6\.3/i.test(ua)) os = "Windows 8.1";
   else if (/windows nt 6\.1/i.test(ua)) os = "Windows 7";
   else if (/windows/i.test(ua)) os = "Windows";
+  else if (/iphone/i.test(ua)) os = "iOS (iPhone)";
+  else if (/ipad/i.test(ua)) os = "iOS (iPad)";
   else if (/macintosh|mac os x/i.test(ua)) {
     const match = ua.match(/Mac OS X ([0-9_]+)/i);
     os = match ? `macOS ${match[1].replace(/_/g, ".")}` : "macOS";
-  } else if (/iphone/i.test(ua)) os = "iOS (iPhone)";
-  else if (/ipad/i.test(ua)) os = "iOS (iPad)";
-  else if (/android/i.test(ua)) {
+  } else if (/android/i.test(ua)) {
     const match = ua.match(/Android ([0-9.]+)/i);
     os = match ? `Android ${match[1]}` : "Android";
   } else if (/cros/i.test(ua)) os = "Chrome OS";
   else if (/linux/i.test(ua)) os = "Linux";
+
 
   // 2. Detección de Navegador
   let browser = "Navegador Web";

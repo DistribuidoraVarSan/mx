@@ -15,10 +15,11 @@ import {
   generateRescueCode,
 } from "../lib/totp";
 import {
-  resolveEmailLanguage,
   buildVerificationCodeEmail,
   buildSecurityAlertEmail,
+  resolveEmailLanguage,
 } from "../lib/email-templates";
+import { recordSecurityActivity } from "../lib/security-activity";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -238,6 +239,12 @@ router.post(
           .set({ twoFactorVerified: true, twoFactorVerifiedAt: nowIso }, { merge: true });
       }
 
+      await recordSecurityActivity(uid, {
+        type: "2fa_enabled",
+        title: "Autenticación en dos pasos activada",
+        description: "Se configuró y activó correctamente la protección 2FA TOTP en tu cuenta.",
+      });
+
       // Enviar correo de confirmación de activación
       const userLang = await getUserLanguage(uid, reqLang);
       const emailLang = resolveEmailLanguage(userLang);
@@ -379,6 +386,12 @@ router.post(
             isVerified = true;
             usedMethod = "backup_code";
 
+            await recordSecurityActivity(uid, {
+              type: "backup_code_used",
+              title: "Código de respaldo 2FA utilizado",
+              description: `Se utilizó un código de respaldo de un solo uso. Quedan ${remainingBackupCount} códigos disponibles.`,
+            });
+
             // Notificamos por correo el uso del código de respaldo
             if (email) {
               const userLang = await getUserLanguage(uid, reqLang);
@@ -442,7 +455,14 @@ router.post(
           if (rescueResult.success) {
             isVerified = true;
             usedMethod = "rescue_email";
+
+            await recordSecurityActivity(uid, {
+              type: "rescue_code_used",
+              title: "Código de rescate 2FA utilizado",
+              description: "Se verificó el acceso de emergencia mediante el código enviado por correo.",
+            });
           }
+
         } catch (rescueErr) {
           logger.warn({ err: rescueErr, uid }, "Error en transacción de código de rescate");
         }
@@ -548,6 +568,12 @@ router.post(
       }
 
       await secDocRef.delete();
+
+      await recordSecurityActivity(uid, {
+        type: "2fa_disabled",
+        title: "Autenticación en dos pasos desactivada",
+        description: "Se desactivó la protección 2FA en tu cuenta.",
+      });
 
       // Enviar correo de alerta por desactivación
       if (email) {

@@ -102,8 +102,19 @@ const fr: Dictionary = {
     "sessionRevokedSuccess": "Session distante déconnectée avec succès.",
     "sessionsRevokedAllSuccess": "Toutes les autres sessions actives ont été déconnectées.",
     "loadingSessions": "Chargement des sessions actives...",
-    "refreshSessions": "Actualiser les sessions"
+    "refreshSessions": "Actualiser les sessions",
+    "revokeAllTotal": "Déconnecter toutes les sessions",
+    "confirmRevokeAllTotal": "Êtes-vous sûr de vouloir déconnecter TOUS les appareils enregistrés ?",
+    "sessionsRevokedTotalSuccess": "Toutes les sessions ont été déconnectées avec succès.",
+    "itWasntMe": "Ce n'était pas moi",
+    "itWasntMeSuccess": "L'accès non reconnu a été bloqué et votre compte est sécurisé.",
+    "securityActivityTitle": "Historique d'activité de sécurité",
+    "securityActivitySubtitle": "Historique chronologique des événements de sécurité, accès et modifications de compte.",
+    "noSecurityActivity": "Aucune activité de sécurité récente.",
+    "loadingActivity": "Chargement de l'activité de sécurité...",
+    "reportSuspiciousActivity": "Vous ne reconnaissez pas un appareil ou un événement ? Bloquer avec 'Ce n'était pas moi'"
   },
+
   "hero": {
     "eyebrow": "Marques de premier plan · Qualité garantie",
     "titleLead": "Solutions de ",

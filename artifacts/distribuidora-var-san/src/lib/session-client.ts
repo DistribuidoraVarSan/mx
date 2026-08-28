@@ -20,6 +20,25 @@ const STORAGE_SESSION_KEY = "varsan_session_id";
 const API_BASE_URL = "https://varsan-api.onrender.com/api";
 
 /**
+ * Genera un identificador de sesión local criptográficamente seguro.
+ */
+function generateSecureSessionId(): string {
+  try {
+    if (typeof window !== "undefined" && window.crypto) {
+      if (typeof window.crypto.randomUUID === "function") {
+        return window.crypto.randomUUID();
+      }
+      const bytes = new Uint8Array(16);
+      window.crypto.getRandomValues(bytes);
+      return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+    }
+  } catch {
+    // Fallback pasivo
+  }
+  return `sess-${Date.now()}-${Math.floor(Date.now() * 1.618).toString(36)}`;
+}
+
+/**
  * Obtiene el identificador de sesión local almacenado en el navegador,
  * o genera uno nuevo si no existe.
  */
@@ -30,15 +49,16 @@ export function getOrCreateSessionId(): string {
       sid = window.localStorage.getItem(STORAGE_SESSION_KEY);
     }
     if (!sid) {
-      sid = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 11)}-${Math.random().toString(36).slice(2, 11)}`;
+      sid = generateSecureSessionId();
       window.sessionStorage.setItem(STORAGE_SESSION_KEY, sid);
       window.localStorage.setItem(STORAGE_SESSION_KEY, sid);
     }
     return sid;
   } catch {
-    return `sess-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    return generateSecureSessionId();
   }
 }
+
 
 /**
  * Limpia el identificador de sesión local (por ejemplo, al cerrar sesión manualmente).
@@ -174,6 +194,128 @@ export async function revokeAllOtherSessions(user: FirebaseUser): Promise<{ succ
     return { success: false };
   }
 }
+
+/**
+ * Invalida/revoca TODAS las sesiones del usuario (revocación global de seguridad).
+ */
+export async function revokeAllSessions(user: FirebaseUser): Promise<{ success: boolean; count?: number }> {
+  if (!user) return { success: false };
+
+  try {
+    const idToken = await user.getIdToken();
+    const currentSessionId = getOrCreateSessionId();
+
+    const response = await fetch(`${API_BASE_URL}/auth/sessions/revoke-all`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
+        "x-session-id": currentSessionId,
+      },
+    });
+
+    if (!response.ok) {
+      return { success: false };
+    }
+
+    const data = await response.json();
+    return { success: true, count: data.revokedCount };
+  } catch (error) {
+    console.error("Error al revocar todas las sesiones:", error);
+    return { success: false };
+  }
+}
+
+/**
+ * Reporte de respuesta rápida 'No fui yo': revoca la sesión no reconocida y alerta por correo.
+ */
+export async function reportItWasntMe(
+  user: FirebaseUser,
+  sessionId?: string,
+  language?: string,
+): Promise<{ success: boolean; message?: string }> {
+  if (!user) return { success: false, message: "Usuario no autenticado." };
+
+  try {
+    const idToken = await user.getIdToken();
+    const currentSessionId = getOrCreateSessionId();
+
+    const response = await fetch(`${API_BASE_URL}/auth/security/it-wasnt-me`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
+        "x-session-id": currentSessionId,
+      },
+      body: JSON.stringify({ sessionId, language }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { success: false, message: data.error || "No se pudo reportar la actividad." };
+    }
+
+    return { success: true, message: data.message };
+  } catch (error) {
+    console.error("Error al reportar actividad sospechosa:", error);
+    return { success: false, message: "Error de red al procesar el reporte de seguridad." };
+  }
+}
+
+export type SecurityActivityType =
+  | "login"
+  | "new_device"
+  | "2fa_enabled"
+  | "2fa_disabled"
+  | "backup_code_used"
+  | "rescue_code_used"
+  | "session_revoked"
+  | "sessions_revoked_others"
+  | "sessions_revoked_all"
+  | "suspicious_activity_reported"
+  | "password_reset";
+
+export interface SecurityActivityRecord {
+  id: string;
+  type: SecurityActivityType;
+  title: string;
+  description: string;
+  ip: string;
+  os: string;
+  browser: string;
+  deviceType: "desktop" | "mobile" | "tablet" | "unknown";
+  country: string;
+  region?: string | null;
+  timestamp: string;
+}
+
+/**
+ * Obtiene el historial de actividad de seguridad del usuario autenticado.
+ */
+export async function fetchSecurityActivity(user: FirebaseUser): Promise<SecurityActivityRecord[]> {
+  if (!user) return [];
+
+  try {
+    const idToken = await user.getIdToken();
+    const currentSessionId = getOrCreateSessionId();
+
+    const response = await fetch(`${API_BASE_URL}/auth/security-activity`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+        "x-session-id": currentSessionId,
+      },
+    });
+
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.activities || [];
+  } catch (error) {
+    console.error("Error al obtener actividad de seguridad:", error);
+    return [];
+  }
+}
+
 
 export interface TwoFactorStatus {
   enabled: boolean;

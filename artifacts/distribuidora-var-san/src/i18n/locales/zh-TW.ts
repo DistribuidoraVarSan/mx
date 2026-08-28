@@ -102,8 +102,19 @@ const zhTW: Dictionary = {
     "sessionRevokedSuccess": "已成功登出該遠端裝置階段作業。",
     "sessionsRevokedAllSuccess": "已成功登出其他所有活躍裝置階段作業。",
     "loadingSessions": "正在載入活躍階段作業...",
-    "refreshSessions": "重新整理階段作業清單"
+    "refreshSessions": "重新整理階段作業清單",
+    "revokeAllTotal": "登出所有裝置階段作業",
+    "confirmRevokeAllTotal": "您確定要登出所有已註冊裝置上的階段作業嗎？",
+    "sessionsRevokedTotalSuccess": "已成功登出所有裝置階段作業。",
+    "itWasntMe": "這不是我",
+    "itWasntMeSuccess": "未識別的存取已被封鎖，您的帳戶已受到保護。",
+    "securityActivityTitle": "安全活動紀錄",
+    "securityActivitySubtitle": "帳戶安全事件、登入存取及安全設定變更的歷史紀錄。",
+    "noSecurityActivity": "近期無安全活動紀錄。",
+    "loadingActivity": "正在載入安全活動紀錄...",
+    "reportSuspiciousActivity": "發現未知裝置或異常活動？使用「這不是我」立即封鎖"
   },
+
   "hero": {
     "eyebrow": "知名品牌 · 品質保證",
     "titleLead": "為您的企業提供",

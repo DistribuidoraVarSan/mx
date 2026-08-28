@@ -12,6 +12,7 @@ import {
 import { requireAuth } from "../middlewares/auth";
 import { authRateLimit, strictActionRateLimit } from "../middlewares/rate-limit";
 import { adminDb } from "../lib/firebase-admin";
+import { recordSecurityActivity } from "../lib/security-activity";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -199,6 +200,12 @@ router.post(
         html,
         text,
         from: EMAIL_SENDERS.security,
+      });
+
+      await recordSecurityActivity(uid, {
+        type: "suspicious_activity_reported",
+        title: alertTitle,
+        description: alertDetails.slice(0, 200),
       });
 
       res.status(200).json({ status: "ok", message: "Alerta de seguridad enviada." });

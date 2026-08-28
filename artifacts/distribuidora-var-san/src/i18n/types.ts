@@ -138,7 +138,18 @@ export type Dictionary = {
     sessionsRevokedAllSuccess: string;
     loadingSessions: string;
     refreshSessions: string;
+    revokeAllTotal: string;
+    confirmRevokeAllTotal: string;
+    sessionsRevokedTotalSuccess: string;
+    itWasntMe: string;
+    itWasntMeSuccess: string;
+    securityActivityTitle: string;
+    securityActivitySubtitle: string;
+    noSecurityActivity: string;
+    loadingActivity: string;
+    reportSuspiciousActivity: string;
   };
+
 
   hero: {
     eyebrow: string;

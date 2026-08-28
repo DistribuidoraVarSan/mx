@@ -102,8 +102,19 @@ const zhCN: Dictionary = {
     "sessionRevokedSuccess": "已成功注销该远程设备会话。",
     "sessionsRevokedAllSuccess": "已成功注销其他所有活跃设备会话。",
     "loadingSessions": "正在加载活跃会话...",
-    "refreshSessions": "刷新会话列表"
+    "refreshSessions": "刷新会话列表",
+    "revokeAllTotal": "注销所有设备会话",
+    "confirmRevokeAllTotal": "您确定要注销所有已注册设备上的会话吗？",
+    "sessionsRevokedTotalSuccess": "已成功注销所有设备会话。",
+    "itWasntMe": "这不是我",
+    "itWasntMeSuccess": "未识别的访问已被阻止，您的账户已得到保护。",
+    "securityActivityTitle": "安全活动记录",
+    "securityActivitySubtitle": "账户安全事件、登录访问及安全设置变更的历史记录。",
+    "noSecurityActivity": "近期无安全活动记录。",
+    "loadingActivity": "正在加载安全活动记录...",
+    "reportSuspiciousActivity": "发现未知设备或异常活动？使用“这不是我”立即阻止"
   },
+
   "hero": {
     "eyebrow": "知名品牌 · 品质保障",
     "titleLead": "为您的企业提供",

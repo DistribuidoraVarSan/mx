@@ -62,12 +62,18 @@ import {
   ShieldAlert,
   QrCode,
   Download,
+  Activity,
+  AlertTriangle,
+  History,
 } from 'lucide-react';
 import {
   registerDeviceSession,
   fetchUserSessions,
   revokeUserSession,
   revokeAllOtherSessions,
+  revokeAllSessions,
+  reportItWasntMe,
+  fetchSecurityActivity,
   fetch2FAStatus,
   setup2FA,
   enable2FA,
@@ -75,9 +81,11 @@ import {
   disable2FA,
   request2FARescueCode,
   type DeviceSession,
+  type SecurityActivityRecord,
   type TwoFactorStatus,
   type TwoFactorSetupData,
 } from './lib/session-client';
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -165,6 +173,8 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [loadingSessions, setLoadingSessions] = useState(false);
   const [sessionActionLoading, setSessionActionLoading] = useState<string | null>(null);
   const [sessionFeedback, setSessionFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [securityActivities, setSecurityActivities] = useState<SecurityActivityRecord[]>([]);
+  const [loadingActivities, setLoadingActivities] = useState(false);
   const [twoFactorStatus, setTwoFactorStatus] = useState<TwoFactorStatus | null>(null);
   const [twoFactorSetupOpen, setTwoFactorSetupOpen] = useState(false);
   const [twoFactorDisableOpen, setTwoFactorDisableOpen] = useState(false);
@@ -653,6 +663,7 @@ t.account.errorGeneric
     try {
       await signOut(auth);
       setSessions([]);
+      setSecurityActivities([]);
       setSessionFeedback(null);
       setTwoFactorStatus(null);
       setTwoFactorChallengeOpen(false);
@@ -665,6 +676,19 @@ t.account.errorGeneric
     }
   };
 
+  const loadSecurityActivities = async (user = currentUser) => {
+    if (!user) return;
+    setLoadingActivities(true);
+    try {
+      const activities = await fetchSecurityActivity(user);
+      setSecurityActivities(activities);
+    } catch (err) {
+      console.warn('Error al cargar actividad de seguridad:', err);
+    } finally {
+      setLoadingActivities(false);
+    }
+  };
+
   const loadSessions = async (user = currentUser) => {
     if (!user) return;
     setLoadingSessions(true);
@@ -673,6 +697,7 @@ t.account.errorGeneric
       const userSessions = await fetchUserSessions(user);
       setSessions(userSessions);
       await load2FAStatus(user);
+      await loadSecurityActivities(user);
     } catch (err: any) {
       console.error('Error al obtener sesiones:', err);
       if (err?.message?.includes('SESSION_REVOKED')) {
@@ -700,6 +725,7 @@ t.account.errorGeneric
       if (success) {
         setSessions((prev) => prev.filter((s) => s.sessionId !== sessionId));
         setSessionFeedback({ type: 'success', text: t.portal.sessionRevokedSuccess });
+        await loadSecurityActivities(currentUser);
       }
     } catch (err: any) {
       console.error('Error al revocar sesión:', err);
@@ -723,6 +749,7 @@ t.account.errorGeneric
       if (res.success) {
         setSessions((prev) => prev.filter((s) => s.isCurrent));
         setSessionFeedback({ type: 'success', text: t.portal.sessionsRevokedAllSuccess });
+        await loadSecurityActivities(currentUser);
       }
     } catch (err: any) {
       console.error('Error al revocar otras sesiones:', err);
@@ -735,6 +762,46 @@ t.account.errorGeneric
       setSessionActionLoading(null);
     }
   };
+
+  const handleRevokeAllTotal = async () => {
+    if (!currentUser) return;
+    if (!window.confirm(t.portal.confirmRevokeAllTotal)) return;
+    setSessionActionLoading('all-total');
+    setSessionFeedback(null);
+    try {
+      const res = await revokeAllSessions(currentUser);
+      if (res.success) {
+        setSessions([]);
+        setSessionFeedback({ type: 'success', text: t.portal.sessionsRevokedTotalSuccess });
+        await handleSignOut();
+      }
+    } catch (err: any) {
+      console.error('Error al revocar todas las sesiones:', err);
+      setSessionFeedback({ type: 'error', text: err.message || 'Error al revocar todas las sesiones' });
+    } finally {
+      setSessionActionLoading(null);
+    }
+  };
+
+  const handleReportItWasntMe = async (sessionId?: string) => {
+    if (!currentUser) return;
+    if (!window.confirm(t.portal.reportSuspiciousActivity)) return;
+    setSessionActionLoading(sessionId || 'it-wasnt-me');
+    setSessionFeedback(null);
+    try {
+      const res = await reportItWasntMe(currentUser, sessionId, language);
+      if (res.success) {
+        setSessionFeedback({ type: 'success', text: t.portal.itWasntMeSuccess });
+        await loadSessions(currentUser);
+      }
+    } catch (err: any) {
+      console.error('Error al reportar actividad:', err);
+      setSessionFeedback({ type: 'error', text: err.message || 'Error al procesar reporte' });
+    } finally {
+      setSessionActionLoading(null);
+    }
+  };
+
 
   const renderDeviceIcon = (deviceType: string) => {
     if (deviceType === 'mobile') return <Smartphone size={17} />;
@@ -1575,13 +1642,14 @@ t.account.errorGeneric
                 </div>
               )}
 
-              {sessions.filter((s) => !s.isCurrent).length > 0 && (
-                <div className="sessions-footer-action">
+              <div className="sessions-footer-action" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 12 }}>
+                {sessions.filter((s) => !s.isCurrent).length > 0 && (
                   <button
                     type="button"
                     className="button button--outline revoke-others-btn"
                     onClick={handleRevokeAllOthers}
                     disabled={sessionActionLoading === 'all-others'}
+                    style={{ fontSize: '0.82rem', padding: '6px 12px' }}
                   >
                     {sessionActionLoading === 'all-others' ? (
                       <Loader2 size={14} className="animate-spin" />
@@ -1590,8 +1658,39 @@ t.account.errorGeneric
                     )}
                     <span>{t.portal.revokeAllOthers}</span>
                   </button>
-                </div>
-              )}
+                )}
+                {sessions.length > 0 && (
+                  <button
+                    type="button"
+                    className="button button--outline"
+                    onClick={handleRevokeAllTotal}
+                    disabled={sessionActionLoading === 'all-total'}
+                    style={{ color: '#dc2626', borderColor: '#fca5a5', fontSize: '0.82rem', padding: '6px 12px' }}
+                  >
+                    {sessionActionLoading === 'all-total' ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={14} />
+                    )}
+                    <span>{t.portal.revokeAllTotal}</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="button button--outline"
+                  onClick={() => handleReportItWasntMe()}
+                  disabled={sessionActionLoading === 'it-wasnt-me'}
+                  style={{ color: '#b45309', borderColor: '#fde68a', fontSize: '0.82rem', padding: '6px 12px' }}
+                  title={t.portal.reportSuspiciousActivity}
+                >
+                  {sessionActionLoading === 'it-wasnt-me' ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <AlertTriangle size={14} />
+                  )}
+                  <span>{t.portal.itWasntMe}</span>
+                </button>
+              </div>
             </div>
 
             {/* Sección de Seguridad y 2FA */}
@@ -1655,6 +1754,86 @@ t.account.errorGeneric
                 </div>
               </div>
             </div>
+
+            {/* Sección de Historial de Actividad de Seguridad */}
+            <div className="security-activity-section" style={{ marginTop: 20, padding: '16px 20px', background: 'var(--panel, #f8fafc)', borderRadius: 12, border: '1px solid var(--line, #e2e8f0)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ padding: 6, background: 'rgba(10, 31, 68, 0.06)', borderRadius: 8, color: 'var(--navy)' }}>
+                    <Activity size={18} />
+                  </div>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 600, color: 'var(--navy)' }}>
+                      {t.portal.securityActivityTitle}
+                    </h4>
+                    <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: 'var(--muted)' }}>
+                      {t.portal.securityActivitySubtitle}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="sessions-refresh-btn"
+                  onClick={() => loadSecurityActivities(currentUser)}
+                  disabled={loadingActivities}
+                  aria-label={t.portal.refreshSessions}
+                  title={t.portal.refreshSessions}
+                >
+                  <RefreshCw size={13} className={loadingActivities ? 'animate-spin' : ''} />
+                </button>
+              </div>
+
+              {loadingActivities && securityActivities.length === 0 ? (
+                <div className="sessions-loading" style={{ padding: '14px 0', fontSize: '0.84rem' }}>
+                  <Loader2 size={15} className="animate-spin" />
+                  <span>{t.portal.loadingActivity}</span>
+                </div>
+              ) : securityActivities.length === 0 ? (
+                <div className="sessions-empty" style={{ padding: '14px 0', fontSize: '0.84rem', color: 'var(--muted)' }}>
+                  <span>{t.portal.noSecurityActivity}</span>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 220, overflowY: 'auto', paddingRight: 4 }}>
+                  {securityActivities.map((act) => (
+                    <div
+                      key={act.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '10px 14px',
+                        background: '#ffffff',
+                        borderRadius: 8,
+                        border: '1px solid #e2e8f0',
+                        fontSize: '0.82rem',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{
+                          color: act.type === 'new_device' || act.type === 'suspicious_activity_reported' ? '#d97706' : act.type === '2fa_enabled' ? '#16a34a' : 'var(--navy)'
+                        }}>
+                          {act.type === 'new_device' || act.type === 'suspicious_activity_reported' ? (
+                            <AlertTriangle size={15} />
+                          ) : act.type.startsWith('2fa') ? (
+                            <ShieldCheck size={15} />
+                          ) : (
+                            <History size={15} />
+                          )}
+                        </div>
+                        <div>
+                          <strong style={{ color: 'var(--navy)', display: 'block', fontSize: '0.84rem' }}>{act.title}</strong>
+                          <span style={{ color: 'var(--muted)', fontSize: '0.78rem' }}>{act.description}</span>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right', whiteSpace: 'nowrap', color: '#64748b', fontSize: '0.76rem' }}>
+                        <span>{formatSessionDate(act.timestamp)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
 
             <div className="portal-actions">
               <button className="button button--navy" onClick={() => { setPortalOpen(false); setProfileOpen(true); }} data-testid="button-open-profile">

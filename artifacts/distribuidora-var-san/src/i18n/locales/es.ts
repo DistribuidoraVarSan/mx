@@ -102,8 +102,19 @@ const es: Dictionary = {
     "sessionRevokedSuccess": "Sesión remota cerrada exitosamente.",
     "sessionsRevokedAllSuccess": "Se cerraron todas las demás sesiones activas.",
     "loadingSessions": "Cargando sesiones activas...",
-    "refreshSessions": "Actualizar sesiones"
+    "refreshSessions": "Actualizar sesiones",
+    "revokeAllTotal": "Cerrar todas las sesiones",
+    "confirmRevokeAllTotal": "¿Deseas cerrar la sesión en TODOS los dispositivos registrados?",
+    "sessionsRevokedTotalSuccess": "Se cerraron exitosamente todas las sesiones.",
+    "itWasntMe": "No fui yo",
+    "itWasntMeSuccess": "Se ha bloqueado el acceso no reconocido y protegido tu cuenta.",
+    "securityActivityTitle": "Historial de actividad de seguridad",
+    "securityActivitySubtitle": "Registro cronológico de eventos, accesos y cambios de seguridad en tu cuenta.",
+    "noSecurityActivity": "No hay eventos de seguridad recientes.",
+    "loadingActivity": "Cargando actividad de seguridad...",
+    "reportSuspiciousActivity": "¿No reconoces un dispositivo o evento? Bloquear con 'No fui yo'"
   },
+
   "hero": {
     "eyebrow": "Marcas líderes · Calidad garantizada",
     "titleLead": "Soluciones en ",

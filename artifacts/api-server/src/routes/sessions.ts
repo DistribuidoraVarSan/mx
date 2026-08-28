@@ -7,6 +7,16 @@ import { requireAuth } from "../middlewares/auth";
 import { authRateLimit, strictActionRateLimit } from "../middlewares/rate-limit";
 import { extractDeviceInfo } from "../lib/device-detector";
 import { logger } from "../lib/logger";
+import { sendEmail, EMAIL_SENDERS } from "../lib/mailer";
+import {
+  buildNewDeviceLoginEmail,
+  buildSecurityAlertEmail,
+  resolveEmailLanguage,
+} from "../lib/email-templates";
+import {
+  recordSecurityActivity,
+  getSecurityActivities,
+} from "../lib/security-activity";
 
 const router: IRouter = Router();
 
@@ -23,9 +33,30 @@ const RevokeOthersSchema = z.object({
   currentSessionId: z.string().min(10).max(100, "Identificador de sesión actual inválido."),
 });
 
+const ItWasntMeSchema = z.object({
+  sessionId: z.string().min(10).max(100).optional(),
+  language: z.string().optional(),
+});
+
+/**
+ * Consulta el idioma preferido guardado en Firestore.
+ */
+async function fetchUserPreferredLanguage(uid: string): Promise<string | undefined> {
+  try {
+    const doc = await adminDb.collection("users").doc(uid).get();
+    if (doc.exists) {
+      return doc.data()?.preferredLanguage;
+    }
+  } catch (err) {
+    logger.warn({ err, uid }, "No se pudo consultar preferredLanguage");
+  }
+  return undefined;
+}
+
 /**
  * POST /api/auth/session/register
  * Registra o actualiza la sesión activa del usuario con su huella de dispositivo e IP.
+ * Detecta nuevos dispositivos y notifica por correo transaccional de seguridad.
  */
 router.post(
   "/auth/session/register",
@@ -43,6 +74,7 @@ router.post(
     }
 
     const uid = req.user!.uid;
+    const email = req.user!.email;
     const clientSessionId = parseResult.data.clientSessionId;
     const reqLanguage = parseResult.data.language;
     const sessionId = clientSessionId || crypto.randomUUID();
@@ -55,15 +87,23 @@ router.post(
         await userDocRef.set({ preferredLanguage: reqLanguage }, { merge: true });
       }
 
-      const sessionDocRef = userDocRef
-        .collection("sessions")
-        .doc(sessionId);
+      const sessionsColRef = userDocRef.collection("sessions");
+      const sessionDocRef = sessionsColRef.doc(sessionId);
+
+      // Verificamos sesiones previas para detectar si es un nuevo dispositivo
+      const existingSessionsSnap = await sessionsColRef.get();
+      const existingDocs = existingSessionsSnap.docs;
+      const isFirstSessionEver = existingDocs.length === 0;
+
+      // Buscar si ya existía una sesión con el mismo SO y navegador
+      const hasSeenDevice = existingDocs.some((d) => {
+        const data = d.data();
+        return data.os === deviceInfo.os && data.browser === deviceInfo.browser;
+      });
 
       const existingDoc = await sessionDocRef.get();
       const existingData = existingDoc.exists ? existingDoc.data() : null;
 
-      // Si la sesión existía y estaba revocada, pero el usuario se vuelve a autenticar con un token válido,
-      // se reactiva la sesión
       const sessionRecord = {
         sessionId,
         os: deviceInfo.os,
@@ -81,9 +121,65 @@ router.post(
 
       await sessionDocRef.set(sessionRecord, { merge: true });
 
+      // Si es un dispositivo nuevo y el usuario ya tenía sesiones previas, despachamos alerta
+      const isNewDevice = !isFirstSessionEver && !hasSeenDevice && !existingDoc.exists;
+
+      if (isNewDevice) {
+        await recordSecurityActivity(uid, {
+          type: "new_device",
+          title: "Nuevo dispositivo registrado",
+          description: `Inicio de sesión desde ${deviceInfo.os} (${deviceInfo.browser}) en ${deviceInfo.country}.`,
+          ip: deviceInfo.ip,
+          os: deviceInfo.os,
+          browser: deviceInfo.browser,
+          deviceType: deviceInfo.deviceType,
+          country: deviceInfo.country,
+          region: deviceInfo.region,
+        });
+
+        if (email) {
+          const userLang = await fetchUserPreferredLanguage(uid);
+          const emailLang = resolveEmailLanguage(reqLanguage, userLang);
+          const { subject, html, text } = buildNewDeviceLoginEmail(emailLang, {
+            recipientName: req.user!.name || "Cliente",
+            deviceType: deviceInfo.deviceType === "mobile" ? "Dispositivo Móvil" : "Computadora de Escritorio",
+            os: deviceInfo.os,
+            browser: deviceInfo.browser,
+            ip: deviceInfo.ip,
+            country: deviceInfo.country,
+            region: deviceInfo.region,
+            loginTime: new Date().toLocaleString("es-MX", { timeZone: "America/Mexico_City" }),
+          });
+
+          sendEmail({
+            to: email,
+            subject,
+            html,
+            text,
+            from: EMAIL_SENDERS.security,
+          }).catch((emailErr) => {
+            logger.warn({ err: emailErr, uid }, "No se pudo enviar alerta de nuevo dispositivo");
+          });
+        }
+      } else if (!existingDoc.exists) {
+        // Registro normal de login
+        await recordSecurityActivity(uid, {
+          type: "login",
+          title: "Inicio de sesión",
+          description: `Acceso desde ${deviceInfo.os} (${deviceInfo.browser}).`,
+          ip: deviceInfo.ip,
+          os: deviceInfo.os,
+          browser: deviceInfo.browser,
+          deviceType: deviceInfo.deviceType,
+          country: deviceInfo.country,
+          region: deviceInfo.region,
+        });
+      }
+
       res.status(200).json({
         status: "ok",
         sessionId,
+        isNewDevice,
         session: {
           sessionId: sessionRecord.sessionId,
           os: sessionRecord.os,
@@ -109,7 +205,7 @@ router.post(
 
 /**
  * GET /api/auth/sessions
- * Devuelve la lista de sesiones asociadas al usuario autenticado.
+ * Devuelve la lista de sesiones activas del usuario con política de retención (< 90 días).
  */
 router.get(
   "/auth/sessions",
@@ -117,6 +213,7 @@ router.get(
   async (req: Request, res: Response) => {
     const uid = req.user!.uid;
     const currentSessionId = req.sessionId || (req.headers["x-session-id"] as string | undefined);
+    const ninetyDaysAgo = Date.now() - 90 * 24 * 60 * 60 * 1000;
 
     try {
       const snapshot = await adminDb
@@ -125,9 +222,21 @@ router.get(
         .collection("sessions")
         .get();
 
+      const batch = adminDb.batch();
+      let hasDeletions = false;
+
       const sessions = snapshot.docs
         .map((doc: QueryDocumentSnapshot<DocumentData>) => {
           const data = doc.data();
+          const lastActiveMs = new Date(data.lastActiveAt || data.createdAt || 0).getTime();
+
+          // Purgar en background sesiones revocadas con más de 90 días
+          if (data.revoked === true && lastActiveMs < ninetyDaysAgo) {
+            batch.delete(doc.ref);
+            hasDeletions = true;
+            return null;
+          }
+
           return {
             sessionId: doc.id,
             os: (data.os as string) || "Desconocido",
@@ -142,7 +251,12 @@ router.get(
             isCurrent: doc.id === currentSessionId,
           };
         })
-        .sort((a: { lastActiveAt: string }, b: { lastActiveAt: string }) => new Date(b.lastActiveAt).getTime() - new Date(a.lastActiveAt).getTime());
+        .filter((s): s is NonNullable<typeof s> => s !== null)
+        .sort((a, b) => new Date(b.lastActiveAt).getTime() - new Date(a.lastActiveAt).getTime());
+
+      if (hasDeletions) {
+        batch.commit().catch(() => {});
+      }
 
       res.status(200).json({
         sessions,
@@ -153,6 +267,26 @@ router.get(
         error: "No se pudieron obtener las sesiones activas.",
         code: "FETCH_SESSIONS_ERROR",
       });
+    }
+  },
+);
+
+/**
+ * GET /api/auth/security-activity
+ * Devuelve el historial cronológico de actividad de seguridad del usuario.
+ */
+router.get(
+  "/auth/security-activity",
+  requireAuth,
+  async (req: Request, res: Response) => {
+    const uid = req.user!.uid;
+
+    try {
+      const activities = await getSecurityActivities(uid, 30);
+      res.status(200).json({ activities });
+    } catch (err) {
+      logger.error({ err, uid }, "Error al consultar actividad de seguridad");
+      res.status(500).json({ error: "No se pudo cargar el historial de seguridad." });
     }
   },
 );
@@ -196,9 +330,21 @@ router.post(
         return;
       }
 
+      const sessionData = sessionDoc.data();
+
       await sessionDocRef.update({
         revoked: true,
         revokedAt: new Date().toISOString(),
+      });
+
+      await recordSecurityActivity(uid, {
+        type: "session_revoked",
+        title: "Sesión cerrada individualmente",
+        description: `Se cerró la sesión del dispositivo ${sessionData?.os || "Desconocido"} (${sessionData?.browser || "Navegador"}).`,
+        ip: sessionData?.ip,
+        os: sessionData?.os,
+        browser: sessionData?.browser,
+        country: sessionData?.country,
       });
 
       res.status(200).json({
@@ -263,6 +409,12 @@ router.post(
 
       if (revokedCount > 0) {
         await batch.commit();
+
+        await recordSecurityActivity(uid, {
+          type: "sessions_revoked_others",
+          title: "Otras sesiones cerradas",
+          description: `Se cerraron ${revokedCount} sesión(es) en otros dispositivos.`,
+        });
       }
 
       res.status(200).json({
@@ -279,5 +431,152 @@ router.post(
     }
   },
 );
+
+/**
+ * POST /api/auth/sessions/revoke-all
+ * Invalida atómicamente TODAS las sesiones del usuario (revocación global de seguridad).
+ */
+router.post(
+  "/auth/sessions/revoke-all",
+  strictActionRateLimit,
+  requireAuth,
+  async (req: Request, res: Response) => {
+    const uid = req.user!.uid;
+    const now = new Date().toISOString();
+
+    try {
+      const snapshot = await adminDb
+        .collection("users")
+        .doc(uid)
+        .collection("sessions")
+        .get();
+
+      const batch = adminDb.batch();
+      let count = 0;
+
+      snapshot.docs.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
+        const data = doc.data();
+        if (!data.revoked) {
+          batch.update(doc.ref, {
+            revoked: true,
+            revokedAt: now,
+          });
+          count++;
+        }
+      });
+
+      if (count > 0) {
+        await batch.commit();
+      }
+
+      await recordSecurityActivity(uid, {
+        type: "sessions_revoked_all",
+        title: "Cierre total de sesiones",
+        description: `Se revocaron todas las ${count} sesión(es) activas por acción de seguridad.`,
+      });
+
+      res.status(200).json({
+        status: "ok",
+        message: `Se cerraron exitosamente todas las sesiones (${count}).`,
+        revokedCount: count,
+      });
+    } catch (err) {
+      logger.error({ err, uid }, "Error al revocar todas las sesiones");
+      res.status(500).json({ error: "No se pudieron revocar todas las sesiones." });
+    }
+  },
+);
+
+/**
+ * POST /api/auth/security/it-wasnt-me
+ * Acción de respuesta rápida: revoca la sesión sospechosa o todas las sesiones remotas,
+ * registra el evento de seguridad y despacha correo de alerta con recomendación de cambio de contraseña.
+ */
+router.post(
+  "/auth/security/it-wasnt-me",
+  strictActionRateLimit,
+  requireAuth,
+  async (req: Request, res: Response) => {
+    const parseResult = ItWasntMeSchema.safeParse(req.body);
+    const { sessionId, language: reqLang } = parseResult.success ? parseResult.data : {};
+
+    const uid = req.user!.uid;
+    const email = req.user!.email;
+    const currentSessionId = req.sessionId || (req.headers["x-session-id"] as string | undefined);
+    const now = new Date().toISOString();
+
+    try {
+      const sessionsColRef = adminDb.collection("users").doc(uid).collection("sessions");
+      const batch = adminDb.batch();
+      let blockedInfo = "Sesión remota desconocida";
+      let revokedCount = 0;
+
+      if (sessionId && (!currentSessionId || sessionId !== currentSessionId)) {
+        // Se especificó una sesión remota concreta para revocar
+        const docRef = sessionsColRef.doc(sessionId);
+        const doc = await docRef.get();
+        if (doc.exists) {
+          const data = doc.data();
+          blockedInfo = `${data?.os || "Dispositivo"} (${data?.browser || "Navegador"}) - IP: ${data?.ip || "N/A"}`;
+          batch.update(docRef, { revoked: true, revokedAt: now });
+          revokedCount = 1;
+        }
+      } else {
+        // Si no se especifica sessionId, o coincide con la sesión actual,
+        // revocamos ÚNICAMENTE todas las DEMÁS sesiones remotas,
+        // garantizando que la sesión actual del usuario permanezca activa e intacta.
+        const snap = await sessionsColRef.get();
+        snap.docs.forEach((doc) => {
+          if (doc.id !== currentSessionId) {
+            const data = doc.data();
+            if (!data.revoked) {
+              batch.update(doc.ref, { revoked: true, revokedAt: now });
+              revokedCount++;
+            }
+          }
+        });
+        blockedInfo = `Todas las demás sesiones remotas activas (${revokedCount})`;
+      }
+
+      if (revokedCount > 0) {
+        await batch.commit();
+      }
+
+      await recordSecurityActivity(uid, {
+        type: "suspicious_activity_reported",
+        title: "Reporte 'No fui yo' ejecutado",
+        description: `Se protegieron los accesos y se revocaron sesiones remotas: ${blockedInfo}.`,
+      });
+
+      if (email) {
+        const userLang = await fetchUserPreferredLanguage(uid);
+        const emailLang = resolveEmailLanguage(reqLang, userLang);
+        const { subject, html, text } = buildSecurityAlertEmail(emailLang, {
+          recipientName: req.user!.name || "Cliente",
+          alertTitle: "Acceso remoto sospechoso bloqueado ('No fui yo')",
+          alertDetails: `Has reportado un acceso no reconocido (${blockedInfo}). Las sesiones remotas sospechosas han sido revocadas de inmediato. Tu sesión actual permanece activa y protegida. Te recomendamos cambiar tu contraseña y asegurar que tu 2FA esté configurado.`,
+        });
+
+        sendEmail({
+          to: email,
+          subject,
+          html,
+          text,
+          from: EMAIL_SENDERS.security,
+        }).catch(() => {});
+      }
+
+      res.status(200).json({
+        status: "ok",
+        message: "El acceso remoto no reconocido ha sido revocado y tu sesión actual permanece protegida.",
+        revokedCount,
+      });
+    } catch (err) {
+      logger.error({ err, uid }, "Error en acción 'No fui yo'");
+      res.status(500).json({ error: "No se pudo procesar el reporte de seguridad." });
+    }
+  },
+);
+
 
 export default router;

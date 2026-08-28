@@ -102,8 +102,19 @@ const enGB: Dictionary = {
     "sessionRevokedSuccess": "Remote session logged out successfully.",
     "sessionsRevokedAllSuccess": "All other active sessions have been logged out.",
     "loadingSessions": "Loading active sessions...",
-    "refreshSessions": "Refresh sessions"
+    "refreshSessions": "Refresh sessions",
+    "revokeAllTotal": "Log out of all sessions",
+    "confirmRevokeAllTotal": "Are you sure you want to log out of ALL registered devices?",
+    "sessionsRevokedTotalSuccess": "All sessions have been logged out successfully.",
+    "itWasntMe": "It wasn't me",
+    "itWasntMeSuccess": "The unrecognized access has been blocked and your account secured.",
+    "securityActivityTitle": "Security Activity Log",
+    "securityActivitySubtitle": "Chronological history of security events, accesses and account changes.",
+    "noSecurityActivity": "No recent security activity recorded.",
+    "loadingActivity": "Loading security activity...",
+    "reportSuspiciousActivity": "Don't recognise a device or event? Block with 'It wasn't me'"
   },
+
   "hero": {
     "eyebrow": "Leading brands · Guaranteed quality",
     "titleLead": "Solutions in ",

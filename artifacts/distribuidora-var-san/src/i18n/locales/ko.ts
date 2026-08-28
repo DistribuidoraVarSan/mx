@@ -102,8 +102,19 @@ const ko: Dictionary = {
     "sessionRevokedSuccess": "원격 세션이 성공적으로 종료되었습니다.",
     "sessionsRevokedAllSuccess": "다른 모든 활성 세션이 종료되었습니다.",
     "loadingSessions": "활성 세션 목록을 불러오는 중...",
-    "refreshSessions": "세션 목록 새로고침"
+    "refreshSessions": "세션 목록 새로고침",
+    "revokeAllTotal": "모든 세션 로그아웃",
+    "confirmRevokeAllTotal": "등록된 모든 기기의 접속 세션을 종료하시겠습니까?",
+    "sessionsRevokedTotalSuccess": "모든 세션이 성공적으로 종료되었습니다.",
+    "itWasntMe": "본인이 아닙니다",
+    "itWasntMeSuccess": "알 수 없는 접속이 차단되었으며 계정이 안전하게 보호되었습니다.",
+    "securityActivityTitle": "보안 활동 기록",
+    "securityActivitySubtitle": "계정 보안 이벤트, 로그인 접속 및 보안 설정 변경 내역입니다.",
+    "noSecurityActivity": "최근 보안 활동 기록이 없습니다.",
+    "loadingActivity": "보안 활동 기록을 불러오는 중...",
+    "reportSuspiciousActivity": "알 수 없는 기기나 활동이 있나요? '본인이 아닙니다'로 즉시 차단"
   },
+
   "hero": {
     "eyebrow": "선도 브랜드 · 품질 보증",
     "titleLead": "귀사를 위한 최적의 ",

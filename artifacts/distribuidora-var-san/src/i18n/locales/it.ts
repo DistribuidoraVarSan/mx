@@ -102,8 +102,19 @@ const it: Dictionary = {
     "sessionRevokedSuccess": "Sessione remota terminata con successo.",
     "sessionsRevokedAllSuccess": "Tutte le altre sessioni attive sono state disconnesse.",
     "loadingSessions": "Caricamento sessioni attive...",
-    "refreshSessions": "Aggiorna sessioni"
+    "refreshSessions": "Aggiorna sessioni",
+    "revokeAllTotal": "Disconnetti tutte le sessioni",
+    "confirmRevokeAllTotal": "Sei sicuro di voler disconnettere TUTTI i dispositivi registrati?",
+    "sessionsRevokedTotalSuccess": "Tutte le sessioni sono state disconnesse con successo.",
+    "itWasntMe": "Non sono stato io",
+    "itWasntMeSuccess": "L'accesso non riconosciuto è stato bloccato e il tuo account è protetto.",
+    "securityActivityTitle": "Registro attività di sicurezza",
+    "securityActivitySubtitle": "Cronologia degli eventi di sicurezza, accessi e modifiche all'account.",
+    "noSecurityActivity": "Nessuna attività di sicurezza recente registrata.",
+    "loadingActivity": "Caricamento attività di sicurezza...",
+    "reportSuspiciousActivity": "Non riconosci un dispositivo o un evento? Blocca con 'Non sono stato io'"
   },
+
   "hero": {
     "eyebrow": "Marchi leader · Qualità garantita",
     "titleLead": "Soluzioni di ",
