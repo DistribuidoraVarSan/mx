@@ -93,131 +93,41 @@ type ChatMessage = {
 
 const queryClient = new QueryClient();
 
-const familySlides = [
-  ['CONFIANZA', 'Hoy atendemos desde pequeños negocios hasta empresas que buscan un proveedor confiable para crecer.'],
-  ['RESPALDO', 'Estamos presentes desde la primera cotización hasta la entrega de cada pedido.'],
-  ['RELACIÓN', 'No buscamos una sola venta. Buscamos construir relaciones duraderas con cada cliente.'],
-  ['CRECER', 'Cuando nuestros clientes crecen, sabemos que estamos haciendo bien nuestro trabajo.'],
-  ['BIENVENIDO', 'Gracias por considerar a Distribuidora Var San como parte de tu empresa.'],
+const industrialImages = [
+  'https://images.unsplash.com/photo-1628235176517-71013205a2de?q=85&w=1400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1576918783754-00613f24b68b?q=80&w=1400&auto=format&fit=crop',
+  'https://plus.unsplash.com/premium_photo-1682147303900-9f3debe39f44?q=80&w=1400&auto=format&fit=crop',
+  'https://plus.unsplash.com/premium_photo-1681732426326-13ddfeecb960?q=80&w=1400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1567954970774-58d6aa6c50dc?q=80&w=1400&auto=format&fit=crop',
+  'https://plus.unsplash.com/premium_photo-1664301191471-0dc137e504bc?q=80&w=1400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1662309376159-b95fb193d96b?q=80&w=1400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1620389523785-bdbe8bfc03c0?q=80&w=1400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1682637275957-8e62180efd1b?q=80&w=1400&auto=format&fit=crop',
 ];
 
-const whySlides = [
-  ['Amplio inventario', 'Miles de productos disponibles para responder con rapidez a las necesidades de distintos sectores.', Boxes],
-  ['Marcas reconocidas', 'Trabajamos con fabricantes de prestigio para ofrecer soluciones confiables y de alto desempeño.', Award],
-  ['Atención personalizada', 'Escuchamos las necesidades de cada cliente para brindar asesoría y soluciones a la medida.', Handshake],
-  ['Entregas confiables', 'Coordinamos cada pedido con compromiso para que recibas tus productos en tiempo y forma.', Truck],
-  ['Soluciones integrales', 'Desde seguridad industrial hasta línea médica, reunimos todo lo que tu empresa necesita en un solo lugar.', ClipboardList],
-  ['Compromiso a largo plazo', 'Buscamos construir relaciones duraderas basadas en confianza, servicio y resultados.', CircleCheck],
-] as const;
+const medicalImages = ['/Rt2.png', '/Rt3.png', '/Rt4.png', '/Rt5.png'];
 
-const industrialProducts: Product[] = [
-  {
-    category: 'SEGURIDAD INDUSTRIAL',
-    title: 'Guantes de Seguridad',
-    description: 'Soluciones de protección para manos diseñadas para distintos niveles de riesgo, manipulación, contacto químico, corte y actividades industriales.',
-    features: ['Anticorte', 'Recubiertos', 'Desechables', 'Contra químicos', 'Textiles', 'Piel'],
-    image: 'https://images.unsplash.com/photo-1628235176517-71013205a2de?q=85&w=1400&auto=format&fit=crop',
-  },
-  {
-    category: 'PROTECCIÓN RESPIRATORIA',
-    title: 'Protección Respiratoria',
-    description: 'Equipos y componentes para protección respiratoria frente a partículas, polvos, neblinas, vapores, gases y otros contaminantes.',
-    features: ['Mascarillas', 'Respiradores', 'Filtros y cartuchos', 'Válvulas', 'Accesorios', 'Autorrescatadores'],
-    image: 'https://images.unsplash.com/photo-1576918783754-00613f24b68b?q=80&w=1400&auto=format&fit=crop',
-  },
-  {
-    category: 'PROTECCIÓN OCULAR',
-    title: 'Protección Ocular',
-    description: 'Equipos diseñados para proteger los ojos y el rostro frente a partículas, impactos, proyecciones y salpicaduras durante las actividades laborales.',
-    features: ['Lentes', 'Goggles', 'Máscaras para soldar', 'Micas', 'Cabezales'],
-    image: 'https://plus.unsplash.com/premium_photo-1682147303900-9f3debe39f44?q=80&w=1400&auto=format&fit=crop',
-  },
-  {
-    category: 'PROTECCIÓN AUDITIVA',
-    title: 'Protección Auditiva',
-    description: 'Soluciones para reducir la exposición al ruido y brindar protección auditiva en distintas áreas de trabajo.',
-    features: ['Orejeras', 'Orejeras para casco', 'Tapones desechables', 'Tapones reutilizables'],
-    image: 'https://plus.unsplash.com/premium_photo-1681732426326-13ddfeecb960?q=80&w=1400&auto=format&fit=crop',
-  },
-  {
-    category: 'PROTECCIÓN PARA LA CABEZA',
-    title: 'Cascos de Seguridad',
-    description: 'Protección para la cabeza destinada a construcción, industria, mantenimiento, trabajo en alturas y áreas operativas.',
-    features: ['Cascos industriales', 'Cascos ventilados', 'Cascos para alturas', 'Suspensiones', 'Barbiquejos'],
-    image: 'https://images.unsplash.com/photo-1567954970774-58d6aa6c50dc?q=80&w=1400&auto=format&fit=crop',
-  },
-  {
-    category: 'TRABAJO EN ALTURA',
-    title: 'Protección Contra Alturas',
-    description: 'Sistemas y equipos destinados a prevenir y detener caídas, posicionar al trabajador y desarrollar actividades en altura de forma segura.',
-    features: ['Arneses', 'Líneas de vida', 'Retráctiles', 'Eslingas', 'Anclajes', 'Absorbedores'],
-    image: 'https://plus.unsplash.com/premium_photo-1664301191471-0dc137e504bc?q=80&w=1400&auto=format&fit=crop',
-  },
-  {
-    category: 'VESTUARIO Y PROTECCIÓN',
-    title: 'Ropa Industrial',
-    description: 'Prendas, accesorios y soluciones de protección personal para actividades operativas y distintos sectores industriales.',
-    features: ['Ropa industrial', 'Desechables', 'Impermeables', 'Calzado industrial', 'Overoles', 'Ergonómicos'],
-    image: 'https://images.unsplash.com/photo-1662309376159-b95fb193d96b?q=80&w=1400&auto=format&fit=crop',
-  },
-  {
-    category: 'SEÑALIZACIÓN Y TRÁNSITO',
-    title: 'Seguridad Vial',
-    description: 'Elementos de señalización, delimitación y alta visibilidad para proteger zonas de tránsito y trabajo.',
-    features: ['Chalecos', 'Cintas', 'Cadenas', 'Postes', 'Trafitambos', 'Conos', 'Señalización'],
-    image: 'https://images.unsplash.com/photo-1620389523785-bdbe8bfc03c0?q=80&w=1400&auto=format&fit=crop',
-  },
-  {
-    category: 'CONTROL DE ENERGÍA',
-    title: 'Bloqueo y Etiquetado',
-    description: 'Dispositivos para procedimientos de bloqueo y etiquetado orientados al aislamiento seguro de fuentes de energía durante el mantenimiento.',
-    features: ['Candados', 'Aspas de bloqueo', 'Cajas grupales', 'Bloqueos eléctricos', 'Bloqueos de válvulas', 'Etiquetas'],
-    image: 'https://images.unsplash.com/photo-1682637275957-8e62180efd1b?q=80&w=1400&auto=format&fit=crop',
-  },
+const whyIcons = [Boxes, Award, Handshake, Truck, ClipboardList, CircleCheck];
+
+const sectorIcons = [
+  Building2,
+  BriefcaseBusiness,
+  Store,
+  Factory,
+  Laptop,
+  Hospital,
+  ShoppingBag,
+  Building2,
+  BookOpen,
+  Store,
 ];
-
-const medicalProducts: Product[] = [
-{
-category: 'LÍNEA MÉDICA · MANEJO DE RPBI',
-title: 'Recolectores',
-description: 'Soluciones para la recolección segura de residuos peligrosos biológico-infecciosos, incluyendo punzocortantes y residuos líquidos.',
-features: ['Punzocortantes', 'Líquidos', 'Sujetadores', 'Canastillas', 'Botes con pedal'],
-image: '/Rt2.png',
-},
-{
-category: 'LÍNEA MÉDICA · RESIDUOS',
-title: 'Bolsas RPBI',
-description: 'Bolsas para la identificación, separación y manejo de residuos, disponibles en diferentes capacidades y presentaciones.',
-features: ['Rojo', 'Amarillo', 'Diferentes capacidades', 'Calibre', 'Identificación'],
-image: '/Rt3.png',
-},
-{
-category: 'LÍNEA MÉDICA · ALMACENAMIENTO',
-title: 'Almacenamiento Temporal',
-description: 'Soluciones para organizar y almacenar temporalmente residuos y materiales dentro de espacios médicos y operativos.',
-features: ['Organización', 'Seguridad', 'Traslado', 'Resistencia', 'Señalización'],
-image: '/Rt4.png',
-},
-{
-category: 'LÍNEA MÉDICA · CONTENEDORES',
-title: 'Contenedores',
-description: 'Contenedores y accesorios para el manejo responsable de residuos y suministros en instituciones de salud.',
-features: ['Contenedores', 'Tapas', 'Pedal', 'Recolección', 'Higiene'],
-image: '/Rt5.png',
-},
-];
-
-
-const sectors = [
-  ['Empresas', Building2], ['Oficinas', BriefcaseBusiness], ['Comercios', Store], ['Industrias', Factory], ['Escuelas', Laptop],
-  ['Hospitales y Clínicas', Hospital], ['Restaurantes', ShoppingBag], ['Hoteles', Building2], ['Instituciones', BookOpen], ['Negocios en general', Store],
-] as const;
 
 const brands = ['DermaCare', '3M', 'SteelPro Safety', 'SUK', 'SAFE', 'Climax', 'ABUS'];
 
 function BrandMark() {
   return <img className="brand-mark" src={varSanLogo} alt="Logo oficial de Distribuidora Var San" />;
 }
+
 
 function App() {
   const { language, t } = useLanguage();
@@ -326,9 +236,27 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
     return unsubscribe;
   }, []);
 
+  const industrialProducts = t.solutions.industrialProducts.map((p, idx) => ({
+    ...p,
+    image: industrialImages[idx] ?? industrialImages[0],
+  }));
+
+  const medicalProducts = t.solutions.medicalProducts.map((p, idx) => ({
+    ...p,
+    image: medicalImages[idx] ?? medicalImages[0],
+  }));
+
   const products = catalogLine === 'industrial' ? industrialProducts : medicalProducts;
   const product = products[catalogIndex] ?? products[0];
-  const WhyIcon = whySlides[whyIndex][2];
+
+  const whySlides = t.whyChoose.reasons.map(([title, desc], idx) => [
+    title,
+    desc,
+    whyIcons[idx] ?? Boxes,
+  ] as const);
+
+  const WhyIcon = whySlides[whyIndex]?.[2] ?? Boxes;
+
 
 const navigateAndClose = (event: MouseEvent<HTMLAnchorElement>) => {
 setMobileMenu(false);
@@ -690,6 +618,10 @@ t.account.errorGeneric
         <div className="container nav-container">
           <a href="#inicio" className="nav-logo" onClick={navigateAndClose} data-testid="link-brand">
             <img className="nav-logo-image" src={varSanLogo} alt="Logo oficial de Distribuidora Var San" />
+            <span className="nav-wordmark">
+              <strong>Distribuidora</strong>
+              <small>Var San</small>
+            </span>
           </a>
           <nav aria-label={t.nav.navegacionPrincipal}>
             <ul className={`nav-links${mobileMenu ? ' is-open' : ''}`}>
@@ -711,8 +643,8 @@ t.account.errorGeneric
           <div className="nav-actions">
             <LanguageSelector />
             <button className="account-button" onClick={() => { if (currentUser) setPortalOpen(true); else { setAccountOpen(true); setAccountMessage(''); } }} data-testid="button-open-account"><User size={15} /><span>{t.nav.miCuenta}</span></button>
+            <button className="nav-toggle" aria-label={mobileMenu ? t.nav.cerrarMenu : t.nav.abrirMenu} aria-expanded={mobileMenu} onClick={() => setMobileMenu(!mobileMenu)} data-testid="button-mobile-menu">{mobileMenu ? <X size={22} /> : <Menu size={22} />}</button>
           </div>
-          <button className="nav-toggle" aria-label={mobileMenu ? t.nav.cerrarMenu : t.nav.abrirMenu} aria-expanded={mobileMenu} onClick={() => setMobileMenu(!mobileMenu)} data-testid="button-mobile-menu">{mobileMenu ? <X size={22} /> : <Menu size={22} />}</button>
         </div>
       </header>
 
@@ -733,71 +665,275 @@ t.account.errorGeneric
         </section>
 
         <section id="esencia" className="section section--paper">
-          <div className="container"><div className="section-heading section-heading--center"><span className="eyebrow">Nuestra esencia</span><h2 className="section-title">Los valores que nos representan.</h2><p className="section-lede">{t.essence.lede}</p></div>
+          <div className="container">
+            <div className="section-heading section-heading--center">
+              <span className="eyebrow">{t.essence.eyebrow}</span>
+              <h2 className="section-title">{t.essence.title}</h2>
+              <p className="section-lede">{t.essence.lede}</p>
+            </div>
             <div className="value-grid">
-              {[['01', 'Calidad', 'Seleccionamos cuidadosamente cada producto para ofrecer soluciones confiables y de alto rendimiento.', Award], ['02', 'Cercanía', 'Brindamos atención personalizada y acompañamiento durante cada pedido.', Handshake], ['03', 'Compromiso', 'Respondemos con responsabilidad, puntualidad y un servicio pensado para tu empresa.', ShieldCheck], ['04', 'Confianza', 'Construimos relaciones duraderas basadas en honestidad, respaldo y resultados consistentes.', CircleCheck]].map(([number, title, text, Icon]) => <article className="value-card" data-number={number} key={title as string} data-testid={`card-value-${number}`}><span className="value-icon"><Icon size={20} /></span><h3>{title as string}</h3><p>{text as string}</p></article>)}
+              {[
+                ['01', t.essence.values.quality.title, t.essence.values.quality.description, Award],
+                ['02', t.essence.values.closeness.title, t.essence.values.closeness.description, Handshake],
+                ['03', t.essence.values.commitment.title, t.essence.values.commitment.description, ShieldCheck],
+                ['04', t.essence.values.trust.title, t.essence.values.trust.description, CircleCheck],
+              ].map(([number, title, text, Icon]) => (
+                <article className="value-card" data-number={number} key={title as string} data-testid={`card-value-${number}`}>
+                  <span className="value-icon"><Icon size={20} /></span>
+                  <h3>{title as string}</h3>
+                  <p>{text as string}</p>
+                </article>
+              ))}
             </div>
           </div>
         </section>
 
         <section id="familia" className="family-section">
-          <div className="container"><div className="family-layout"><div><span className="eyebrow">Forma parte de la familia Var San</span><h2 className="section-title">{t.family.title}</h2></div><div className="slider-controls"><button className="icon-button" onClick={() => setFamilyIndex((familyIndex - 1 + familySlides.length) % familySlides.length)} aria-label="Anterior" data-testid="button-family-previous"><ChevronLeft size={18} /></button><button className="icon-button" onClick={() => setFamilyIndex((familyIndex + 1) % familySlides.length)} aria-label="Siguiente" data-testid="button-family-next"><ChevronRight size={18} /></button></div></div>
-            <article className="family-card" aria-live="polite" data-testid="content-family-slide"><div className="family-card-content"><span className="family-label">Experiencia Var San</span><h3>{familySlides[familyIndex][0]}</h3><p>{familySlides[familyIndex][1]}</p></div></article><div className="family-dots">{familySlides.map((slide, index) => <button className={`dot${index === familyIndex ? ' active' : ''}`} key={slide[0]} onClick={() => setFamilyIndex(index)} aria-label={`Ver experiencia ${slide[0].toLowerCase()}`} data-testid={`button-family-dot-${index}`} />)}</div>
+          <div className="container">
+            <div className="family-layout">
+              <div>
+                <span className="eyebrow">{t.family.eyebrow}</span>
+                <h2 className="section-title">{t.family.title}</h2>
+              </div>
+              <div className="slider-controls">
+                <button className="icon-button" onClick={() => setFamilyIndex((familyIndex - 1 + t.family.slides.length) % t.family.slides.length)} aria-label={t.common.previous} data-testid="button-family-previous">
+                  <ChevronLeft size={18} />
+                </button>
+                <button className="icon-button" onClick={() => setFamilyIndex((familyIndex + 1) % t.family.slides.length)} aria-label={t.common.next} data-testid="button-family-next">
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            </div>
+            <article className="family-card" aria-live="polite" data-testid="content-family-slide">
+              <div className="family-card-content">
+                <span className="family-label">{t.family.subtitle}</span>
+                <h3>{t.family.slides[familyIndex]?.[0]}</h3>
+                <p>{t.family.slides[familyIndex]?.[1]}</p>
+              </div>
+            </article>
+            <div className="family-dots">
+              {t.family.slides.map((slide, index) => (
+                <button
+                  className={`dot${index === familyIndex ? ' active' : ''}`}
+                  key={slide[0]}
+                  onClick={() => setFamilyIndex(index)}
+                  aria-label={t.family.ariaLabel.replace('{slide}', slide[0].toLowerCase())}
+                  data-testid={`button-family-dot-${index}`}
+                />
+              ))}
+            </div>
           </div>
         </section>
 
         <section id="soluciones" className="section catalog">
-          <div className="container"><div className="section-heading"><span className="eyebrow">Nuestras soluciones</span><h2 className="section-title">Encuentra la solución ideal para tu empresa</h2><p className="section-lede">El botón <strong>“Consultar catálogo completo”</strong> abrirá el PDF de la línea seleccionada. Cada categoría (<strong>Seguridad Industrial</strong> y <strong>Línea Médica</strong>) cuenta con su propio catálogo independiente.</p></div>
-            <div className="catalog-lines" role="tablist" aria-label="Líneas de productos"><button className={`line-button${catalogLine === 'industrial' ? ' active' : ''}`} onClick={() => { setCatalogLine('industrial'); setCatalogIndex(0); }} role="tab" aria-selected={catalogLine === 'industrial'} data-testid="button-line-industrial"><span className="line-number">01</span><span className="line-text">SEGURIDAD INDUSTRIAL</span></button><button className={`line-button${catalogLine === 'medical' ? ' active' : ''}`} onClick={() => { setCatalogLine('medical'); setCatalogIndex(0); }} role="tab" aria-selected={catalogLine === 'medical'} data-testid="button-line-medical"><span className="line-number">02</span><span className="line-text">LÍNEA MÉDICA</span></button></div>
-            <div className="catalog-tabs" role="tablist" aria-label="Categorías"><span className="sr-only">Categorías de productos</span>{products.map((item, index) => <button className={`catalog-tab${catalogIndex === index ? ' active' : ''}`} key={item.title} onClick={() => setCatalogIndex(index)} data-testid={`button-catalog-tab-${index}`}>{item.title.replace('Protección ', '').replace(' de Seguridad', '').replace(' Contra ', ' ')}</button>)}</div>
-            <article className="catalog-stage" aria-live="polite" data-testid="content-catalog-product"><div className="catalog-visual"><div className="catalog-counter"><strong>{String(catalogIndex + 1).padStart(2, '0')}</strong> / {String(products.length).padStart(2, '0')}</div><img src={product.image} alt={product.title} /><div className="catalog-arrows"><button className="icon-button" onClick={() => setCatalogIndex((catalogIndex - 1 + products.length) % products.length)} aria-label="Categoría anterior" data-testid="button-catalog-previous"><ArrowLeft size={17} /></button><button className="icon-button" onClick={() => setCatalogIndex((catalogIndex + 1) % products.length)} aria-label="Categoría siguiente" data-testid="button-catalog-next"><ArrowRight size={17} /></button></div></div><div className="catalog-info"><div className="catalog-meta"><span className="catalog-category">{product.category}</span><span className="catalog-index">{String(catalogIndex + 1).padStart(2, '0')}</span></div><h3>{product.title}</h3><p>{product.description}</p><ul className="feature-list">{product.features.map((feature) => <li key={feature}>{feature}</li>)}</ul><a href={catalogLine === 'medical' ? 'catalogo-medico.pdf' : 'catalogo.pdf'} target="_blank" rel="noopener noreferrer" className="catalog-link" data-testid="link-full-catalog">Consultar catálogo completo <ArrowUpRight size={15} /></a></div></article>
+          <div className="container">
+            <div className="section-heading">
+              <span className="eyebrow">{t.solutions.eyebrow}</span>
+              <h2 className="section-title">{t.solutions.title}</h2>
+              <p className="section-lede">
+                {t.solutions.catalogPart1}
+                <strong>{t.solutions.catalogStrongPart}</strong>
+                {t.solutions.catalogPart2}
+                <strong>{t.solutions.lineIndustrial}</strong>
+                {t.solutions.andConjunction}
+                <strong>{t.solutions.lineMedical}</strong>
+                {t.solutions.catalogPart3}
+              </p>
+            </div>
+            <div className="catalog-lines" role="tablist" aria-label={t.solutions.tabListLabel}>
+              <button
+                className={`line-button${catalogLine === 'industrial' ? ' active' : ''}`}
+                onClick={() => { setCatalogLine('industrial'); setCatalogIndex(0); }}
+                role="tab"
+                aria-selected={catalogLine === 'industrial'}
+                data-testid="button-line-industrial"
+              >
+                <span className="line-number">01</span>
+                <span className="line-text">{t.solutions.lineIndustrial}</span>
+              </button>
+              <button
+                className={`line-button${catalogLine === 'medical' ? ' active' : ''}`}
+                onClick={() => { setCatalogLine('medical'); setCatalogIndex(0); }}
+                role="tab"
+                aria-selected={catalogLine === 'medical'}
+                data-testid="button-line-medical"
+              >
+                <span className="line-number">02</span>
+                <span className="line-text">{t.solutions.lineMedical}</span>
+              </button>
+            </div>
+            <div className="catalog-tabs" role="tablist" aria-label={t.solutions.categoriesLabel}>
+              <span className="sr-only">{t.solutions.categoriesScreenReader}</span>
+              {products.map((item, index) => (
+                <button
+                  className={`catalog-tab${catalogIndex === index ? ' active' : ''}`}
+                  key={item.tabTitle}
+                  onClick={() => setCatalogIndex(index)}
+                  data-testid={`button-catalog-tab-${index}`}
+                >
+                  {item.tabTitle}
+                </button>
+              ))}
+            </div>
+            <article className="catalog-stage" aria-live="polite" data-testid="content-catalog-product">
+              <div className="catalog-visual">
+                <div className="catalog-counter">
+                  <strong>{String(catalogIndex + 1).padStart(2, '0')}</strong> / {String(products.length).padStart(2, '0')}
+                </div>
+                <img src={product.image} alt={product.title} />
+                <div className="catalog-arrows">
+                  <button
+                    className="icon-button"
+                    onClick={() => setCatalogIndex((catalogIndex - 1 + products.length) % products.length)}
+                    aria-label={t.solutions.previousCategory}
+                    data-testid="button-catalog-previous"
+                  >
+                    <ArrowLeft size={17} />
+                  </button>
+                  <button
+                    className="icon-button"
+                    onClick={() => setCatalogIndex((catalogIndex + 1) % products.length)}
+                    aria-label={t.solutions.nextCategory}
+                    data-testid="button-catalog-next"
+                  >
+                    <ArrowRight size={17} />
+                  </button>
+                </div>
+              </div>
+              <div className="catalog-info">
+                <div className="catalog-meta">
+                  <span className="catalog-category">{product.category}</span>
+                  <span className="catalog-index">{String(catalogIndex + 1).padStart(2, '0')}</span>
+                </div>
+                <h3>{product.title}</h3>
+                <p>{product.description}</p>
+                <ul className="feature-list">
+                  {product.features.map((feature) => (
+                    <li key={feature}>{feature}</li>
+                  ))}
+                </ul>
+                <a
+                  href={catalogLine === 'medical' ? 'catalogo-medico.pdf' : 'catalogo.pdf'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="catalog-link"
+                  data-testid="link-full-catalog"
+                >
+                  {t.solutions.fullCatalog} <ArrowUpRight size={15} />
+                </a>
+              </div>
+            </article>
           </div>
         </section>
 
         <section id="eleccion" className="section section--white">
-          <div className="container why-layout"><div className="why-intro"><span className="eyebrow">¿Por qué elegirnos?</span><h2 className="section-title">¿Por qué elegir Distribuidora Var San?</h2><p className="section-lede">{t.whyChoose.lede}</p><div className="why-dots">{whySlides.map((slide, index) => <button className={`dot${index === whyIndex ? ' active' : ''}`} key={slide[0]} onClick={() => setWhyIndex(index)} aria-label={`Ver razón ${index + 1}`} data-testid={`button-why-dot-${index}`} />)}</div></div><div className="why-slider"><button className="icon-button" onClick={() => setWhyIndex((whyIndex - 1 + whySlides.length) % whySlides.length)} aria-label="Razón anterior" data-testid="button-why-previous"><ChevronLeft size={19} /></button><article className="why-card" data-testid="content-why-slide"><span className="why-icon"><WhyIcon size={23} /></span><h3>{whySlides[whyIndex][0]}</h3><p>{whySlides[whyIndex][1]}</p></article><button className="icon-button" onClick={() => setWhyIndex((whyIndex + 1) % whySlides.length)} aria-label="Razón siguiente" data-testid="button-why-next"><ChevronRight size={19} /></button></div></div>
+          <div className="container why-layout">
+            <div className="why-intro">
+              <span className="eyebrow">{t.whyChoose.eyebrow}</span>
+              <h2 className="section-title">{t.whyChoose.title}</h2>
+              <p className="section-lede">{t.whyChoose.lede}</p>
+              <div className="why-dots">
+                {whySlides.map((slide, index) => (
+                  <button
+                    className={`dot${index === whyIndex ? ' active' : ''}`}
+                    key={slide[0]}
+                    onClick={() => setWhyIndex(index)}
+                    aria-label={t.whyChoose.reasonLabel.replace('{number}', String(index + 1))}
+                    data-testid={`button-why-dot-${index}`}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="why-slider">
+              <button
+                className="icon-button"
+                onClick={() => setWhyIndex((whyIndex - 1 + whySlides.length) % whySlides.length)}
+                aria-label={t.whyChoose.previousReason}
+                data-testid="button-why-previous"
+              >
+                <ChevronLeft size={19} />
+              </button>
+              <article className="why-card" data-testid="content-why-slide">
+                <span className="why-icon"><WhyIcon size={23} /></span>
+                <h3>{whySlides[whyIndex][0]}</h3>
+                <p>{whySlides[whyIndex][1]}</p>
+              </article>
+              <button
+                className="icon-button"
+                onClick={() => setWhyIndex((whyIndex + 1) % whySlides.length)}
+                aria-label={t.whyChoose.nextReason}
+                data-testid="button-why-next"
+              >
+                <ChevronRight size={19} />
+              </button>
+            </div>
+          </div>
         </section>
 
-        <section id="impulsamos" className="section section--paper"><div className="container"><div className="section-heading"><span className="eyebrow">Sectores que impulsamos</span><h2 className="section-title">Soluciones especializadas para empresas <em>{t.sectors.titleEmphasis}</em></h2></div><div className="sectors-grid">{sectors.map(([name, Icon]) => <article className="sector-item" key={name} data-testid={`card-sector-${name}`}><Icon size={23} /><h3>{name}</h3></article>)}</div></div></section>
+        <section id="impulsamos" className="section section--paper">
+          <div className="container">
+            <div className="section-heading">
+              <span className="eyebrow">{t.sectors.eyebrow}</span>
+              <h2 className="section-title">
+                {t.sectors.title} <em>{t.sectors.titleEmphasis}</em>
+              </h2>
+            </div>
+            <div className="sectors-grid">
+              {t.sectors.names.map((name, index) => {
+                const Icon = sectorIcons[index] ?? Store;
+                return (
+                  <article className="sector-item" key={name} data-testid={`card-sector-${name}`}>
+                    <Icon size={23} />
+                    <h3>{name}</h3>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
 
-        <section id="marcas" className="section brands-section"><div className="container"><div className="section-heading section-heading--center"><span className="eyebrow">Marcas</span><h2 className="section-title">Marcas que trabajamos</h2><p className="section-lede">Distribuimos productos originales de fabricantes reconocidos por su calidad y seguridad.</p></div><div className="brands-grid">{brands.map((brand) => <div className="brand-card" key={brand} data-testid={`card-brand-${brand}`}><div><strong>{brand}</strong><small>{t.brands.distributed}</small></div></div>)}</div></div></section>
+        <section id="marcas" className="section brands-section">
+          <div className="container">
+            <div className="section-heading section-heading--center">
+              <span className="eyebrow">{t.brands.eyebrow}</span>
+              <h2 className="section-title">{t.brands.title}</h2>
+              <p className="section-lede">{t.brands.lede}</p>
+            </div>
+            <div className="brands-grid">
+              {brands.map((brand) => (
+                <div className="brand-card" key={brand} data-testid={`card-brand-${brand}`}>
+                  <div>
+                    <strong>{brand}</strong>
+                    <small>{t.brands.distributed}</small>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
         <section id="proceso" className="section section--paper">
-  <div className="container">
-    <div className="section-heading section-heading--center">
-      <span className="eyebrow">{t.process.eyebrow}</span>
-      <h2 className="section-title">
-        Así de <em>sencillo</em> es trabajar con nosotros
-      </h2>
-    </div>
+          <div className="container">
+            <div className="section-heading section-heading--center">
+              <span className="eyebrow">{t.process.eyebrow}</span>
+              <h2 className="section-title">
+                {t.process.title.split(t.process.titleEmphasis)[0]}
+                <em>{t.process.titleEmphasis}</em>
+                {t.process.title.split(t.process.titleEmphasis)[1] ?? ''}
+              </h2>
+            </div>
 
-    <div className="process-steps">
-      {[
-        [
-          '1',
-          'Solicita tu cotización',
-          'Contáctanos por WhatsApp, teléfono o correo electrónico y comparte los productos que necesitas.',
-        ],
-        [
-          '2',
-          'Elaboramos tu propuesta',
-          'Revisamos tu solicitud y preparamos una cotización personalizada de acuerdo con tus requerimientos.',
-        ],
-        [
-          '3',
-          'Coordinamos tu pedido',
-          'Una vez aceptada la cotización, coordinamos contigo la entrega o la recolección de los productos en la fecha acordada.',
-        ],
-      ].map(([number, title, text]) => (
-        <article className="process-step" key={number}>
-          <div className="step-number">{number}</div>
-          <h3>{title}</h3>
-          <p>{text}</p>
-        </article>
-      ))}
-    </div>
-  </div>
-</section>
+            <div className="process-steps">
+              {t.process.steps.map(([number, title, text]) => (
+                <article className="process-step" key={number}>
+                  <div className="step-number">{number}</div>
+                  <h3>{title}</h3>
+                  <p>{text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
 
 <section id="contacto" className="section contact-section">
   <div className="container contact-grid">
@@ -816,7 +952,7 @@ t.account.errorGeneric
         <div className="contact-detail">
           <Mail size={18} />
           <div>
-            <span>Correo electrónico</span>
+            <span>{t.contact.email}</span>
             <a
               href="mailto:distribuidora.varsan@outlook.com"
               data-testid="link-email"
@@ -829,16 +965,16 @@ t.account.errorGeneric
         <div className="contact-detail">
           <Phone size={18} />
           <div>
-            <span>Teléfono y WhatsApp</span>
-            <strong>Próximamente.</strong>
+            <span>{t.contact.phone}</span>
+            <strong>{t.contact.upcoming}</strong>
           </div>
         </div>
 
         <div className="contact-detail">
           <Clock3 size={18} />
           <div>
-            <span>Atención</span>
-            <strong>Empresas, industrias, comercios e instituciones</strong>
+            <span>{t.contact.attention}</span>
+            <strong>{t.contact.attentionInfo}</strong>
           </div>
         </div>
       </div>
@@ -852,7 +988,7 @@ t.account.errorGeneric
         onSubmit={handleContactSubmit}
       >
         <label>
-          Nombre
+          {t.contact.form.nameLabel}
           <input
             type="text"
             name="name"
@@ -861,14 +997,14 @@ t.account.errorGeneric
           />
           <ValidationError
             className="field-error"
-            prefix="Nombre"
+            prefix={t.contact.form.nameLabel}
             field="name"
             errors={contactState.errors}
           />
         </label>
 
         <label>
-          Correo electrónico
+          {t.contact.form.emailLabel}
           <input
             type="email"
             name="email"
@@ -877,14 +1013,14 @@ t.account.errorGeneric
           />
           <ValidationError
             className="field-error"
-            prefix="Correo electrónico"
+            prefix={t.contact.form.emailLabel}
             field="email"
             errors={contactState.errors}
           />
         </label>
 
         <label>
-          Empresa
+          {t.contact.form.companyLabel}
           <input
             type="text"
             name="company"
@@ -892,14 +1028,14 @@ t.account.errorGeneric
           />
           <ValidationError
             className="field-error"
-            prefix="Empresa"
+            prefix={t.contact.form.companyLabel}
             field="company"
             errors={contactState.errors}
           />
         </label>
 
         <label>
-          Mensaje
+          {t.contact.form.messageLabel}
           <textarea
             name="message"
             required
@@ -907,14 +1043,14 @@ t.account.errorGeneric
           />
           <ValidationError
             className="field-error"
-            prefix="Mensaje"
+            prefix={t.contact.form.messageLabel}
             field="message"
             errors={contactState.errors}
           />
         </label>
 
         <button type="submit" disabled={contactState.submitting} data-testid="button-submit-contact">
-          {contactState.submitting ? 'Enviando...' : 'Enviar solicitud'}
+          {contactState.submitting ? t.contact.submitting : t.contact.form.submitButton}
           {contactState.submitting ? (
             <Loader2 size={17} className="newsletter-spinner" />
           ) : (
@@ -923,7 +1059,6 @@ t.account.errorGeneric
         </button>
       </form>
 
-
       {contactState.succeeded && (
         <p
           className="contact-message contact-message--success"
@@ -931,14 +1066,10 @@ t.account.errorGeneric
           data-testid="status-contact"
         >
           <CircleCheck size={15} />
-          ¡Solicitud enviada correctamente! Nos pondremos en contacto contigo a la brevedad.
+          {t.contact.submitSuccess}
         </p>
       )}
 
-      {/* Errores generales (no atados a un campo puntual) que devuelve
-          Formspree, por ejemplo "Form not found" en un 404: sin field, este
-          ValidationError reporta esos errores generales tal cual los envía
-          Formspree, en lugar de un mensaje genérico inventado. */}
       <ValidationError
         errors={contactState.errors}
         className="contact-message contact-message--error"
@@ -961,13 +1092,13 @@ t.account.errorGeneric
                 onChange={(event) => { setNewsletterEmail(event.target.value); if (newsletterStatus !== 'idle') { setNewsletterStatus('idle'); setNewsletterMessage(''); } }}
                 placeholder={t.newsletter.placeholder}
                 required
-                aria-label="Correo electrónico para suscripción al newsletter"
+                aria-label={t.newsletter.ariaLabelInput}
                 disabled={newsletterStatus === 'loading'}
                 data-testid="input-newsletter-email"
               />
               <button
                 type="submit"
-                aria-label="Suscribirme al newsletter"
+                aria-label={t.newsletter.ariaLabelButton}
                 disabled={newsletterStatus === 'loading'}
                 data-testid="button-newsletter-submit"
               >
@@ -985,113 +1116,111 @@ t.account.errorGeneric
       </main>
 
       <footer className="footer">
-<div className="container">
-<div className="footer-grid">
-<div>
-<div className="footer-brand-row">
-<BrandMark />
-<div>
-<h2>Distribuidora Var San</h2>
-<p>Soluciones en limpieza y protección</p>
-</div>
-</div>
+        <div className="container">
+          <div className="footer-grid">
+            <div>
+              <div className="footer-brand-row">
+                <BrandMark />
+                <div>
+                  <h2>Distribuidora Var San</h2>
+                  <p>{t.footer.brandDescription}</p>
+                </div>
+              </div>
 
-<p className="footer-description">
-Soluciones en limpieza y protección para tu empresa.
-Comprometidos con brindar soluciones confiables en limpieza,
-mantenimiento y protección para empresas, comercios e instituciones.
-</p>
-</div>
+              <p className="footer-description">
+                {t.footer.footerTagline}
+              </p>
+            </div>
 
-<div>
-<h3>{t.footer.navigationHeading}</h3>
-<ul className="footer-links">
-{([
-['inicio', t.nav.inicio],
-['esencia', t.nav.esencia],
-['familia', t.nav.familia],
-['soluciones', t.nav.soluciones],
-['eleccion', t.nav.eleccion],
-] as const).map(([id, label]) => (
-<li key={id}>
-<a
-href={`#${id}`}
-onClick={navigateAndClose}
-data-testid={`footer-link-${id}`}
->
-{label}
-</a>
-</li>
-))}
-</ul>
-</div>
+            <div>
+              <h3>{t.footer.navigationHeading}</h3>
+              <ul className="footer-links">
+                {([
+                  ['inicio', t.nav.inicio],
+                  ['esencia', t.nav.esencia],
+                  ['familia', t.nav.familia],
+                  ['soluciones', t.nav.soluciones],
+                  ['eleccion', t.nav.eleccion],
+                ] as const).map(([id, label]) => (
+                  <li key={id}>
+                    <a
+                      href={`#${id}`}
+                      onClick={navigateAndClose}
+                      data-testid={`footer-link-${id}`}
+                    >
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-<div>
-<h3>{t.footer.contactHeading}</h3>
-<ul className="footer-links">
-<li>
-<a
-href="mailto:distribuidora.varsan@outlook.com"
-data-testid="footer-link-email"
->
-distribuidora.varsan@outlook.com
-</a>
-</li>
+            <div>
+              <h3>{t.footer.contactHeading}</h3>
+              <ul className="footer-links">
+                <li>
+                  <a
+                    href="mailto:distribuidora.varsan@outlook.com"
+                    data-testid="footer-link-email"
+                  >
+                    distribuidora.varsan@outlook.com
+                  </a>
+                </li>
 
-<li>
-<span data-testid="footer-link-phone">
-Número (Próximamente)
-</span>
-</li>
+                <li>
+                  <span data-testid="footer-link-phone">
+                    {t.footer.upcoming}
+                  </span>
+                </li>
 
-<li>
-<a
-href="#contacto"
-onClick={navigateAndClose}
-data-testid="footer-link-quote"
->
-{t.footer.requestQuote}
-</a>
-</li>
-</ul>
-</div>
-</div>
+                <li>
+                  <a
+                    href="#contacto"
+                    onClick={navigateAndClose}
+                    data-testid="footer-link-quote"
+                  >
+                    {t.footer.requestQuote}
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
 
-<div className="footer-bottom">
-<span>
-{t.footer.rightsReserved.replace('{year}', '2026')}
-{' '}
-{t.footer.tagline}
-</span>
+          <div className="footer-bottom">
+            <span>
+              {t.footer.rightsReserved.replace('{year}', '2026')}
+              {' '}
+              {t.footer.tagline}
+            </span>
 
-<span className="footer-legal">
-<a
-href="/privacidad"
-onClick={navigateAndClose}
-data-testid="footer-link-privacy"
->
-{t.footer.privacyNotice}
-</a>
+            <span className="footer-legal">
+              <a
+                href="/privacidad"
+                onClick={navigateAndClose}
+                data-testid="footer-link-privacy"
+              >
+                {t.footer.privacyNotice}
+              </a>
 
-<a
-href="/cookies"
-onClick={navigateAndClose}
-data-testid="footer-link-cookies"
->
-{t.footer.cookiesPolicy}
-</a>
+              <a
+                href="/cookies"
+                onClick={navigateAndClose}
+                data-testid="footer-link-cookies"
+              >
+                {t.footer.cookiesPolicy}
+              </a>
 
-<a
-href="/terminos"
-onClick={navigateAndClose}
->
-{t.footer.termsAndConditions}
-</a>
-</span>
+              <a
+                href="/terminos"
+                onClick={navigateAndClose}
+              >
+                {t.footer.termsAndConditions}
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
 
-</div>
-</div>
-</footer>
 
 
       <button className="chat-trigger" onClick={() => setChatOpen(!chatOpen)} aria-label={chatOpen ? t.chatbot.closeButtonLabel : t.chatbot.openButtonLabel} data-testid="button-open-chat">{chatOpen ? <X size={21} /> : <MessageCircle size={21} />}</button>

@@ -1,8 +1,35 @@
 /**
- * Forma que debe tener CADA archivo en /i18n/locales.
- * Si agregas una clave nueva aquí, TypeScript te obligará
- * a agregarla en los 8 idiomas (así no se te olvida ninguno).
+ * Estructura de diccionario i18n para Distribuidora Var San.
+ * Si agregas una clave aquí, TypeScript verificará los 8 idiomas.
  */
+
+export type LegalSection = {
+  title?: string;
+  paragraphs?: string[];
+  list?: string[];
+  highlight?: string;
+  subsections?: Array<{
+    title: string;
+    paragraphs?: string[];
+    list?: string[];
+  }>;
+};
+
+export type LegalDoc = {
+  title: string;
+  lastUpdated: string;
+  intro: string[];
+  sections: LegalSection[];
+  contactBlock: {
+    brand: string;
+    email: string;
+  };
+  signoff: {
+    brand: string;
+    tagline: string;
+  };
+};
+
 export type Dictionary = {
   nav: {
     inicio: string;
@@ -34,6 +61,7 @@ export type Dictionary = {
     previous: string;
     next: string;
     loading: string;
+    backToHome: string;
   };
 
   cookies: {
@@ -165,6 +193,23 @@ export type Dictionary = {
     previousCategory: string;
     nextCategory: string;
     fullCatalog: string;
+    lineIndustrial: string;
+    lineMedical: string;
+    andConjunction: string;
+    industrialProducts: Array<{
+      category: string;
+      title: string;
+      tabTitle: string;
+      description: string;
+      features: string[];
+    }>;
+    medicalProducts: Array<{
+      category: string;
+      title: string;
+      tabTitle: string;
+      description: string;
+      features: string[];
+    }>;
   };
 
   whyChoose: {
@@ -208,6 +253,9 @@ export type Dictionary = {
     phone: string;
     attention: string;
     attentionInfo: string;
+    upcoming: string;
+    submitting: string;
+    submitSuccess: string;
     form: {
       nameLabel: string;
       emailLabel: string;
@@ -257,10 +305,18 @@ export type Dictionary = {
     termsAndConditions: string;
     brandDescription: string;
     footerTagline: string;
+    upcoming: string;
   };
 
   splash: {
     ariaLabel: string;
     tagline: string;
+  };
+
+  legal: {
+    backToHome: string;
+    cookies: LegalDoc;
+    privacy: LegalDoc;
+    terms: LegalDoc;
   };
 };
