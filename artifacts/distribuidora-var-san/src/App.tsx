@@ -68,7 +68,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import varSanLogo from '@assets/8be73d9d-79af-44b9-bb97-68ad86e72b0e_1786235359068.jpeg';
+import varSanLogo from '@assets/dvs-logo-transparent.png';
 
 type Product = {
   category: string;
@@ -642,8 +642,26 @@ t.account.errorGeneric
           </nav>
           <div className="nav-actions">
             <LanguageSelector />
-            <button className="account-button" onClick={() => { if (currentUser) setPortalOpen(true); else { setAccountOpen(true); setAccountMessage(''); } }} data-testid="button-open-account"><User size={15} /><span>{t.nav.miCuenta}</span></button>
-            <button className="nav-toggle" aria-label={mobileMenu ? t.nav.cerrarMenu : t.nav.abrirMenu} aria-expanded={mobileMenu} onClick={() => setMobileMenu(!mobileMenu)} data-testid="button-mobile-menu">{mobileMenu ? <X size={22} /> : <Menu size={22} />}</button>
+            <button
+              className="account-button"
+              onClick={() => { if (currentUser) setPortalOpen(true); else { setAccountOpen(true); setAccountMessage(''); } }}
+              aria-label={currentUser ? t.portal.myProfile : t.nav.miCuenta}
+              data-testid="button-open-account"
+            >
+              <User size={18} />
+              <span className="account-button-label">{t.nav.miCuenta}</span>
+            </button>
+            <button
+              className={`nav-toggle${mobileMenu ? ' is-active' : ''}`}
+              aria-label={mobileMenu ? t.nav.cerrarMenu : t.nav.abrirMenu}
+              aria-expanded={mobileMenu}
+              onClick={() => setMobileMenu(!mobileMenu)}
+              data-testid="button-mobile-menu"
+            >
+              <span className="nav-toggle-bar nav-toggle-bar--top" />
+              <span className="nav-toggle-bar nav-toggle-bar--mid" />
+              <span className="nav-toggle-bar nav-toggle-bar--bot" />
+            </button>
           </div>
         </div>
       </header>

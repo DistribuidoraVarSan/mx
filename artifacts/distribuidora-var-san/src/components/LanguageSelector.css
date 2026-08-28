@@ -46,6 +46,43 @@
   white-space: nowrap;
 }
 
+.language-selector-icon {
+  flex-shrink: 0;
+}
+
+@media (max-width: 820px) {
+  .language-selector-button {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: var(--radius-sm);
+    color: var(--white);
+  }
+  .language-selector-button:hover,
+  .language-selector-button:focus-visible {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--gold);
+  }
+  .language-selector-label {
+    display: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .language-selector-button {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+}
+
 /* Dropdown menu — position: fixed soluciona el clipping de overflow:hidden en .nav-container */
 .language-selector-menu {
   background: rgba(9, 20, 46, 0.95);

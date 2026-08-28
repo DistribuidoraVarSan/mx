@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
+import { Globe } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LANGUAGES } from '../i18n/languages';
 import './LanguageSelector.css';
@@ -68,6 +69,7 @@ export default function LanguageSelector() {
         aria-haspopup="listbox"
         data-testid="button-language-selector"
       >
+        <Globe size={18} className="language-selector-icon" />
         <span className="language-selector-label">{currentLanguage?.nativeName}</span>
       </button>
 
