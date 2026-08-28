@@ -5,6 +5,8 @@ import newsletterRouter from "./newsletter";
 import sessionsRouter from "./sessions";
 import authEmailsRouter from "./auth-emails";
 import twoFactorRouter from "./two-factor";
+import accountRouter from "./account";
+import supportRouter from "./support";
 
 const router: IRouter = Router();
 
@@ -14,4 +16,6 @@ router.use(newsletterRouter);
 router.use(sessionsRouter);
 router.use(authEmailsRouter);
 router.use(twoFactorRouter);
+router.use(accountRouter);
+router.use(supportRouter);
 export default router;

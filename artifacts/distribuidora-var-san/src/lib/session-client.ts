@@ -527,3 +527,294 @@ export async function request2FARescueCode(
     return { success: false, error: "Error de red al solicitar código de rescate." };
   }
 }
+
+/**
+ * Notifica al backend que la contraseña ha sido actualizada mediante Firebase Auth.
+ */
+export async function notifyPasswordChanged(
+  user: FirebaseUser,
+  language?: string,
+): Promise<{ success: boolean }> {
+  if (!user) return { success: false };
+
+  try {
+    const idToken = await user.getIdToken();
+    const currentSessionId = getOrCreateSessionId();
+
+    const response = await fetch(`${API_BASE_URL}/auth/account/password-changed`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
+        "x-session-id": currentSessionId,
+      },
+      body: JSON.stringify({ language }),
+    });
+
+    return { success: response.ok };
+  } catch (error) {
+    console.warn("No se pudo notificar cambio de contraseña al backend:", error);
+    return { success: false };
+  }
+}
+
+/**
+ * Solicita el cambio seguro de correo electrónico en Firebase Auth y backend.
+ */
+export async function requestChangeEmail(
+  user: FirebaseUser,
+  newEmail: string,
+  twoFactorCode?: string,
+  language?: string,
+): Promise<{ success: boolean; message?: string; error?: string }> {
+  if (!user || !newEmail) return { success: false, error: "Correo requerido." };
+
+  try {
+    const idToken = await user.getIdToken();
+    const currentSessionId = getOrCreateSessionId();
+
+    const response = await fetch(`${API_BASE_URL}/auth/account/change-email`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
+        "x-session-id": currentSessionId,
+      },
+      body: JSON.stringify({ newEmail, twoFactorCode, language }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { success: false, error: data.error || "No se pudo actualizar el correo electrónico." };
+    }
+
+    return { success: true, message: data.message };
+  } catch (error) {
+    console.error("Error al solicitar cambio de correo:", error);
+    return { success: false, error: "Error de conexión al procesar el cambio de correo." };
+  }
+}
+
+/**
+ * Solicita la desactivación segura de la cuenta.
+ */
+export async function requestDeactivateAccount(
+  user: FirebaseUser,
+  twoFactorCode?: string,
+  language?: string,
+): Promise<{ success: boolean; message?: string; error?: string }> {
+  if (!user) return { success: false, error: "Usuario no autenticado." };
+
+  try {
+    const idToken = await user.getIdToken();
+    const currentSessionId = getOrCreateSessionId();
+
+    const response = await fetch(`${API_BASE_URL}/auth/account/deactivate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
+        "x-session-id": currentSessionId,
+      },
+      body: JSON.stringify({ confirm: true, twoFactorCode, language }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { success: false, error: data.error || "No se pudo desactivar la cuenta." };
+    }
+
+    return { success: true, message: data.message };
+  } catch (error) {
+    console.error("Error al desactivar cuenta:", error);
+    return { success: false, error: "Error de red al desactivar la cuenta." };
+  }
+}
+
+/**
+ * Solicita la eliminación definitiva e irrevocable de la cuenta y sus datos.
+ */
+export async function requestDeleteAccount(
+  user: FirebaseUser,
+  twoFactorCode?: string,
+  language?: string,
+): Promise<{ success: boolean; message?: string; error?: string }> {
+  if (!user) return { success: false, error: "Usuario no autenticado." };
+
+  try {
+    const idToken = await user.getIdToken();
+    const currentSessionId = getOrCreateSessionId();
+
+    const response = await fetch(`${API_BASE_URL}/auth/account/delete`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
+        "x-session-id": currentSessionId,
+      },
+      body: JSON.stringify({ confirm: true, twoFactorCode, language }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { success: false, error: data.error || "No se pudo eliminar la cuenta." };
+    }
+
+    return { success: true, message: data.message };
+  } catch (error) {
+    console.error("Error al eliminar cuenta:", error);
+    return { success: false, error: "Error de red al eliminar la cuenta." };
+  }
+}
+
+/**
+ * Envía un informe de error técnico / bug report a soporte.
+ */
+export async function submitBugReport(params: {
+  title: string;
+  description: string;
+  stepsToReproduce?: string;
+  expectedBehavior?: string;
+  severity?: "low" | "medium" | "high" | "critical";
+  appVersion?: string;
+  technicalDetails?: {
+    os?: string;
+    browser?: string;
+    deviceType?: string;
+    language?: string;
+  };
+}): Promise<{ success: boolean; ticketId?: string; message?: string; error?: string }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/support/bug-report`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { success: false, error: data.error || "No se pudo enviar el informe de fallos." };
+    }
+
+    return { success: true, ticketId: data.ticketId, message: data.message };
+  } catch (error) {
+    console.error("Error al enviar informe de fallos:", error);
+    return { success: false, error: "Error de red al enviar el informe." };
+  }
+}
+
+export interface BrowserStorageInfo {
+  quotaBytes?: number;
+  usageBytes?: number;
+  percentUsed?: number;
+  localStorageBytes: number;
+  localStorageKeys: number;
+  sessionStorageBytes: number;
+  sessionStorageKeys: number;
+  cookieCount: number;
+  indexedDbSupported: boolean;
+  cacheStorageSupported: boolean;
+  serviceWorkerSupported: boolean;
+}
+
+/**
+ * Mide de forma segura y precisa el almacenamiento LOCAL DEL NAVEGADOR.
+ */
+export async function getBrowserStorageEstimate(): Promise<BrowserStorageInfo> {
+  let quotaBytes: number | undefined;
+  let usageBytes: number | undefined;
+  let percentUsed: number | undefined;
+
+  // 1. navigator.storage.estimate()
+  if (typeof navigator !== "undefined" && navigator.storage && typeof navigator.storage.estimate === "function") {
+    try {
+      const estimate = await navigator.storage.estimate();
+      quotaBytes = estimate.quota;
+      usageBytes = estimate.usage;
+      if (quotaBytes && usageBytes) {
+        percentUsed = Math.min(100, Math.round((usageBytes / quotaBytes) * 100));
+      }
+    } catch {
+      // Ignorar fallo de permiso o modo privado
+    }
+  }
+
+  // 2. localStorage
+  let localStorageBytes = 0;
+  let localStorageKeys = 0;
+  try {
+    if (typeof window !== "undefined" && window.localStorage) {
+      localStorageKeys = window.localStorage.length;
+      for (let i = 0; i < window.localStorage.length; i++) {
+        const key = window.localStorage.key(i) || "";
+        const val = window.localStorage.getItem(key) || "";
+        localStorageBytes += (key.length + val.length) * 2; // UTF-16 approx
+      }
+    }
+  } catch {}
+
+  // 3. sessionStorage
+  let sessionStorageBytes = 0;
+  let sessionStorageKeys = 0;
+  try {
+    if (typeof window !== "undefined" && window.sessionStorage) {
+      sessionStorageKeys = window.sessionStorage.length;
+      for (let i = 0; i < window.sessionStorage.length; i++) {
+        const key = window.sessionStorage.key(i) || "";
+        const val = window.sessionStorage.getItem(key) || "";
+        sessionStorageBytes += (key.length + val.length) * 2;
+      }
+    }
+  } catch {}
+
+  // 4. Cookies accesibles vía document.cookie (No HttpOnly)
+  let cookieCount = 0;
+  try {
+    if (typeof document !== "undefined" && document.cookie) {
+      cookieCount = document.cookie.split(";").filter((c) => c.trim().length > 0).length;
+    }
+  } catch {}
+
+  // 5. Soporte de APIs avanzadas
+  const indexedDbSupported = typeof window !== "undefined" && "indexedDB" in window;
+  const cacheStorageSupported = typeof window !== "undefined" && "caches" in window;
+  const serviceWorkerSupported = typeof navigator !== "undefined" && "serviceWorker" in navigator;
+
+  return {
+    quotaBytes,
+    usageBytes,
+    percentUsed,
+    localStorageBytes,
+    localStorageKeys,
+    sessionStorageBytes,
+    sessionStorageKeys,
+    cookieCount,
+    indexedDbSupported,
+    cacheStorageSupported,
+    serviceWorkerSupported,
+  };
+}
+
+/**
+ * Limpia de forma segura los datos temporales del navegador local (sin destruir credenciales activas esenciales).
+ */
+export function clearSafeBrowserStorage(): { clearedCount: number } {
+  let clearedCount = 0;
+  try {
+    // Limpiamos sessionStorage excepto la sesión activa
+    if (typeof window !== "undefined" && window.sessionStorage) {
+      const keysToPreserve = [STORAGE_SESSION_KEY];
+      const allKeys = Object.keys(window.sessionStorage);
+      for (const k of allKeys) {
+        if (!keysToPreserve.includes(k)) {
+          window.sessionStorage.removeItem(k);
+          clearedCount++;
+        }
+      }
+    }
+  } catch {}
+
+  return { clearedCount };
+}

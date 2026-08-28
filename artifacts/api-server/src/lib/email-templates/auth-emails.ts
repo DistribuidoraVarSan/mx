@@ -1303,3 +1303,146 @@ ${params.actionUrl ? `${tr.actionButton}: ${params.actionUrl}` : ""}`;
     subject: tr.subject,
   });
 }
+
+/**
+ * 6. Notificación de Cambio de Correo Electrónico
+ */
+export function buildEmailChangedEmail(
+  language: EmailLanguage = "es",
+  params: EmailChangeNotificationParams,
+): EmailContent {
+  const tr = AUTH_TRANSLATIONS[language]?.emailChange || AUTH_TRANSLATIONS.es.emailChange;
+  const greeting = params.recipientName ? `${tr.greeting} ${params.recipientName}:` : tr.greeting;
+  const time = params.timestamp || new Date().toLocaleString(language === "en-GB" ? "en-GB" : "es-MX");
+
+  const bodyHtml = `
+<p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
+<strong>${greeting}</strong>
+</p>
+<p style="margin:0 0 20px;color:#526274;font-size:15px;line-height:1.6;">
+${tr.intro}
+</p>
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:18px;margin:20px 0;">
+  <p style="margin:0 0 8px;color:#64748b;font-size:13px;"><strong>${tr.oldEmailLabel}</strong> ${params.oldEmail}</p>
+  <p style="margin:0 0 8px;color:#0a1f44;font-size:13px;font-weight:700;"><strong>${tr.newEmailLabel}</strong> ${params.newEmail}</p>
+  <p style="margin:0;color:#64748b;font-size:12px;"><strong>${tr.timeLabel}</strong> ${time}</p>
+</div>
+<div style="background:#fff7ed;border-left:4px solid #f97316;padding:14px 16px;border-radius:0 4px 4px 0;margin:18px 0;">
+  <p style="margin:0;color:#9a3412;font-size:13px;line-height:1.5;">${tr.warning}</p>
+</div>`;
+
+  const textBody = `${greeting}
+
+${tr.intro}
+
+${tr.oldEmailLabel} ${params.oldEmail}
+${tr.newEmailLabel} ${params.newEmail}
+${tr.timeLabel} ${time}
+
+${tr.warning}`;
+
+  return renderBaseEmail({
+    language,
+    kicker: tr.kicker,
+    heading: tr.heading,
+    bodyHtml,
+    textBody,
+    subject: tr.subject,
+  });
+}
+
+/**
+ * 7. Notificación / Confirmación de Cuenta Desactivada
+ */
+export function buildAccountDeactivatedEmail(
+  language: EmailLanguage = "es",
+  params: { recipientName?: string; deactivationDate?: string },
+): EmailContent {
+  const tr = AUTH_TRANSLATIONS[language]?.accountDeletion || AUTH_TRANSLATIONS.es.accountDeletion;
+  const greeting = params.recipientName ? `${tr.greeting} ${params.recipientName}:` : tr.greeting;
+  const time = params.deactivationDate || new Date().toLocaleString(language === "en-GB" ? "en-GB" : "es-MX");
+
+  const deactivationSubject = language === "en-GB"
+    ? "Account deactivated — Distribuidora Var San"
+    : "Cuenta desactivada — Distribuidora Var San";
+  const deactivationHeading = language === "en-GB"
+    ? "Your account has been deactivated"
+    : "Tu cuenta ha sido desactivada";
+  const deactivationMessage = language === "en-GB"
+    ? "Your client account at Distribuidora Var San has been successfully deactivated upon your request. All active sessions have been revoked. If you wish to reactivate your account in the future, please contact our support team."
+    : "Tu cuenta de cliente en Distribuidora Var San ha sido desactivada exitosamente conforme a tu solicitud. Todas tus sesiones activas han sido cerradas. Si deseas reactivar tu cuenta en el futuro, por favor contáctanos.";
+
+  const bodyHtml = `
+<p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
+<strong>${greeting}</strong>
+</p>
+<p style="margin:0 0 20px;color:#526274;font-size:15px;line-height:1.6;">
+${deactivationMessage}
+</p>
+<p style="margin:0 0 20px;color:#64748b;font-size:13px;">
+<strong>Fecha / Date:</strong> ${time}
+</p>`;
+
+  const textBody = `${greeting}
+
+${deactivationMessage}
+
+Fecha / Date: ${time}`;
+
+  return renderBaseEmail({
+    language,
+    kicker: tr.kicker,
+    heading: deactivationHeading,
+    bodyHtml,
+    textBody,
+    subject: deactivationSubject,
+  });
+}
+
+/**
+ * 8. Notificación / Confirmación de Cuenta Eliminada
+ */
+export function buildAccountDeletedEmail(
+  language: EmailLanguage = "es",
+  params: { recipientName?: string; deletionDate?: string },
+): EmailContent {
+  const tr = AUTH_TRANSLATIONS[language]?.accountDeletion || AUTH_TRANSLATIONS.es.accountDeletion;
+  const greeting = params.recipientName ? `${tr.greeting} ${params.recipientName}:` : tr.greeting;
+  const time = params.deletionDate || new Date().toLocaleString(language === "en-GB" ? "en-GB" : "es-MX");
+
+  const deletionSubject = language === "en-GB"
+    ? "Account deleted permanently — Distribuidora Var San"
+    : "Cuenta eliminada permanentemente — Distribuidora Var San";
+  const deletionHeading = language === "en-GB"
+    ? "Your account has been deleted"
+    : "Tu cuenta ha sido eliminada";
+  const deletionMessage = language === "en-GB"
+    ? "Your client account and associated session data at Distribuidora Var San have been permanently deleted in accordance with your request. We thank you for the trust placed in our company."
+    : "Tu cuenta de cliente y los datos de sesión asociados en Distribuidora Var San han sido eliminados de forma definitiva conforme a tu solicitud. Agradecemos la confianza depositada en nosotros.";
+
+  const bodyHtml = `
+<p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
+<strong>${greeting}</strong>
+</p>
+<p style="margin:0 0 20px;color:#526274;font-size:15px;line-height:1.6;">
+${deletionMessage}
+</p>
+<p style="margin:0 0 20px;color:#64748b;font-size:13px;">
+<strong>Fecha / Date:</strong> ${time}
+</p>`;
+
+  const textBody = `${greeting}
+
+${deletionMessage}
+
+Fecha / Date: ${time}`;
+
+  return renderBaseEmail({
+    language,
+    kicker: tr.kicker,
+    heading: deletionHeading,
+    bodyHtml,
+    textBody,
+    subject: deletionSubject,
+  });
+}

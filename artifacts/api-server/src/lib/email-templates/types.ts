@@ -77,3 +77,8 @@ export interface AccountDeletionEmailParams {
   confirmationCode?: string;
   deletionDate?: string;
 }
+
+export interface AccountDeactivationEmailParams {
+  recipientName?: string;
+  deactivationDate?: string;
+}
