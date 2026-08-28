@@ -210,7 +210,7 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
       }
 
       // Registrar dispositivo / sesión en segundo plano al autenticarse
-      registerDeviceSession(user).catch((err) => {
+      registerDeviceSession(user, language).catch((err) => {
         console.warn('No se pudo registrar la sesión del dispositivo:', err);
       });
 
@@ -234,7 +234,13 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
     });
 
     return unsubscribe;
-  }, []);
+  }, [language]);
+
+  useEffect(() => {
+    if (currentUser) {
+      setDoc(doc(db, 'users', currentUser.uid), { preferredLanguage: language }, { merge: true }).catch(() => {});
+    }
+  }, [language, currentUser]);
 
   const industrialProducts = t.solutions.industrialProducts.map((p, idx) => ({
     ...p,
@@ -312,7 +318,7 @@ window.scrollTo({ top: 0, behavior: 'smooth' });
       const response = await fetch('https://varsan-api.onrender.com/api/newsletter/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, language }),
       });
 
       const data: { status?: string; message?: string; error?: string } = await response
@@ -364,6 +370,7 @@ window.scrollTo({ top: 0, behavior: 'smooth' });
           name,
           company,
           email,
+          preferredLanguage: language,
           createdAt: serverTimestamp(),
         }, { merge: true });
 
@@ -419,7 +426,12 @@ t.account.errorGeneric
           name: credential.user.displayName || t.portal.defaultClientName,
           company: '',
           email: credential.user.email || '',
+          preferredLanguage: language,
           createdAt: serverTimestamp(),
+        }, { merge: true });
+      } else {
+        await setDoc(doc(db, 'users', credential.user.uid), {
+          preferredLanguage: language,
         }, { merge: true });
       }
 
@@ -441,6 +453,7 @@ t.account.errorGeneric
         name: profile.name.trim(),
         company: profile.company.trim(),
         email: currentUser.email || profile.email,
+        preferredLanguage: language,
       }, { merge: true });
       setProfileOpen(false);
       setPortalOpen(true);

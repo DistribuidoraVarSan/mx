@@ -12,6 +12,7 @@ const router: IRouter = Router();
 
 const RegisterSessionSchema = z.object({
   clientSessionId: z.string().min(16).max(100).optional(),
+  language: z.string().optional(),
 });
 
 const RevokeSessionSchema = z.object({
@@ -43,14 +44,18 @@ router.post(
 
     const uid = req.user!.uid;
     const clientSessionId = parseResult.data.clientSessionId;
+    const reqLanguage = parseResult.data.language;
     const sessionId = clientSessionId || crypto.randomUUID();
     const deviceInfo = extractDeviceInfo(req);
     const now = new Date().toISOString();
 
     try {
-      const sessionDocRef = adminDb
-        .collection("users")
-        .doc(uid)
+      const userDocRef = adminDb.collection("users").doc(uid);
+      if (reqLanguage) {
+        await userDocRef.set({ preferredLanguage: reqLanguage }, { merge: true });
+      }
+
+      const sessionDocRef = userDocRef
         .collection("sessions")
         .doc(sessionId);
 

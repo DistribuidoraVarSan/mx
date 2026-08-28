@@ -1,9 +1,10 @@
 import { Router, type IRouter, type Request } from "express";
+import crypto from "node:crypto";
 import { z } from "zod";
-import { eq } from "drizzle-orm";
-import { db, newsletterSubscribersTable } from "@workspace/db";
+import { db, newsletterSubscribersTable, eq } from "@workspace/db";
 import { sendEmail } from "../lib/mailer";
 import { buildWelcomeEmail } from "../lib/newsletter-email-templates";
+import { resolveEmailLanguage } from "../lib/email-templates";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -15,6 +16,7 @@ const SubscribeRequestSchema = z.object({
     .toLowerCase()
     .min(1, "El correo electrónico es obligatorio.")
     .email("Ingresa un correo electrónico válido."),
+  language: z.string().optional(),
 });
 
 /**
@@ -98,7 +100,11 @@ router.post("/newsletter/subscribe", async (req, res) => {
       : (
           await db
             .insert(newsletterSubscribersTable)
-            .values({ email, source: "website_footer" })
+            .values({
+              email,
+              source: "website_footer",
+              unsubscribeToken: crypto.randomUUID(),
+            })
             .returning()
         )[0];
 
@@ -110,8 +116,9 @@ router.post("/newsletter/subscribe", async (req, res) => {
     // El correo de bienvenida se envía después de responder: si el proveedor
     // de correo falla, la suscripción ya quedó registrada y el usuario ya
     // recibió su confirmación en pantalla. El error solo queda en el log.
+    const emailLang = resolveEmailLanguage(parseResult.data.language);
     const unsubscribeUrl = `${getPublicOrigin(req)}/api/newsletter/unsubscribe?token=${subscriber.unsubscribeToken}`;
-    const { subject, html, text } = buildWelcomeEmail({ unsubscribeUrl });
+    const { subject, html, text } = buildWelcomeEmail({ unsubscribeUrl }, emailLang);
 
     sendEmail({ to: email, subject, html, text })
       .then(() =>

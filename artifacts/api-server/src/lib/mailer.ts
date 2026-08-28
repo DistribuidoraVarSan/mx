@@ -1,10 +1,19 @@
 import { logger } from "./logger";
 
-interface SendEmailParams {
+export const EMAIL_SENDERS = {
+  verification: "Distribuidora Var San <verificacion@distribuidoravarsan.com.mx>",
+  security: "Distribuidora Var San <seguridad@distribuidoravarsan.com.mx>",
+  accounts: "Distribuidora Var San <cuentas@distribuidoravarsan.com.mx>",
+} as const;
+
+export type EmailSenderKey = keyof typeof EMAIL_SENDERS;
+
+export interface SendEmailParams {
   to: string;
   subject: string;
   html: string;
   text: string;
+  from?: string;
 }
 
 const RESEND_API_URL = "https://api.resend.com/emails";
@@ -12,20 +21,18 @@ const RESEND_API_URL = "https://api.resend.com/emails";
 /**
  * Envía un correo transaccional a través de la API de Resend.
  *
- * Requiere las variables de entorno RESEND_API_KEY y RESEND_FROM_EMAIL.
- * Nunca se exponen al frontend: solo existen en este proceso de servidor.
- *
- * Si el servicio no está configurado (por ejemplo, en un entorno de
- * desarrollo sin credenciales), se registra una advertencia y no se envía
- * el correo, para no romper el flujo de suscripción.
+ * Requiere la variable de entorno RESEND_API_KEY.
+ * Si se especifica `from`, se utiliza dicho remitente; de lo contrario, se
+ * utiliza `process.env.RESEND_FROM_EMAIL` como fallback predeterminado.
+ * Nunca se exponen credenciales al frontend: solo existen en este proceso de servidor.
  */
-export async function sendEmail({ to, subject, html, text }: SendEmailParams): Promise<void> {
+export async function sendEmail({ to, subject, html, text, from }: SendEmailParams): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_FROM_EMAIL;
+  const sender = from || process.env.RESEND_FROM_EMAIL;
 
-  if (!apiKey || !from) {
+  if (!apiKey || !sender) {
     logger.warn(
-      "RESEND_API_KEY o RESEND_FROM_EMAIL no están configurados; se omite el envío de correo.",
+      "RESEND_API_KEY o remitente no están configurados; se omite el envío de correo.",
     );
     return;
   }
@@ -36,7 +43,7 @@ export async function sendEmail({ to, subject, html, text }: SendEmailParams): P
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ from, to, subject, html, text }),
+    body: JSON.stringify({ from: sender, to, subject, html, text }),
   });
 
   if (!response.ok) {

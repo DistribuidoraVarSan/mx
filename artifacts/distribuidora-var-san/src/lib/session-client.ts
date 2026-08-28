@@ -55,7 +55,7 @@ export function clearStoredSessionId(): void {
 /**
  * Registra o actualiza la sesión del dispositivo activo en el backend mediante Firebase ID Token.
  */
-export async function registerDeviceSession(user: FirebaseUser): Promise<SessionRecord | null> {
+export async function registerDeviceSession(user: FirebaseUser, language?: string): Promise<SessionRecord | null> {
   if (!user) return null;
 
   try {
@@ -69,7 +69,7 @@ export async function registerDeviceSession(user: FirebaseUser): Promise<Session
         Authorization: `Bearer ${idToken}`,
         "x-session-id": clientSessionId,
       },
-      body: JSON.stringify({ clientSessionId }),
+      body: JSON.stringify({ clientSessionId, language }),
     });
 
     if (!response.ok) {
