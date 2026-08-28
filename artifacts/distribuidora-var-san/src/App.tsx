@@ -56,13 +56,27 @@ import {
   User,
   UserCheck,
   X,
+  Copy,
+  CheckCheck,
+  KeyRound,
+  ShieldAlert,
+  QrCode,
+  Download,
 } from 'lucide-react';
 import {
   registerDeviceSession,
   fetchUserSessions,
   revokeUserSession,
   revokeAllOtherSessions,
+  fetch2FAStatus,
+  setup2FA,
+  enable2FA,
+  verify2FAChallenge,
+  disable2FA,
+  request2FARescueCode,
   type DeviceSession,
+  type TwoFactorStatus,
+  type TwoFactorSetupData,
 } from './lib/session-client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
@@ -151,6 +165,19 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [loadingSessions, setLoadingSessions] = useState(false);
   const [sessionActionLoading, setSessionActionLoading] = useState<string | null>(null);
   const [sessionFeedback, setSessionFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [twoFactorStatus, setTwoFactorStatus] = useState<TwoFactorStatus | null>(null);
+  const [twoFactorSetupOpen, setTwoFactorSetupOpen] = useState(false);
+  const [twoFactorDisableOpen, setTwoFactorDisableOpen] = useState(false);
+  const [twoFactorChallengeOpen, setTwoFactorChallengeOpen] = useState(false);
+  const [twoFactorSetupData, setTwoFactorSetupData] = useState<TwoFactorSetupData | null>(null);
+  const [twoFactorCodeInput, setTwoFactorCodeInput] = useState('');
+  const [twoFactorBackupInput, setTwoFactorBackupInput] = useState('');
+  const [twoFactorRescueInput, setTwoFactorRescueInput] = useState('');
+  const [twoFactorChallengeMethod, setTwoFactorChallengeMethod] = useState<'totp' | 'backup' | 'rescue'>('totp');
+  const [twoFactorLoading, setTwoFactorLoading] = useState(false);
+  const [twoFactorFeedback, setTwoFactorFeedback] = useState<{ type: 'success' | 'warning'; text: string } | null>(null);
+  const [copiedKey, setCopiedKey] = useState(false);
+  const [copiedBackup, setCopiedBackup] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{ role: 'bot', text: t.chatbot.greeting }]);
   const [chatInput, setChatInput] = useState('');
@@ -381,10 +408,9 @@ window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
 
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       setAccountMessage(t.account.loginSuccess);
-      setAccountOpen(false);
-      setPortalOpen(true);
+      await checkPostLogin2FA(userCredential.user);
     } catch (error: any) {
 console.error("ERROR REAL DE FIREBASE:", error);
 console.error("CÓDIGO:", error?.code);
@@ -435,13 +461,173 @@ t.account.errorGeneric
         }, { merge: true });
       }
 
-      setAccountOpen(false);
-      setPortalOpen(true);
+      await checkPostLogin2FA(credential.user);
     } catch (error: any) {
       console.error('Error al iniciar con Google:', error);
       if (error?.code !== 'auth/popup-closed-by-user') {
         setAccountMessage(t.account.errorGoogleSignIn);
       }
+    }
+  };
+
+  const checkPostLogin2FA = async (user: FirebaseUser) => {
+    try {
+      const status = await fetch2FAStatus(user);
+      setTwoFactorStatus(status);
+      if (status?.enabled) {
+        setAccountOpen(false);
+        setPortalOpen(false);
+        setTwoFactorChallengeOpen(true);
+        setTwoFactorChallengeMethod('totp');
+        setTwoFactorCodeInput('');
+        setTwoFactorBackupInput('');
+        setTwoFactorRescueInput('');
+        setTwoFactorFeedback(null);
+        return;
+      }
+    } catch (err) {
+      console.warn('Error al verificar 2FA post-login:', err);
+    }
+    setAccountOpen(false);
+    setPortalOpen(true);
+  };
+
+  const load2FAStatus = async (user = currentUser) => {
+    if (!user) return;
+    try {
+      const status = await fetch2FAStatus(user);
+      setTwoFactorStatus(status);
+      return status;
+    } catch {
+      return null;
+    }
+  };
+
+  const handleStart2FASetup = async () => {
+    if (!currentUser) return;
+    setTwoFactorLoading(true);
+    setTwoFactorFeedback(null);
+    setCopiedKey(false);
+    setCopiedBackup(false);
+    setTwoFactorCodeInput('');
+
+    try {
+      const setup = await setup2FA(currentUser);
+      if (setup) {
+        setTwoFactorSetupData(setup);
+        setTwoFactorSetupOpen(true);
+      } else {
+        setSessionFeedback({ type: 'error', text: 'No se pudo iniciar la configuración de 2FA.' });
+      }
+    } catch (err: any) {
+      setSessionFeedback({ type: 'error', text: err.message || 'Error al iniciar 2FA' });
+    } finally {
+      setTwoFactorLoading(false);
+    }
+  };
+
+  const handleConfirm2FAEnable = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!currentUser || !twoFactorCodeInput) return;
+    setTwoFactorLoading(true);
+    setTwoFactorFeedback(null);
+
+    try {
+      const result = await enable2FA(currentUser, twoFactorCodeInput.trim(), language);
+      if (result.success) {
+        setTwoFactorSetupOpen(false);
+        setTwoFactorSetupData(null);
+        setTwoFactorCodeInput('');
+        await load2FAStatus(currentUser);
+        setSessionFeedback({ type: 'success', text: result.message || '2FA activado con éxito' });
+      } else {
+        setTwoFactorFeedback({ type: 'warning', text: result.error || t.twoFactor.errorInvalidCode });
+      }
+    } catch (err: any) {
+      setTwoFactorFeedback({ type: 'warning', text: err.message || t.twoFactor.errorInvalidCode });
+    } finally {
+      setTwoFactorLoading(false);
+    }
+  };
+
+  const handleConfirm2FADisable = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!currentUser) return;
+    setTwoFactorLoading(true);
+    setTwoFactorFeedback(null);
+
+    try {
+      const params: { code?: string; backupCode?: string; language?: string } = { language };
+      if (twoFactorCodeInput.trim().includes('-')) {
+        params.backupCode = twoFactorCodeInput.trim();
+      } else {
+        params.code = twoFactorCodeInput.trim();
+      }
+
+      const result = await disable2FA(currentUser, params);
+      if (result.success) {
+        setTwoFactorDisableOpen(false);
+        setTwoFactorCodeInput('');
+        await load2FAStatus(currentUser);
+        setSessionFeedback({ type: 'success', text: result.message || '2FA desactivado con éxito' });
+      } else {
+        setTwoFactorFeedback({ type: 'warning', text: result.error || t.twoFactor.errorInvalidCode });
+      }
+    } catch (err: any) {
+      setTwoFactorFeedback({ type: 'warning', text: err.message || t.twoFactor.errorInvalidCode });
+    } finally {
+      setTwoFactorLoading(false);
+    }
+  };
+
+  const handleVerify2FAChallenge = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!currentUser) return;
+    setTwoFactorLoading(true);
+    setTwoFactorFeedback(null);
+
+    try {
+      const params: { code?: string; backupCode?: string; rescueCode?: string; language?: string } = {
+        language,
+      };
+      if (twoFactorChallengeMethod === 'totp') params.code = twoFactorCodeInput.trim();
+      else if (twoFactorChallengeMethod === 'backup') params.backupCode = twoFactorBackupInput.trim();
+      else if (twoFactorChallengeMethod === 'rescue') params.rescueCode = twoFactorRescueInput.trim();
+
+      const result = await verify2FAChallenge(currentUser, params);
+      if (result.success) {
+        setTwoFactorChallengeOpen(false);
+        setTwoFactorCodeInput('');
+        setTwoFactorBackupInput('');
+        setTwoFactorRescueInput('');
+        setPortalOpen(true);
+      } else {
+        setTwoFactorFeedback({ type: 'warning', text: result.error || t.twoFactor.errorInvalidCode });
+      }
+    } catch (err: any) {
+      setTwoFactorFeedback({ type: 'warning', text: err.message || t.twoFactor.errorInvalidCode });
+    } finally {
+      setTwoFactorLoading(false);
+    }
+  };
+
+  const handleRequestRescueCode = async () => {
+    if (!currentUser) return;
+    setTwoFactorLoading(true);
+    setTwoFactorFeedback(null);
+
+    try {
+      const res = await request2FARescueCode(currentUser, language);
+      if (res.success) {
+        setTwoFactorChallengeMethod('rescue');
+        setTwoFactorFeedback({ type: 'success', text: t.twoFactor.rescueEmailSent });
+      } else {
+        setTwoFactorFeedback({ type: 'warning', text: res.error || 'No se pudo enviar el código de rescate.' });
+      }
+    } catch (err: any) {
+      setTwoFactorFeedback({ type: 'warning', text: err.message || 'Error de conexión' });
+    } finally {
+      setTwoFactorLoading(false);
     }
   };
 
@@ -468,6 +654,10 @@ t.account.errorGeneric
       await signOut(auth);
       setSessions([]);
       setSessionFeedback(null);
+      setTwoFactorStatus(null);
+      setTwoFactorChallengeOpen(false);
+      setTwoFactorSetupOpen(false);
+      setTwoFactorDisableOpen(false);
       setPortalOpen(false);
       setProfileOpen(false);
     } catch (error) {
@@ -482,6 +672,7 @@ t.account.errorGeneric
     try {
       const userSessions = await fetchUserSessions(user);
       setSessions(userSessions);
+      await load2FAStatus(user);
     } catch (err: any) {
       console.error('Error al obtener sesiones:', err);
       if (err?.message?.includes('SESSION_REVOKED')) {
@@ -1403,6 +1594,68 @@ t.account.errorGeneric
               )}
             </div>
 
+            {/* Sección de Seguridad y 2FA */}
+            <div className="two-factor-section" style={{ marginTop: 20, padding: '16px 20px', background: 'var(--panel, #f8fafc)', borderRadius: 12, border: '1px solid var(--line, #e2e8f0)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                  <div style={{ padding: 8, background: twoFactorStatus?.enabled ? 'rgba(34, 197, 94, 0.1)' : 'rgba(10, 31, 68, 0.06)', borderRadius: 8, color: twoFactorStatus?.enabled ? '#16a34a' : 'var(--navy)' }}>
+                    <ShieldCheck size={20} />
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <h4 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 600, color: 'var(--navy)' }}>{t.twoFactor.title}</h4>
+                      <span style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                        padding: '2px 8px',
+                        borderRadius: 12,
+                        background: twoFactorStatus?.enabled ? '#dcfce7' : '#f1f5f9',
+                        color: twoFactorStatus?.enabled ? '#15803d' : '#64748b'
+                      }}>
+                        {twoFactorStatus?.enabled ? t.twoFactor.enabledBadge : t.twoFactor.disabledBadge}
+                      </span>
+                    </div>
+                    <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: 'var(--muted)', maxWidth: 440 }}>
+                      {t.twoFactor.subtitle}
+                    </p>
+                    {twoFactorStatus?.enabled && typeof twoFactorStatus.backupCodesRemaining === 'number' && (
+                      <small style={{ display: 'block', marginTop: 4, fontSize: '0.76rem', color: '#64748b' }}>
+                        {t.twoFactor.remainingBackupCodes.replace('{count}', String(twoFactorStatus.backupCodesRemaining))}
+                      </small>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  {twoFactorStatus?.enabled ? (
+                    <button
+                      type="button"
+                      className="button button--outline"
+                      style={{ color: '#dc2626', borderColor: '#fca5a5', padding: '6px 14px', fontSize: '0.82rem' }}
+                      onClick={() => {
+                        setTwoFactorCodeInput('');
+                        setTwoFactorFeedback(null);
+                        setTwoFactorDisableOpen(true);
+                      }}
+                      data-testid="button-disable-2fa"
+                    >
+                      <LockKeyhole size={13} /> {t.twoFactor.disableBtn}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="button button--navy"
+                      style={{ padding: '6px 14px', fontSize: '0.82rem' }}
+                      onClick={handleStart2FASetup}
+                      disabled={twoFactorLoading}
+                      data-testid="button-enable-2fa"
+                    >
+                      {twoFactorLoading ? <Loader2 size={13} className="animate-spin" /> : <ShieldCheck size={13} />} {t.twoFactor.enableBtn}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
             <div className="portal-actions">
               <button className="button button--navy" onClick={() => { setPortalOpen(false); setProfileOpen(true); }} data-testid="button-open-profile">
                 <UserCheck size={15} />{t.portal.myProfile}
@@ -1412,6 +1665,320 @@ t.account.errorGeneric
               </button>
               <button className="button button--outline" style={{ color: 'var(--navy)', borderColor: 'var(--line)' }} onClick={() => setPortalOpen(false)} data-testid="button-close-portal-action">
                 {t.portal.closePortal}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {/* Modal de Configuración y Activación 2FA */}
+      {twoFactorSetupOpen && twoFactorSetupData && (
+        <div className="modal-backdrop" role="presentation" onMouseDown={(e) => { if (e.currentTarget === e.target) setTwoFactorSetupOpen(false); }}>
+          <section className="modal modal--wide" role="dialog" aria-modal="true" aria-labelledby="twofactor-setup-heading">
+            <button className="modal-close" onClick={() => setTwoFactorSetupOpen(false)} aria-label={t.common.close} data-testid="button-close-2fa-setup">
+              <X size={18} />
+            </button>
+            <div className="portal-header">
+              <span className="eyebrow"><ShieldCheck size={13} /> {t.twoFactor.title}</span>
+              <h2 id="twofactor-setup-heading">{t.twoFactor.setupTitle}</h2>
+              <p className="modal-intro">{t.twoFactor.setupIntro}</p>
+            </div>
+
+            {twoFactorFeedback && (
+              <div className={`account-message account-message--${twoFactorFeedback.type === 'success' ? 'success' : 'warning'}`} style={{ marginBottom: 16 }}>
+                {twoFactorFeedback.text}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginTop: 10 }}>
+              {/* Paso 1: Clave y URI */}
+              <div style={{ padding: 16, background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
+                <h4 style={{ margin: '0 0 8px', fontSize: '0.92rem', color: 'var(--navy)', fontWeight: 600 }}>
+                  {t.twoFactor.step1Title}
+                </h4>
+                <p style={{ margin: '0 0 10px', fontSize: '0.82rem', color: 'var(--muted)' }}>
+                  {t.twoFactor.step1Scan}
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <code style={{ padding: '8px 12px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.95rem', letterSpacing: '0.1em', fontWeight: 600, color: 'var(--navy)' }}>
+                    {twoFactorSetupData.secretKey}
+                  </code>
+                  <button
+                    type="button"
+                    className="button button--outline"
+                    style={{ padding: '6px 12px', fontSize: '0.8rem', color: 'var(--navy)' }}
+                    onClick={() => {
+                      navigator.clipboard.writeText(twoFactorSetupData.secretKey);
+                      setCopiedKey(true);
+                      setTimeout(() => setCopiedKey(false), 3000);
+                    }}
+                  >
+                    {copiedKey ? <CheckCheck size={13} color="#16a34a" /> : <Copy size={13} />}
+                    <span>{copiedKey ? t.twoFactor.keyCopied : t.twoFactor.copyKey}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Paso 2: Códigos de Respaldo */}
+              <div style={{ padding: 16, background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
+                  <h4 style={{ margin: 0, fontSize: '0.92rem', color: 'var(--navy)', fontWeight: 600 }}>
+                    {t.twoFactor.step3Title}
+                  </h4>
+                  <button
+                    type="button"
+                    className="button button--outline"
+                    style={{ padding: '4px 10px', fontSize: '0.78rem', color: 'var(--navy)' }}
+                    onClick={() => {
+                      const text = twoFactorSetupData.backupCodes.join('\n');
+                      navigator.clipboard.writeText(text);
+                      setCopiedBackup(true);
+                      setTimeout(() => setCopiedBackup(false), 3000);
+                    }}
+                  >
+                    {copiedBackup ? <CheckCheck size={12} color="#16a34a" /> : <Copy size={12} />}
+                    <span>{copiedBackup ? t.twoFactor.backupCodesCopied : t.twoFactor.copyBackupCodes}</span>
+                  </button>
+                </div>
+                <p style={{ margin: '0 0 10px', fontSize: '0.82rem', color: 'var(--muted)' }}>
+                  {t.twoFactor.step3BackupIntro}
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 8 }}>
+                  {twoFactorSetupData.backupCodes.map((code, idx) => (
+                    <div key={idx} style={{ padding: '6px 10px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 6, fontFamily: 'monospace', fontSize: '0.88rem', textAlign: 'center', fontWeight: 600, color: '#334155' }}>
+                      {code}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Paso 3: Confirmación con código de 6 dígitos */}
+              <form onSubmit={handleConfirm2FAEnable} style={{ padding: 16, background: '#f1f5f9', borderRadius: 10, border: '1px solid #cbd5e1' }}>
+                <h4 style={{ margin: '0 0 8px', fontSize: '0.92rem', color: 'var(--navy)', fontWeight: 600 }}>
+                  {t.twoFactor.step2Title}
+                </h4>
+                <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: 'var(--muted)' }}>
+                  {t.twoFactor.step2EnterCode}
+                </p>
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={8}
+                    required
+                    placeholder={t.twoFactor.inputCodePlaceholder}
+                    value={twoFactorCodeInput}
+                    onChange={(e) => setTwoFactorCodeInput(e.target.value)}
+                    style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #cbd5e1', fontSize: '1.1rem', letterSpacing: '0.15em', fontWeight: 600, width: 160, textAlign: 'center' }}
+                    data-testid="input-2fa-verify-code"
+                  />
+                  <button
+                    type="submit"
+                    className="button button--navy"
+                    disabled={twoFactorLoading || !twoFactorCodeInput.trim()}
+                    data-testid="button-confirm-enable-2fa"
+                  >
+                    {twoFactorLoading ? <Loader2 size={15} className="animate-spin" /> : <ShieldCheck size={15} />}
+                    <span>{twoFactorLoading ? t.twoFactor.activating : t.twoFactor.confirmAndActivate}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {/* Modal para Desactivar 2FA */}
+      {twoFactorDisableOpen && (
+        <div className="modal-backdrop" role="presentation" onMouseDown={(e) => { if (e.currentTarget === e.target) setTwoFactorDisableOpen(false); }}>
+          <section className="modal" role="dialog" aria-modal="true" aria-labelledby="twofactor-disable-heading">
+            <button className="modal-close" onClick={() => setTwoFactorDisableOpen(false)} aria-label={t.common.close} data-testid="button-close-2fa-disable">
+              <X size={18} />
+            </button>
+            <div className="modal-brand">
+              <BrandMark />
+              <div><strong>DISTRIBUIDORA VAR SAN</strong><small>{t.twoFactor.title}</small></div>
+            </div>
+            <h2 id="twofactor-disable-heading" style={{ color: '#dc2626' }}>{t.twoFactor.disableConfirmTitle}</h2>
+            <p className="modal-intro">{t.twoFactor.disableConfirmIntro}</p>
+
+            {twoFactorFeedback && (
+              <div className="account-message account-message--warning" style={{ marginBottom: 16 }}>
+                {twoFactorFeedback.text}
+              </div>
+            )}
+
+            <form className="account-form" onSubmit={handleConfirm2FADisable}>
+              <div className="form-field">
+                <label htmlFor="input-disable-2fa-code">{t.twoFactor.enterCodeToDisable}</label>
+                <input
+                  id="input-disable-2fa-code"
+                  type="text"
+                  required
+                  placeholder={t.twoFactor.inputCodePlaceholder}
+                  value={twoFactorCodeInput}
+                  onChange={(e) => setTwoFactorCodeInput(e.target.value)}
+                  style={{ textAlign: 'center', letterSpacing: '0.1em', fontSize: '1.05rem', fontWeight: 600 }}
+                  data-testid="input-2fa-disable-code"
+                />
+              </div>
+              <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+                <button
+                  type="submit"
+                  className="button"
+                  style={{ background: '#dc2626', color: '#fff', flex: 1 }}
+                  disabled={twoFactorLoading || !twoFactorCodeInput.trim()}
+                  data-testid="button-confirm-disable-2fa"
+                >
+                  {twoFactorLoading ? <Loader2 size={14} className="animate-spin" /> : <LockKeyhole size={14} />}
+                  <span>{twoFactorLoading ? t.twoFactor.deactivating : t.twoFactor.confirmDisable}</span>
+                </button>
+                <button
+                  type="button"
+                  className="button button--outline"
+                  style={{ color: 'var(--navy)', borderColor: 'var(--line)' }}
+                  onClick={() => setTwoFactorDisableOpen(false)}
+                >
+                  {t.twoFactor.cancel}
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+
+      {/* Modal Interceptor de Reto 2FA en Inicio de Sesión */}
+      {twoFactorChallengeOpen && (
+        <div className="modal-backdrop" role="presentation">
+          <section className="modal" role="dialog" aria-modal="true" aria-labelledby="twofactor-challenge-heading">
+            <button className="modal-close" onClick={handleSignOut} aria-label={t.common.close} data-testid="button-cancel-2fa-challenge">
+              <X size={18} />
+            </button>
+            <div className="modal-brand">
+              <BrandMark />
+              <div><strong>DISTRIBUIDORA VAR SAN</strong><small>{t.account.portalTitle}</small></div>
+            </div>
+            <h2 id="twofactor-challenge-heading">{t.twoFactor.challengeTitle}</h2>
+            <p className="modal-intro">{t.twoFactor.challengeIntro}</p>
+
+            {twoFactorFeedback && (
+              <div className={`account-message account-message--${twoFactorFeedback.type === 'success' ? 'success' : 'warning'}`} style={{ marginBottom: 16 }}>
+                {twoFactorFeedback.text}
+              </div>
+            )}
+
+            <form className="account-form" onSubmit={handleVerify2FAChallenge}>
+              {twoFactorChallengeMethod === 'totp' && (
+                <div className="form-field">
+                  <label htmlFor="input-challenge-totp">{t.twoFactor.step2EnterCode}</label>
+                  <input
+                    id="input-challenge-totp"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    required
+                    placeholder={t.twoFactor.inputCodePlaceholder}
+                    value={twoFactorCodeInput}
+                    onChange={(e) => setTwoFactorCodeInput(e.target.value)}
+                    style={{ textAlign: 'center', letterSpacing: '0.2em', fontSize: '1.25rem', fontWeight: 700 }}
+                    data-testid="input-2fa-challenge-totp"
+                  />
+                </div>
+              )}
+
+              {twoFactorChallengeMethod === 'backup' && (
+                <div className="form-field">
+                  <label htmlFor="input-challenge-backup">{t.twoFactor.enterBackupCodePlaceholder}</label>
+                  <input
+                    id="input-challenge-backup"
+                    type="text"
+                    autoComplete="off"
+                    maxLength={10}
+                    required
+                    placeholder={t.twoFactor.enterBackupCodePlaceholder}
+                    value={twoFactorBackupInput}
+                    onChange={(e) => setTwoFactorBackupInput(e.target.value)}
+                    style={{ textAlign: 'center', letterSpacing: '0.15em', fontSize: '1.1rem', fontWeight: 600, fontFamily: 'monospace' }}
+                    data-testid="input-2fa-challenge-backup"
+                  />
+                </div>
+              )}
+
+              {twoFactorChallengeMethod === 'rescue' && (
+                <div className="form-field">
+                  <label htmlFor="input-challenge-rescue">{t.twoFactor.enterRescueCodePlaceholder}</label>
+                  <input
+                    id="input-challenge-rescue"
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    required
+                    placeholder={t.twoFactor.inputCodePlaceholder}
+                    value={twoFactorRescueInput}
+                    onChange={(e) => setTwoFactorRescueInput(e.target.value)}
+                    style={{ textAlign: 'center', letterSpacing: '0.2em', fontSize: '1.2rem', fontWeight: 700 }}
+                    data-testid="input-2fa-challenge-rescue"
+                  />
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="button button--navy"
+                disabled={twoFactorLoading}
+                style={{ width: '100%', marginTop: 8 }}
+                data-testid="button-submit-2fa-challenge"
+              >
+                {twoFactorLoading ? <Loader2 size={15} className="animate-spin" /> : <ShieldCheck size={15} />}
+                <span>{twoFactorLoading ? t.twoFactor.verifying : t.twoFactor.verifyButton}</span>
+              </button>
+            </form>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 16, fontSize: '0.82rem', textAlign: 'center' }}>
+              {twoFactorChallengeMethod !== 'totp' && (
+                <button
+                  type="button"
+                  onClick={() => { setTwoFactorChallengeMethod('totp'); setTwoFactorFeedback(null); }}
+                  style={{ background: 'none', border: 'none', color: 'var(--navy)', textDecoration: 'underline', cursor: 'pointer', padding: 4 }}
+                >
+                  <KeyRound size={12} style={{ display: 'inline', marginRight: 4 }} />
+                  {t.twoFactor.useTotpLink}
+                </button>
+              )}
+
+              {twoFactorChallengeMethod !== 'backup' && (
+                <button
+                  type="button"
+                  onClick={() => { setTwoFactorChallengeMethod('backup'); setTwoFactorFeedback(null); }}
+                  style={{ background: 'none', border: 'none', color: 'var(--navy)', textDecoration: 'underline', cursor: 'pointer', padding: 4 }}
+                >
+                  <LockKeyhole size={12} style={{ display: 'inline', marginRight: 4 }} />
+                  {t.twoFactor.useBackupCodeLink}
+                </button>
+              )}
+
+              {twoFactorChallengeMethod !== 'rescue' && (
+                <button
+                  type="button"
+                  onClick={handleRequestRescueCode}
+                  disabled={twoFactorLoading}
+                  style={{ background: 'none', border: 'none', color: '#64748b', textDecoration: 'underline', cursor: 'pointer', padding: 4 }}
+                >
+                  <Mail size={12} style={{ display: 'inline', marginRight: 4 }} />
+                  {t.twoFactor.rescueEmailLink}
+                </button>
+              )}
+            </div>
+
+            <div className="account-footer" style={{ marginTop: 16 }}>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '0.78rem', cursor: 'pointer' }}
+              >
+                {t.twoFactor.cancel} / {t.portal.logOut}
               </button>
             </div>
           </section>

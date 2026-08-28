@@ -313,6 +313,51 @@ export type Dictionary = {
     tagline: string;
   };
 
+  twoFactor: {
+    title: string;
+    subtitle: string;
+    enabledBadge: string;
+    disabledBadge: string;
+    enableBtn: string;
+    disableBtn: string;
+    setupTitle: string;
+    setupIntro: string;
+    step1Title: string;
+    step1Scan: string;
+    step1ManualKey: string;
+    step2Title: string;
+    step2EnterCode: string;
+    step3Title: string;
+    step3BackupCodes: string;
+    step3BackupIntro: string;
+    copyKey: string;
+    keyCopied: string;
+    copyBackupCodes: string;
+    backupCodesCopied: string;
+    confirmAndActivate: string;
+    activating: string;
+    deactivating: string;
+    disableConfirmTitle: string;
+    disableConfirmIntro: string;
+    enterCodeToDisable: string;
+    confirmDisable: string;
+    challengeTitle: string;
+    challengeIntro: string;
+    inputCodePlaceholder: string;
+    verifyButton: string;
+    verifying: string;
+    useBackupCodeLink: string;
+    useTotpLink: string;
+    enterBackupCodePlaceholder: string;
+    rescueEmailLink: string;
+    rescueEmailSent: string;
+    enterRescueCodePlaceholder: string;
+    cancel: string;
+    errorInvalidCode: string;
+    errorLocked: string;
+    remainingBackupCodes: string;
+  };
+
   legal: {
     backToHome: string;
     cookies: LegalDoc;
