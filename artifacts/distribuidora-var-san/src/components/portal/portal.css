@@ -1,0 +1,647 @@
+/* =========================================================
+   PORTAL DE CLIENTE — DISTRIBUIDORA VAR SAN
+   Estilos corporativos modulares y responsivos
+   ========================================================= */
+
+/* Modal y contenedor principal */
+.customer-portal-dialog {
+  max-width: 680px;
+  width: 95%;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 20px 40px rgba(10, 31, 68, 0.18);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.portal-main-container,
+.settings-screen-container,
+.subscreen-container {
+  padding: 8px 6px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Encabezados y navegación subpantallas */
+.subscreen-header,
+.settings-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.subscreen-back-btn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: var(--navy);
+  font-size: 1.2rem;
+  font-weight: 700;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.subscreen-back-btn:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  transform: translateX(-2px);
+}
+
+.subscreen-title-wrap,
+.settings-header-titles {
+  flex: 1;
+}
+
+.subscreen-title,
+.settings-main-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.2;
+}
+
+.subscreen-subtitle,
+.settings-username-badge {
+  font-size: 0.82rem;
+  color: var(--gold);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: block;
+}
+
+.subscreen-intro {
+  margin: 0 0 18px;
+  font-size: 0.86rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* Filas de navegación de configuración */
+.settings-category-group {
+  margin-bottom: 22px;
+}
+
+.settings-category-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.settings-rows-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.settings-nav-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 14px 16px;
+  background: #ffffff;
+  border: none;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  gap: 14px;
+}
+
+.settings-nav-row:last-child {
+  border-bottom: none;
+}
+
+.settings-nav-row:hover {
+  background: #f8fafc;
+}
+
+.nav-row-icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--navy);
+  flex-shrink: 0;
+}
+
+.nav-row-icon-wrap--danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.nav-row-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-row-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 2px;
+}
+
+.settings-nav-row--danger .nav-row-title {
+  color: #b91c1c;
+}
+
+.nav-row-desc {
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.nav-row-arrow {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+/* Selector de Organizaciones */
+.organization-selector-container {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.organization-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  min-height: 42px;
+}
+
+.organization-trigger:hover,
+.organization-trigger--active {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 2px rgba(10, 31, 68, 0.08);
+}
+
+.organization-trigger-icon {
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.organization-trigger-text {
+  flex: 1;
+  font-size: 0.88rem;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.organization-trigger-text.placeholder {
+  color: #94a3b8;
+}
+
+.organization-chevron {
+  color: #64748b;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.organization-chevron.rotate {
+  transform: rotate(180deg);
+}
+
+.organization-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(10, 31, 68, 0.12);
+  z-index: 50;
+  padding: 10px;
+  max-height: 320px;
+  display: flex;
+  flex-direction: column;
+}
+
+.organization-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+}
+
+.organization-search-input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-size: 0.84rem;
+  outline: none;
+}
+
+.organization-category-chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+
+.category-chip {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  color: #475569;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.category-chip.active {
+  background: var(--navy);
+  color: #ffffff;
+  border-color: var(--navy);
+}
+
+.organization-results-list {
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.organization-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.organization-item:hover {
+  background: #f1f5f9;
+}
+
+.organization-item.selected {
+  background: #f8fafc;
+  border-left: 3px solid var(--navy);
+}
+
+.organization-item-name {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--navy);
+  display: block;
+}
+
+.organization-item-badge {
+  font-size: 0.72rem;
+  color: #64748b;
+  display: block;
+}
+
+.organization-item-check {
+  color: var(--navy);
+  flex-shrink: 0;
+}
+
+.choose-custom-btn,
+.reset-custom-btn {
+  font-size: 0.78rem;
+  padding: 6px 12px;
+}
+
+/* Checklist de contraseña */
+.password-rules-container {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.password-rules-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.password-strength-bar {
+  height: 4px;
+  background: #e2e8f0;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.password-strength-fill {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.password-strength-fill--1,
+.password-strength-fill--2 {
+  background-color: #ef4444;
+}
+
+.password-strength-fill--3,
+.password-strength-fill--4 {
+  background-color: #f59e0b;
+}
+
+.password-strength-fill--5 {
+  background-color: #10b981;
+}
+
+.password-rules-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 10px;
+}
+
+.password-rule-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.password-rule-item--passed {
+  color: #166534;
+  font-weight: 600;
+}
+
+.password-rule-item--failed {
+  color: #94a3b8;
+}
+
+.password-rule-icon {
+  flex-shrink: 0;
+}
+
+@media (max-width: 360px) {
+  .password-rules-list {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
+
+/* Switch Toggle */
+.toggle-switch {
+  position: relative;
+  width: 52px;
+  height: 28px;
+  background: #cbd5e1;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  transition: background-color 0.25s ease;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.toggle-switch--active {
+  background: #16a34a;
+}
+
+.toggle-switch-slider {
+  width: 24px;
+  height: 24px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.25s ease;
+  transform: translateX(0);
+}
+
+.toggle-switch--active .toggle-switch-slider {
+  transform: translateX(24px);
+}
+
+.toggle-switch-text {
+  position: absolute;
+  right: 6px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.toggle-switch--active .toggle-switch-text {
+  right: auto;
+  left: 7px;
+}
+
+/* Clases utilitarias */
+.link-button {
+  background: none;
+  border: none;
+  color: var(--navy);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.84rem;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.link-button:hover {
+  color: var(--gold);
+}
+
+.form-input--readonly {
+  background-color: #f8fafc;
+  cursor: not-allowed;
+  color: #475569;
+}
+
+.form-input--valid {
+  border-color: #16a34a !important;
+}
+
+.form-input--invalid {
+  border-color: #dc2626 !important;
+}
+
+.form-field-hint {
+  font-size: 0.74rem;
+  color: #64748b;
+  margin-top: 4px;
+  display: block;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* =========================================================
+   ESTILOS Y ANIMACIONES: PERSONAJES DE AUTENTICACIÓN
+   ========================================================= */
+
+.auth-mascots-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto 8px;
+  overflow: visible;
+}
+
+.auth-characters-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-characters-svg {
+  width: 100%;
+  height: auto;
+  max-height: 120px;
+  filter: drop-shadow(0 6px 12px rgba(10, 31, 68, 0.08));
+}
+
+/* Animación sutil de respiración en reposo */
+.char--left,
+.char--center,
+.char--right {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.state--idle .char--left {
+  animation: subtleFloatLeft 4s ease-in-out infinite alternate;
+}
+
+.state--idle .char--center {
+  animation: subtleFloatCenter 3.6s ease-in-out infinite alternate;
+}
+
+.state--idle .char--right {
+  animation: subtleFloatRight 4.2s ease-in-out infinite alternate;
+}
+
+@keyframes subtleFloatLeft {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(-3px) rotate(-1deg); }
+}
+
+@keyframes subtleFloatCenter {
+  0% { transform: translateY(0) scaleY(1); }
+  100% { transform: translateY(-4px) scaleY(1.02); }
+}
+
+@keyframes subtleFloatRight {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(-3px) rotate(1deg); }
+}
+
+/* Animaciones de Éxito / Celebración */
+.char--bounce-left {
+  animation: bounceCelebration 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) infinite alternate;
+}
+
+.char--bounce-center {
+  animation: bounceCelebration 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) infinite alternate 0.1s;
+}
+
+.char--bounce-right {
+  animation: bounceCelebration 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) infinite alternate 0.05s;
+}
+
+@keyframes bounceCelebration {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-14px) scale(1.05); }
+}
+
+/* Animación de Preocupación / Error */
+.char--worried {
+  animation: worriedWiggle 0.4s ease-in-out 2;
+}
+
+@keyframes worriedWiggle {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  25% { transform: translateX(-4px) rotate(-2deg); }
+  75% { transform: translateX(4px) rotate(2deg); }
+}
+
+.pulse-light {
+  animation: pulseGlow 1.2s infinite alternate;
+}
+
+@keyframes pulseGlow {
+  0% { opacity: 0.6; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Botón para alternar visibilidad de contraseña */
+.password-toggle-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.password-toggle-btn:hover {
+  color: var(--navy);
+  background-color: #f1f5f9;
+}

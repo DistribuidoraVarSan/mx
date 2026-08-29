@@ -1591,3 +1591,107 @@ ${tr.supportNotice}`;
     subject: tr.subject,
   });
 }
+
+/**
+ * 8. Bienvenida a Nuevo Cliente Registrado en el Portal
+ */
+export function buildClientWelcomeEmail(
+  language: EmailLanguage = "es",
+  params: { recipientName?: string; email?: string; company?: string; portalUrl?: string } = {},
+): EmailContent {
+  const greeting = params.recipientName ? `Hola, ${escapeHtml(params.recipientName)}:` : "Hola:";
+  const safeCompany = params.company ? escapeHtml(params.company) : "";
+  const portalUrl = params.portalUrl || "https://distribuidoravarsan.com.mx";
+
+  const bodyHtml = `
+<p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
+<strong>${greeting}</strong>
+</p>
+<p style="margin:0 0 16px;color:#334155;font-size:15px;line-height:1.65;">
+Te damos la más cordial bienvenida al <strong>Portal de Cliente de Distribuidora Var San</strong>. Tu cuenta ha sido creada exitosamente.
+</p>
+${safeCompany ? `
+<p style="margin:0 0 16px;color:#334155;font-size:15px;line-height:1.65;">
+Empresa / Institución vinculada: <strong>${safeCompany}</strong>
+</p>
+` : ""}
+<p style="margin:0 0 20px;color:#334155;font-size:15px;line-height:1.65;">
+Desde tu portal podrás consultar información de tu cuenta, gestionar tus sesiones activas, configurar la seguridad en dos pasos (2FA), descargar tus datos y acceder a todos nuestros catálogos de soluciones industriales y médicas.
+</p>
+<div style="margin:26px 0;text-align:center;">
+<a href="${escapeHtml(portalUrl)}" style="background:#0a1f44;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:14px 28px;border-radius:6px;display:inline-block;border-bottom:3px solid #c9a84c;">
+Acceder al Portal de Cliente
+</a>
+</div>
+<p style="margin:20px 0 0;color:#64748b;font-size:13px;line-height:1.6;">
+Si tienes dudas o necesitas atención personalizada, nuestro equipo de soporte está siempre listo para ayudarte.
+</p>`;
+
+  const textBody = `${greeting}
+
+Te damos la más cordial bienvenida al Portal de Cliente de Distribuidora Var San. Tu cuenta ha sido creada exitosamente.
+
+${params.company ? `Empresa / Institución: ${params.company}\n\n` : ""}Accede a tu portal en: ${portalUrl}
+
+CALIDAD Y CONFIANZA EN CADA SUMINISTRO.
+Distribuidora Var San`;
+
+  return renderBaseEmail({
+    language,
+    kicker: "PORTAL DE CLIENTES",
+    heading: "¡Bienvenido a Distribuidora Var San!",
+    bodyHtml,
+    textBody,
+    subject: "Bienvenido a Distribuidora Var San — Tu cuenta está lista",
+  });
+}
+
+/**
+ * 9. Código de Verificación para Descarga de Datos
+ */
+export function buildDataExportCodeEmail(
+  language: EmailLanguage = "es",
+  params: { code: string; recipientName?: string; expiresInMinutes?: number },
+): EmailContent {
+  const greeting = params.recipientName ? `Hola, ${escapeHtml(params.recipientName)}:` : "Hola:";
+  const safeCode = escapeHtml(params.code);
+  const minutes = params.expiresInMinutes || 15;
+
+  const bodyHtml = `
+<p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
+<strong>${greeting}</strong>
+</p>
+<p style="margin:0 0 20px;color:#526274;font-size:15px;line-height:1.6;">
+Hemos recibido una solicitud para descargar una copia de tus datos almacenados en Distribuidora Var San. Para verificar tu identidad, utiliza el siguiente código de seguridad:
+</p>
+<div style="background:#f8fafc;border:2px dashed #0a1f44;border-radius:8px;padding:24px;text-align:center;margin:24px 0;">
+  <p style="margin:0 0 6px;color:#64748b;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700;">Código de verificación</p>
+  <span style="color:#0a1f44;font-family:Consolas,'Courier New',monospace;font-size:34px;font-weight:800;letter-spacing:8px;">${safeCode}</span>
+</div>
+<p style="margin:0 0 12px;color:#64748b;font-size:13px;">
+Este código expirará en <strong>${minutes} minutos</strong> y es de un solo uso.
+</p>
+<div style="background:#fff7ed;border-left:4px solid #f97316;padding:12px 16px;border-radius:0 4px 4px 0;margin:18px 0;">
+  <p style="margin:0;color:#9a3412;font-size:13px;line-height:1.5;">
+    Si tú no solicitaste este archivo con tus datos, te recomendamos cambiar tu contraseña y revisar tus sesiones de inmediato.
+  </p>
+</div>`;
+
+  const textBody = `${greeting}
+
+Hemos recibido una solicitud para descargar tus datos. Código de verificación:
+
+${params.code}
+
+Expira en ${minutes} minutos.
+Si tú no solicitaste este código, por favor protege tu cuenta de inmediato.`;
+
+  return renderBaseEmail({
+    language,
+    kicker: "VERIFICACIÓN DE IDENTIDAD",
+    heading: "Verifica tu identidad para descargar tus datos",
+    bodyHtml,
+    textBody,
+    subject: "Código de verificación para descarga de datos — Distribuidora Var San",
+  });
+}

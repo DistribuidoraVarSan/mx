@@ -14,7 +14,9 @@ export type SecurityActivityType =
   | "sessions_revoked_others"
   | "sessions_revoked_all"
   | "suspicious_activity_reported"
-  | "password_reset";
+  | "password_reset"
+  | "data_export_code_requested"
+  | "data_export_verified";
 
 export interface SecurityActivityInput {
   type: SecurityActivityType;

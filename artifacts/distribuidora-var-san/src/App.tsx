@@ -19,6 +19,9 @@ import LanguageSelector from './components/LanguageSelector';
 import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import PoliticaCookies from './pages/PoliticaCookies';
 import TerminosCondiciones from './pages/TerminosCondiciones';
+import { AuthModal } from './components/portal/AuthModal';
+import { CustomerPortalModal } from './components/portal/CustomerPortalModal';
+import './components/portal/portal.css';
 import {
   ArrowLeft,
   ArrowRight,
@@ -191,7 +194,18 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [accountTab, setAccountTab] = useState<'login' | 'register'>('login');
   const [accountMessage, setAccountMessage] = useState('');
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
-  const [profile, setProfile] = useState({ name: '', email: '', company: '' });
+  const [profile, setProfile] = useState<{
+    name: string;
+    lastName?: string;
+    email?: string;
+    company?: string;
+    phone?: string;
+    username?: string;
+    country?: string;
+    preferredLanguage?: string;
+    autoBugReport?: boolean;
+    createdAt?: any;
+  }>({ name: '', lastName: '', email: '', company: '', phone: '', username: '', country: 'México' });
   const [sessions, setSessions] = useState<DeviceSession[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(false);
   const [sessionActionLoading, setSessionActionLoading] = useState<string | null>(null);
@@ -316,7 +330,7 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
       setCurrentUser(user);
 
       if (!user) {
-        setProfile({ name: '', email: '', company: '' });
+        setProfile({ name: '', lastName: '', email: '', company: '', phone: '', username: '', country: 'México' });
         setSessions([]);
         return;
       }
@@ -330,17 +344,33 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
         const profileSnapshot = await getDoc(doc(db, 'users', user.uid));
         const data = profileSnapshot.exists() ? profileSnapshot.data() : {};
 
+        const rawDisplayName = user.displayName || '';
+        const nameParts = rawDisplayName.trim().split(' ');
+        const fallbackFirstName = nameParts[0] || t.portal.defaultClientName;
+        const fallbackLastName = nameParts.slice(1).join(' ');
+
         setProfile({
-          name: (data.name as string) || user.displayName || t.portal.defaultClientName,
+          name: (data.name as string) || fallbackFirstName,
+          lastName: (data.lastName as string) || fallbackLastName,
           email: (data.email as string) || user.email || '',
           company: (data.company as string) || t.portal.notSpecified,
+          phone: (data.phone as string) || '',
+          username: (data.username as string) || (user.email ? user.email.split('@')[0] : 'usuario'),
+          country: (data.country as string) || 'México',
+          preferredLanguage: (data.preferredLanguage as string) || language,
+          autoBugReport: data.autoBugReport ?? true,
+          createdAt: data.createdAt,
         });
       } catch (error) {
         console.error('Error al cargar el perfil de Firebase:', error);
         setProfile({
           name: user.displayName || t.portal.defaultClientName,
+          lastName: '',
           email: user.email || '',
           company: t.portal.notSpecified,
+          phone: '',
+          username: user.email ? user.email.split('@')[0] : 'usuario',
+          country: 'México',
         });
       }
     });
@@ -729,7 +759,7 @@ t.account.errorGeneric
       }
       await setDoc(doc(db, 'users', currentUser.uid), {
         name: profile.name.trim(),
-        company: profile.company.trim(),
+        company: (profile.company || '').trim(),
         email: currentUser.email || profile.email,
         preferredLanguage: language,
       }, { merge: true });
@@ -1854,793 +1884,41 @@ t.account.errorGeneric
         );
       })()}
 
-      {accountOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setAccountOpen(false); }}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="account-heading"><button className="modal-close" onClick={() => setAccountOpen(false)} aria-label={t.common.close} data-testid="button-close-account"><X size={18} /></button><div className="modal-brand"><BrandMark /><div><strong>DISTRIBUIDORA VAR SAN</strong><small>{t.account.portalTitle}</small></div></div><h2 id="account-heading">{accountTab === 'login' ? t.account.loginTitle : t.account.registerTitle}</h2><p className="modal-intro">{accountTab === 'login' ? t.account.loginIntro : t.account.registerIntro}</p><div className="account-tabs"><button className={`account-tab${accountTab === 'login' ? ' active' : ''}`} onClick={() => { setAccountTab('login'); setAccountMessage(''); }} data-testid="button-tab-login">{t.account.tabLogin}</button><button className={`account-tab${accountTab === 'register' ? ' active' : ''}`} onClick={() => { setAccountTab('register'); setAccountMessage(''); }} data-testid="button-tab-register">{t.account.tabRegister}</button></div><form className="account-form" onSubmit={submitAccount}>{accountTab === 'register' && <><div className="form-field"><label htmlFor="account-name">{t.account.fieldName}</label><input id="account-name" name="name" required placeholder={t.account.fieldNamePlaceholder} data-testid="input-account-name" /></div><div className="form-field"><label htmlFor="account-company">{t.account.fieldCompany}</label><input id="account-company" name="company" placeholder={t.account.fieldCompanyPlaceholder} data-testid="input-account-company" /></div></>}<div className="form-field"><label htmlFor="account-email">{t.account.fieldEmail}</label><input id="account-email" name="email" type="email" required placeholder={t.account.fieldEmailPlaceholder} data-testid="input-account-email" /></div><div className="form-field"><label htmlFor="account-password">{t.account.fieldPassword}</label><input id="account-password" name="password" type="password" required minLength={6} placeholder={accountTab === 'login' ? t.account.fieldPasswordPlaceholderLogin : t.account.fieldPasswordPlaceholderRegister} data-testid="input-account-password" /></div>{accountTab === 'register' && <div className="form-field"><label htmlFor="account-confirm">{t.account.fieldConfirmPassword}</label><input id="account-confirm" name="confirmPassword" type="password" required minLength={6} placeholder={t.account.fieldConfirmPasswordPlaceholder} data-testid="input-account-confirm" /></div>}{accountMessage && <div className="account-message account-message--warning" role="status" data-testid="status-account">{accountMessage}</div>}<button className="button button--navy" type="submit" data-testid="button-submit-account">{accountTab === 'login' ? t.account.submitLogin : t.account.submitRegister} <ArrowRight size={15} /></button></form><button className="button button--outline" type="button" onClick={signInWithGoogle} style={{ color: 'var(--navy)', borderColor: 'var(--line)', marginTop: 10 }}><User size={15} /> {t.account.continueWithGoogle}</button><div className="account-footer"><LockKeyhole size={13} /> {t.account.secureAccessNote}</div></section></div>}
+      <AuthModal
+        isOpen={accountOpen}
+        initialTab={accountTab}
+        language={language}
+        onClose={() => setAccountOpen(false)}
+        onAuthSuccess={() => {
+          setAccountOpen(false);
+          setPortalOpen(true);
+        }}
+        onRequires2FA={(user) => {
+          checkPostLogin2FA(user);
+        }}
+      />
 
-      {portalOpen && (
-        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setPortalOpen(false); }}>
-          <section className="modal modal--wide" role="dialog" aria-modal="true" aria-labelledby="portal-heading">
-            <button className="modal-close" onClick={() => setPortalOpen(false)} aria-label={t.portal.closePortal} data-testid="button-close-portal">
-              <X size={18} />
-            </button>
-            <div className="portal-header">
-              <span className="eyebrow">{t.portal.eyebrow}</span>
-              <h2 id="portal-heading">{t.portal.welcome.replace('{name}', (profile.name || currentUser?.displayName) ? `, ${profile.name || currentUser?.displayName}` : '')}</h2>
-              <p className="modal-intro">{portalView === 'main' ? t.portal.intro : (t.portal.settingsSubtitle || t.portal.intro)}</p>
-            </div>
-
-            {/* VISTA 1: DASHBOARD PRINCIPAL DEL PORTAL DE CLIENTE */}
-            {portalView === 'main' && (
-              <div className="portal-main-dashboard">
-                <div className="profile-summary">
-                  <div className="profile-row">
-                    <span>{t.portal.fieldNameLabel}</span>
-                    <strong>{profile.name || currentUser?.displayName || t.portal.defaultClientName}</strong>
-                  </div>
-                  <div className="profile-row">
-                    <span>{t.portal.fieldEmailLabel}</span>
-                    <strong>{profile.email || currentUser?.email || t.portal.notAvailable}</strong>
-                  </div>
-                  <div className="profile-row">
-                    <span>{t.portal.fieldCompanyLabel}</span>
-                    <strong>{profile.company || t.portal.notSpecified}</strong>
-                  </div>
-                  <div className="profile-row">
-                    <span>{t.portal.accountStatus || 'Estado de cuenta'}</span>
-                    <strong style={{ color: '#166534', display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <CircleCheck size={14} /> {t.portal.activeStatus || 'Activa'}
-                    </strong>
-                  </div>
-                </div>
-
-                <div className="portal-quick-status-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, margin: '18px 0' }}>
-                  <div style={{ padding: '14px 16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
-                    {twoFactorStatus?.enabled ? (
-                      <ShieldCheck size={24} style={{ color: '#166534' }} />
-                    ) : (
-                      <ShieldAlert size={24} style={{ color: '#b45309' }} />
-                    )}
-                    <div>
-                      <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>{t.twoFactor.title}</div>
-                      <div style={{ fontSize: '0.88rem', fontWeight: 700, color: twoFactorStatus?.enabled ? '#166534' : '#b45309' }}>
-                        {twoFactorStatus?.enabled ? t.twoFactor.enabledBadge : t.twoFactor.disabledBadge}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div style={{ padding: '14px 16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <Laptop size={24} style={{ color: 'var(--navy)' }} />
-                    <div>
-                      <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>{t.portal.tabSecurity}</div>
-                      <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--navy)' }}>
-                        {sessions.length > 0 ? `${sessions.length} sesión(es)` : 'Sesión actual activa'}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, margin: '22px 0 14px' }}>
-                  <button
-                    type="button"
-                    className="button button--navy"
-                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 22px', fontSize: '0.92rem' }}
-                    onClick={() => { setPortalView('settings'); setPortalTab('account'); }}
-                    data-testid="button-open-settings"
-                  >
-                    <Settings size={16} />
-                    <span>{t.portal.settingsButton || 'Configuración'}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="button button--outline"
-                    style={{ color: 'var(--navy)', fontSize: '0.88rem', padding: '10px 16px' }}
-                    onClick={() => setProfileOpen(true)}
-                    data-testid="button-edit-profile-main"
-                  >
-                    <UserCheck size={15} /> {t.portal.myProfile}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* VISTA 2: PANEL DE CONFIGURACIÓN Y SUBSECCIONES */}
-            {portalView === 'settings' && (
-              <div className="portal-settings-container">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, borderBottom: '1px solid #e2e8f0', paddingBottom: 12 }}>
-                  <button
-                    type="button"
-                    className="button button--outline"
-                    style={{ color: 'var(--navy)', fontSize: '0.82rem', padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6 }}
-                    onClick={() => setPortalView('main')}
-                    data-testid="button-back-to-portal"
-                  >
-                    <ArrowLeft size={14} />
-                    <span>{t.portal.backToPortal || 'Volver al Portal'}</span>
-                  </button>
-                  <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--navy)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Settings size={16} style={{ color: 'var(--gold)' }} />
-                    <span>{t.portal.settingsButton || 'Configuración'}</span>
-                  </div>
-                </div>
-
-                {/* Pestañas de Navegación de Configuración */}
-                <div className="portal-nav-tabs" role="tablist">
-                  <button
-                    type="button"
-                    className={`portal-nav-tab${portalTab === 'account' ? ' active' : ''}`}
-                    onClick={() => setPortalTab('account')}
-                    role="tab"
-                    aria-selected={portalTab === 'account'}
-                    data-testid="tab-portal-account"
-                  >
-                    <UserCheck size={14} />
-                    <span>{t.portal.tabAccount}</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`portal-nav-tab${portalTab === 'security' ? ' active' : ''}`}
-                    onClick={() => setPortalTab('security')}
-                    role="tab"
-                    aria-selected={portalTab === 'security'}
-                    data-testid="tab-portal-security"
-                  >
-                    <ShieldCheck size={14} />
-                    <span>{t.portal.tabSecurity}</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`portal-nav-tab${portalTab === 'storage' ? ' active' : ''}`}
-                    onClick={() => setPortalTab('storage')}
-                    role="tab"
-                    aria-selected={portalTab === 'storage'}
-                    data-testid="tab-portal-storage"
-                  >
-                    <HardDrive size={14} />
-                    <span>{t.portal.tabStorage}</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`portal-nav-tab${portalTab === 'resources' ? ' active' : ''}`}
-                    onClick={() => setPortalTab('resources')}
-                    role="tab"
-                    aria-selected={portalTab === 'resources'}
-                    data-testid="tab-portal-resources"
-                  >
-                    <HelpCircle size={14} />
-                    <span>{t.portal.tabResources}</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`portal-nav-tab${portalTab === 'legal' ? ' active' : ''}`}
-                    onClick={() => setPortalTab('legal')}
-                    role="tab"
-                    aria-selected={portalTab === 'legal'}
-                    data-testid="tab-portal-legal"
-                  >
-                    <FileText size={14} />
-                    <span>{t.portal.tabLegal}</span>
-                  </button>
-                </div>
-
-            {/* CONTENIDO DE PESTAÑA: 1. PERFIL Y CUENTA */}
-            {portalTab === 'account' && (
-              <div>
-                <div className="profile-summary">
-                  <div className="profile-row">
-                    <span>{t.portal.fieldNameLabel}</span>
-                    <strong>{profile.name || t.portal.defaultClientName}</strong>
-                  </div>
-                  <div className="profile-row">
-                    <span>{t.portal.fieldEmailLabel}</span>
-                    <strong>{profile.email || currentUser?.email || t.portal.notAvailable}</strong>
-                  </div>
-                  <div className="profile-row">
-                    <span>{t.portal.fieldCompanyLabel}</span>
-                    <strong>{profile.company || t.portal.notSpecified}</strong>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'flex-start', margin: '14px 0 20px' }}>
-                  <button
-                    type="button"
-                    className="button button--outline"
-                    style={{ color: 'var(--navy)', fontSize: '0.82rem', padding: '6px 14px' }}
-                    onClick={() => { setProfileOpen(true); }}
-                    data-testid="button-edit-profile"
-                  >
-                    <UserCheck size={14} /> {t.portal.myProfile}
-                  </button>
-                </div>
-
-                <div className="account-actions-grid">
-                  {/* Cambiar Contraseña */}
-                  <div className="account-action-card">
-                    <div>
-                      <h4><KeyRound size={16} /> {t.portal.changePassword}</h4>
-                      <p>{t.portal.passwordChangedSuccess}</p>
-                    </div>
-                    <button
-                      type="button"
-                      className="button button--navy account-action-btn"
-                      onClick={() => { setChangePasswordOpen(true); setPasswordFeedback(null); }}
-                      data-testid="button-open-change-password"
-                    >
-                      {t.portal.changePassword}
-                    </button>
-                  </div>
-
-                  {/* Cambiar Correo */}
-                  <div className="account-action-card">
-                    <div>
-                      <h4><Mail size={16} /> {t.portal.changeEmail}</h4>
-                      <p>{t.portal.emailChangedSuccess}</p>
-                    </div>
-                    <button
-                      type="button"
-                      className="button button--navy account-action-btn"
-                      onClick={() => { setChangeEmailOpen(true); setEmailFeedback(null); }}
-                      data-testid="button-open-change-email"
-                    >
-                      {t.portal.changeEmail}
-                    </button>
-                  </div>
-
-                  {/* Desactivar Cuenta */}
-                  <div className="account-action-card account-action-card--danger">
-                    <div>
-                      <h4><AlertTriangle size={16} /> {t.portal.deactivateAccount}</h4>
-                      <p>{t.portal.deactivateWarning}</p>
-                    </div>
-                    <button
-                      type="button"
-                      className="button button--outline account-action-btn"
-                      style={{ color: '#b91c1c', borderColor: '#fca5a5' }}
-                      onClick={() => { setDeactivateOpen(true); setDeactivateFeedback(null); }}
-                      data-testid="button-open-deactivate"
-                    >
-                      {t.portal.deactivateAccount}
-                    </button>
-                  </div>
-
-                  {/* Eliminar Cuenta */}
-                  <div className="account-action-card account-action-card--danger">
-                    <div>
-                      <h4><Trash2 size={16} /> {t.portal.deleteAccount}</h4>
-                      <p>{t.portal.deleteWarning}</p>
-                    </div>
-                    <button
-                      type="button"
-                      className="button button--outline account-action-btn"
-                      style={{ color: '#b91c1c', borderColor: '#fca5a5', background: '#fee2e2' }}
-                      onClick={() => { setDeleteAccountOpen(true); setDeleteFeedback(null); }}
-                      data-testid="button-open-delete"
-                    >
-                      {t.portal.deleteAccount}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* CONTENIDO DE PESTAÑA: 2. SEGURIDAD Y SESIONES */}
-            {portalTab === 'security' && (
-              <div>
-                {/* Sección 2FA TOTP */}
-                <div style={{ background: '#ffffff', borderRadius: 12, border: '1px solid #e2e8f0', padding: 18, marginBottom: 20 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                        <ShieldCheck size={18} style={{ color: twoFactorStatus?.enabled ? '#16a34a' : '#d97706' }} />
-                        <strong style={{ color: 'var(--navy)', fontSize: '0.95rem' }}>{t.twoFactor.title}</strong>
-                        <span style={{
-                          fontSize: '0.74rem',
-                          fontWeight: 700,
-                          padding: '2px 8px',
-                          borderRadius: 9999,
-                          background: twoFactorStatus?.enabled ? '#dcfce7' : '#fef3c7',
-                          color: twoFactorStatus?.enabled ? '#15803d' : '#b45309',
-                        }}>
-                          {twoFactorStatus?.enabled ? t.twoFactor.enabledBadge : t.twoFactor.disabledBadge}
-                        </span>
-                      </div>
-                      <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--muted)' }}>
-                        {t.twoFactor.subtitle}
-                      </p>
-                    </div>
-                    <div>
-                      {twoFactorStatus?.enabled ? (
-                        <button
-                          type="button"
-                          className="button button--outline"
-                          style={{ color: '#b91c1c', borderColor: '#fca5a5', fontSize: '0.82rem', padding: '7px 14px' }}
-                          onClick={() => { setTwoFactorDisableOpen(true); setTwoFactorFeedback(null); }}
-                          data-testid="button-open-disable-2fa"
-                        >
-                          <ShieldAlert size={14} /> {t.twoFactor.disableBtn}
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className="button button--navy"
-                          style={{ fontSize: '0.82rem', padding: '7px 14px' }}
-                          onClick={handleStart2FASetup}
-                          disabled={twoFactorLoading}
-                          data-testid="button-start-2fa-setup"
-                        >
-                          {twoFactorLoading ? <Loader2 size={14} className="animate-spin" /> : <QrCode size={14} />}
-                          <span>{t.twoFactor.enableBtn}</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Gestión de sesiones y dispositivos */}
-                <div className="sessions-section">
-                  <div className="sessions-header">
-                    <div>
-                      <h3 className="sessions-title">{t.portal.sessionsTitle}</h3>
-                      <p className="sessions-subtitle">{t.portal.sessionsSubtitle}</p>
-                    </div>
-                    <button
-                      type="button"
-                      className="sessions-refresh-btn"
-                      onClick={() => loadSessions(currentUser)}
-                      disabled={loadingSessions}
-                      aria-label={t.portal.refreshSessions}
-                      title={t.portal.refreshSessions}
-                    >
-                      <RefreshCw size={14} className={loadingSessions ? 'animate-spin' : ''} />
-                    </button>
-                  </div>
-
-                  {sessionFeedback && (
-                    <div className={`account-message account-message--${sessionFeedback.type === 'success' ? 'success' : 'warning'}`} role="status" style={{ marginBottom: 12 }}>
-                      {sessionFeedback.text}
-                    </div>
-                  )}
-
-                  {loadingSessions && sessions.length === 0 ? (
-                    <div className="sessions-loading">
-                      <Loader2 size={16} className="animate-spin" />
-                      <span>{t.portal.loadingSessions}</span>
-                    </div>
-                  ) : sessions.length === 0 ? (
-                    <div className="sessions-empty">
-                      <span>{t.portal.noActiveSessions}</span>
-                    </div>
-                  ) : (
-                    <div className="sessions-list">
-                      {sessions.map((sess) => (
-                        <div key={sess.sessionId} className={`session-item${sess.isCurrent ? ' session-item--current' : ''}`}>
-                          <div className="session-icon-wrap">
-                            {renderDeviceIcon(sess.deviceType)}
-                          </div>
-                          <div className="session-info">
-                            <div className="session-title-row">
-                              <strong className="session-device-name">
-                                {sess.os || 'Dispositivo'} • {sess.browser || 'Navegador'}
-                              </strong>
-                              {sess.isCurrent && (
-                                <span className="session-badge">{t.portal.currentDeviceBadge}</span>
-                              )}
-                            </div>
-                            <div className="session-meta">
-                              {sess.country && (
-                                <span><Globe size={11} /> {sess.country === 'MX' ? 'México' : sess.country}</span>
-                              )}
-                              {sess.ip && <span>IP: {sess.ip}</span>}
-                              <span>{t.portal.lastActiveLabel}: {formatSessionDate(sess.lastActiveAt)}</span>
-                            </div>
-                          </div>
-                          {!sess.isCurrent && (
-                            <button
-                              type="button"
-                              className="session-revoke-btn"
-                              onClick={() => handleRevokeSession(sess.sessionId)}
-                              disabled={sessionActionLoading === sess.sessionId}
-                              aria-label={t.portal.revokeSession}
-                            >
-                              {sessionActionLoading === sess.sessionId ? (
-                                <Loader2 size={13} className="animate-spin" />
-                              ) : (
-                                <Trash2 size={13} />
-                              )}
-                              <span>{t.portal.revokeSession}</span>
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="sessions-footer-action" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 12 }}>
-                    {sessions.filter((s) => !s.isCurrent).length > 0 && (
-                      <button
-                        type="button"
-                        className="button button--outline revoke-others-btn"
-                        onClick={handleRevokeAllOthers}
-                        disabled={sessionActionLoading === 'all-others'}
-                        style={{ fontSize: '0.8rem', padding: '6px 12px', color: 'var(--navy)' }}
-                      >
-                        {sessionActionLoading === 'all-others' ? (
-                          <Loader2 size={13} className="animate-spin" />
-                        ) : (
-                          <Trash2 size={13} />
-                        )}
-                        <span>{t.portal.revokeAllOthers}</span>
-                      </button>
-                    )}
-
-                    {sessions.length > 0 && (
-                      <button
-                        type="button"
-                        className="button button--outline revoke-all-total-btn"
-                        onClick={handleRevokeAllTotal}
-                        disabled={sessionActionLoading === 'all-total'}
-                        style={{ fontSize: '0.8rem', padding: '6px 12px', color: '#b91c1c', borderColor: '#fca5a5' }}
-                        data-testid="button-revoke-all-total"
-                      >
-                        {sessionActionLoading === 'all-total' ? (
-                          <Loader2 size={13} className="animate-spin" />
-                        ) : (
-                          <ShieldAlert size={13} />
-                        )}
-                        <span>{t.portal.revokeAllTotal}</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Historial de actividad de seguridad */}
-                <div style={{ marginTop: 22, borderTop: '1px solid #e2e8f0', paddingTop: 18 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <Activity size={16} style={{ color: 'var(--navy)' }} />
-                      <div>
-                        <h4 style={{ margin: 0, fontSize: '0.92rem', color: 'var(--navy)', fontWeight: 600 }}>
-                          {t.portal.securityActivityTitle}
-                        </h4>
-                        <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--muted)' }}>
-                          {t.portal.securityActivitySubtitle}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      className="sessions-refresh-btn"
-                      onClick={() => loadSecurityActivities(currentUser)}
-                      disabled={loadingActivities}
-                      aria-label={t.portal.refreshSessions}
-                      title={t.portal.refreshSessions}
-                    >
-                      <RefreshCw size={13} className={loadingActivities ? 'animate-spin' : ''} />
-                    </button>
-                  </div>
-
-                  {loadingActivities && securityActivities.length === 0 ? (
-                    <div className="sessions-loading" style={{ padding: '14px 0', fontSize: '0.84rem' }}>
-                      <Loader2 size={15} className="animate-spin" />
-                      <span>{t.portal.loadingActivity}</span>
-                    </div>
-                  ) : securityActivities.length === 0 ? (
-                    <div className="sessions-empty" style={{ padding: '14px 0', fontSize: '0.84rem', color: 'var(--muted)' }}>
-                      <span>{t.portal.noSecurityActivity}</span>
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 220, overflowY: 'auto', paddingRight: 4 }}>
-                      {securityActivities.map((act) => (
-                        <div
-                          key={act.id}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            padding: '10px 14px',
-                            background: '#ffffff',
-                            borderRadius: 8,
-                            border: '1px solid #e2e8f0',
-                            fontSize: '0.82rem',
-                          }}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <div style={{
-                              color: act.type === 'new_device' || act.type === 'suspicious_activity_reported' ? '#d97706' : act.type === '2fa_enabled' ? '#16a34a' : 'var(--navy)'
-                            }}>
-                              {act.type === 'new_device' || act.type === 'suspicious_activity_reported' ? (
-                                <AlertTriangle size={15} />
-                              ) : act.type.startsWith('2fa') ? (
-                                <ShieldCheck size={15} />
-                              ) : (
-                                <History size={15} />
-                              )}
-                            </div>
-                            <div>
-                              <strong style={{ color: 'var(--navy)', display: 'block', fontSize: '0.84rem' }}>{act.title}</strong>
-                              <span style={{ color: 'var(--muted)', fontSize: '0.78rem' }}>{act.description}</span>
-                            </div>
-                          </div>
-                          <div style={{ textAlign: 'right', whiteSpace: 'nowrap', color: '#64748b', fontSize: '0.76rem' }}>
-                            <span>{formatSessionDate(act.timestamp)}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* CONTENIDO DE PESTAÑA: 3. ALMACENAMIENTO */}
-            {portalTab === 'storage' && (
-              <div>
-                <div className="storage-hero-card">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 style={{ margin: 0, fontSize: '1rem', color: '#ffffff' }}>{t.portal.storageTitle}</h3>
-                    <button
-                      type="button"
-                      className="sessions-refresh-btn"
-                      style={{ color: '#ffffff', borderColor: 'rgba(255,255,255,0.3)' }}
-                      onClick={loadBrowserStorage}
-                      disabled={loadingStorage}
-                    >
-                      <RefreshCw size={13} className={loadingStorage ? 'animate-spin' : ''} />
-                    </button>
-                  </div>
-                  <p style={{ margin: '6px 0 12px', fontSize: '0.8rem', opacity: 0.85 }}>
-                    {t.portal.storageSubtitle}
-                  </p>
-
-                  <div className="storage-progress-bar">
-                    <div className="storage-progress-fill" style={{ width: `${storageInfo?.percentUsed || 0}%` }} />
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.76rem' }}>
-                    <span>
-                      {t.portal.storageUsage}:{' '}
-                      <strong>
-                        {storageInfo?.usageBytes ? `${(storageInfo.usageBytes / (1024 * 1024)).toFixed(1)} MB` : t.portal.storageUnavailable}
-                      </strong>
-                    </span>
-                    <span>
-                      {storageInfo?.quotaBytes ? `Cuota: ${(storageInfo.quotaBytes / (1024 * 1024 * 1024)).toFixed(1)} GB` : ''}
-                    </span>
-                  </div>
-                </div>
-
-                {storageFeedback && (
-                  <div className={`account-message account-message--${storageFeedback.type === 'success' ? 'success' : 'warning'}`} style={{ marginBottom: 14 }}>
-                    {storageFeedback.text}
-                  </div>
-                )}
-
-                <div className="storage-metrics-grid">
-                  <div className="storage-metric-box">
-                    <strong>{t.portal.storageLocalStorage}</strong>
-                    <span>{storageInfo?.localStorageKeys || 0} claves (~{storageInfo ? (storageInfo.localStorageBytes / 1024).toFixed(1) : 0} KB)</span>
-                  </div>
-
-                  <div className="storage-metric-box">
-                    <strong>{t.portal.storageSessionStorage}</strong>
-                    <span>{storageInfo?.sessionStorageKeys || 0} claves (~{storageInfo ? (storageInfo.sessionStorageBytes / 1024).toFixed(1) : 0} KB)</span>
-                  </div>
-
-                  <div className="storage-metric-box">
-                    <strong>{t.portal.storageCookies}</strong>
-                    <span>{storageInfo?.cookieCount || 0} cookies</span>
-                  </div>
-
-                  <div className="storage-metric-box">
-                    <strong>{t.portal.storageIndexedDb}</strong>
-                    <span>{storageInfo?.indexedDbSupported ? t.portal.storageAvailable : t.portal.storageUnavailable}</span>
-                  </div>
-
-                  <div className="storage-metric-box">
-                    <strong>{t.portal.storageCacheStorage}</strong>
-                    <span>{storageInfo?.cacheStorageSupported ? t.portal.storageAvailable : t.portal.storageUnavailable}</span>
-                  </div>
-
-                  <div className="storage-metric-box">
-                    <strong>{t.portal.storageServiceWorker}</strong>
-                    <span>{storageInfo?.serviceWorkerSupported ? t.portal.storageAvailable : t.portal.storageUnavailable}</span>
-                  </div>
-                </div>
-
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: '12px 14px', marginBottom: 16 }}>
-                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5 }}>
-                    <LockKeyhole size={13} style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />
-                    {t.portal.storageCookiesNote}
-                  </p>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <button
-                    type="button"
-                    className="button button--outline"
-                    onClick={handleClearBrowserStorage}
-                    style={{ color: 'var(--navy)', fontSize: '0.82rem' }}
-                    data-testid="button-clear-storage"
-                  >
-                    <Trash2 size={14} /> {t.portal.storageClearBtn}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* CONTENIDO DE PESTAÑA: 4. RECURSOS Y AYUDA */}
-            {portalTab === 'resources' && (
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, borderBottom: '1px solid #e2e8f0', paddingBottom: 12 }}>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--navy)' }}>{t.portal.resourcesTitle}</h3>
-                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--muted)' }}>{t.portal.resourcesSubtitle}</p>
-                  </div>
-                  <span className="version-pill">{t.portal.resourcesVersionValue}</span>
-                </div>
-
-                {/* Preguntas frecuentes */}
-                <h4 style={{ margin: '14px 0 8px', fontSize: '0.92rem', color: 'var(--navy)', fontWeight: 600 }}>
-                  <HelpCircle size={15} style={{ display: 'inline', marginRight: 6 }} />
-                  {t.portal.resourcesFaq}
-                </h4>
-
-                <div className="faq-list">
-                  {[
-                    { q: t.portal.faqQuestion1, a: t.portal.faqAnswer1 },
-                    { q: t.portal.faqQuestion2, a: t.portal.faqAnswer2 },
-                    { q: t.portal.faqQuestion3, a: t.portal.faqAnswer3 },
-                    { q: t.portal.faqQuestion4, a: t.portal.faqAnswer4 },
-                  ].map((item, index) => {
-                    const isOpen = faqOpenIndex === index;
-                    return (
-                      <div key={`faq-${index}`} className="faq-item">
-                        <button
-                          type="button"
-                          className="faq-question"
-                          onClick={() => setFaqOpenIndex(isOpen ? null : index)}
-                        >
-                          <span>{item.q}</span>
-                          {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                        </button>
-                        {isOpen && <div className="faq-answer">{item.a}</div>}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Soporte y Reporte de Fallos */}
-                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 20 }}>
-                  <button
-                    type="button"
-                    className="button button--navy"
-                    onClick={() => { setBugReportOpen(true); setBugReportFeedback(null); }}
-                    style={{ fontSize: '0.84rem' }}
-                    data-testid="button-open-bug-report"
-                  >
-                    <Bug size={14} /> {t.portal.resourcesReportBug}
-                  </button>
-                </div>
-
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: '12px 14px', marginTop: 16 }}>
-                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5 }}>
-                    <Mail size={13} style={{ display: 'inline', marginRight: 5, verticalAlign: 'middle' }} />
-                    {t.portal.resourcesSupportChannels}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* CONTENIDO DE PESTAÑA: 5. LEGAL */}
-            {portalTab === 'legal' && (
-              <div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, margin: '14px 0' }}>
-                  <a
-                    href="/privacidad"
-                    onClick={navigateAndClose}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '14px 18px',
-                      background: '#ffffff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: 10,
-                      textDecoration: 'none',
-                      color: 'var(--navy)',
-                      fontWeight: 600,
-                      fontSize: '0.88rem',
-                    }}
-                    data-testid="portal-link-privacy"
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <FileText size={16} style={{ color: 'var(--gold)' }} />
-                      <span>{t.footer.privacyNotice}</span>
-                    </div>
-                    <ArrowRight size={15} />
-                  </a>
-
-                  <a
-                    href="/cookies"
-                    onClick={navigateAndClose}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '14px 18px',
-                      background: '#ffffff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: 10,
-                      textDecoration: 'none',
-                      color: 'var(--navy)',
-                      fontWeight: 600,
-                      fontSize: '0.88rem',
-                    }}
-                    data-testid="portal-link-cookies"
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <FileText size={16} style={{ color: 'var(--gold)' }} />
-                      <span>{t.footer.cookiesPolicy}</span>
-                    </div>
-                    <ArrowRight size={15} />
-                  </a>
-
-                  <a
-                    href="/terminos"
-                    onClick={navigateAndClose}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '14px 18px',
-                      background: '#ffffff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: 10,
-                      textDecoration: 'none',
-                      color: 'var(--navy)',
-                      fontWeight: 600,
-                      fontSize: '0.88rem',
-                    }}
-                    data-testid="portal-link-terms"
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <FileText size={16} style={{ color: 'var(--gold)' }} />
-                      <span>{t.footer.termsAndConditions}</span>
-                    </div>
-                    <ArrowRight size={15} />
-                  </a>
-                </div>
-              </div>
-            )}
-
-            </div>
-          )}
-
-            <div className="portal-actions" style={{ marginTop: 22, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-              <div style={{ display: 'flex', gap: 8 }}>
-                {portalView === 'settings' && (
-                  <button
-                    type="button"
-                    className="button button--outline"
-                    style={{ color: 'var(--navy)', borderColor: 'var(--line)', fontSize: '0.84rem' }}
-                    onClick={() => setPortalView('main')}
-                    data-testid="button-bottom-back-to-portal"
-                  >
-                    <ArrowLeft size={14} /> {t.portal.backToPortal || 'Volver al Portal'}
-                  </button>
-                )}
-              </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button className="button button--outline" style={{ color: 'var(--navy)', borderColor: 'var(--line)' }} onClick={handleSignOut} data-testid="button-logout">
-                  <LockKeyhole size={15} />{t.portal.logOut}
-                </button>
-                <button className="button button--outline" style={{ color: 'var(--navy)', borderColor: 'var(--line)' }} onClick={() => setPortalOpen(false)} data-testid="button-close-portal-action">
-                  {t.portal.closePortal}
-                </button>
-              </div>
-            </div>
-          </section>
-        </div>
-      )}
+      <CustomerPortalModal
+        isOpen={portalOpen}
+        currentUser={currentUser}
+        profile={profile}
+        sessions={sessions}
+        securityActivities={securityActivities}
+        twoFactorStatus={twoFactorStatus}
+        loadingSessions={loadingSessions}
+        onClose={() => setPortalOpen(false)}
+        onProfileUpdate={(updated) => setProfile(updated)}
+        onTwoFactorChange={(status) => setTwoFactorStatus(status)}
+        onRefreshSessions={() => loadSessions(currentUser)}
+        onRevokeSession={(sessionId) => handleRevokeSession(sessionId)}
+        onRevokeAllOthers={() => handleRevokeAllOthers()}
+        onNavigateLegal={(path) => {
+          setPortalOpen(false);
+          window.history.pushState({}, '', path);
+          setCurrentPath(path);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
 
       {/* Modal de Configuración y Activación 2FA */}
       {twoFactorSetupOpen && twoFactorSetupData && (

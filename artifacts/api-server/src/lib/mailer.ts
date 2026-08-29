@@ -1,6 +1,6 @@
 import { logger } from "./logger";
 
-export const OFFICIAL_SENDER = "Distribuidora Var San <no-reply@distribuidoravarsan.com.mx>";
+export const OFFICIAL_SENDER = "Distribuidora Var San <no-reply@distribuidora.com.mx>";
 
 export const EMAIL_SENDERS = {
   default: OFFICIAL_SENDER,

@@ -95,3 +95,23 @@ export interface AccountDeactivationEmailParams {
   recipientName?: string;
   deactivationDate?: string;
 }
+
+export interface ClientWelcomeEmailParams {
+  recipientName?: string;
+  email?: string;
+  company?: string;
+  portalUrl?: string;
+}
+
+export interface DataExportCodeEmailParams {
+  code: string;
+  recipientName?: string;
+  expiresInMinutes?: number;
+}
+
+export interface DataExportReadyEmailParams {
+  recipientName?: string;
+  downloadUrl?: string;
+  expiresInHours?: number;
+  summaryText?: string;
+}
