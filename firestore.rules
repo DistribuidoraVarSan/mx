@@ -12,14 +12,22 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    function hasValidUserFields() {
-      return request.resource.data.keys().hasOnly(['name', 'company', 'email', 'createdAt'])
-        && request.resource.data.name is string
-        && request.resource.data.name.size() <= 150
-        && request.resource.data.company is string
-        && request.resource.data.company.size() <= 150
-        && request.resource.data.email is string
-        && request.resource.data.email == request.auth.token.email;
+    function isSupportedLanguage(lang) {
+      return lang in ['es', 'en-GB', 'fr', 'pt', 'it', 'zh-CN', 'zh-TW', 'ko'];
+    }
+
+    function hasValidProfileFields() {
+      let allowedKeys = ['name', 'company', 'email', 'phone', 'preferredLanguage', 'createdAt'];
+      let data = request.resource.data;
+      return data.keys().hasOnly(allowedKeys)
+        && data.name is string
+        && data.name.size() <= 150
+        && data.company is string
+        && data.company.size() <= 150
+        && data.email is string
+        && data.email == request.auth.token.email
+        && (!('phone' in data) || (data.phone is string && data.phone.size() <= 30))
+        && (!('preferredLanguage' in data) || (data.preferredLanguage is string && isSupportedLanguage(data.preferredLanguage)));
     }
 
     // Regla para la colección de usuarios
@@ -30,20 +38,21 @@ service cloud.firestore {
 
       // 2. Creación: registro inicial (Email/Password o Google)
       allow create: if isOwner(userId)
-                    && hasValidUserFields()
+                    && hasValidProfileFields()
                     && request.resource.data.createdAt is timestamp
                     && request.resource.data.createdAt == request.time;
 
-      // 3. Actualización: guardar cambios desde "Mi Perfil" (saveProfile)
+      // 3. Actualización: guardar cambios de perfil legítimos (saveProfile / preferredLanguage)
+      // Bloquea campos administrativos o sensibles (status, deactivatedAt, 2FA, etc.) desde cliente
       allow update: if isOwner(userId)
-                    && hasValidUserFields()
+                    && hasValidProfileFields()
                     && request.resource.data.createdAt == resource.data.createdAt;
 
-      // 4. Eliminación: bloqueada desde el cliente
+      // 4. Eliminación: bloqueada desde el cliente (administrada exclusivamente por backend Admin SDK)
       allow delete: if false;
     }
 
-    // Bloqueo total por defecto para cualquier otra colección no declarada
+    // Bloqueo total por defecto para cualquier otra colección (sessions, security, security_activity, etc.)
     match /{document=**} {
       allow read, write: if false;
     }

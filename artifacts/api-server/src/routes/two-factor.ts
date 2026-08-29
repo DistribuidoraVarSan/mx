@@ -51,17 +51,22 @@ const RequestRescueSchema = z.object({
 });
 
 /**
- * Consulta la preferencia de idioma del usuario en Firestore.
+ * Consulta la información de perfil del usuario en Firestore (nombre real y preferencia de idioma).
  */
-async function getUserLanguage(uid: string, fallbackLang?: string): Promise<string> {
+async function fetchUserData(uid: string): Promise<{ name?: string; preferredLanguage?: string }> {
   try {
     const doc = await adminDb.collection("users").doc(uid).get();
     if (doc.exists) {
       const data = doc.data();
-      if (data?.preferredLanguage) return data.preferredLanguage;
+      return {
+        name: typeof data?.name === "string" && data.name.trim().length > 0 ? data.name.trim() : undefined,
+        preferredLanguage: typeof data?.preferredLanguage === "string" ? data.preferredLanguage : undefined,
+      };
     }
-  } catch {}
-  return resolveEmailLanguage(fallbackLang);
+  } catch (err) {
+    logger.warn({ err, uid }, "No se pudo consultar datos de usuario en Firestore");
+  }
+  return {};
 }
 
 /**
@@ -246,10 +251,11 @@ router.post(
       });
 
       // Enviar correo de confirmación de activación
-      const userLang = await getUserLanguage(uid, reqLang);
-      const emailLang = resolveEmailLanguage(userLang);
+      const userData = await fetchUserData(uid);
+      const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
+      const recipientName = userData.name || req.user!.name || "Cliente Var San";
       const { subject, html, text } = buildSecurityAlertEmail(emailLang, {
-        recipientName: req.user!.name || "Cliente",
+        recipientName,
         alertTitle: "2FA Activado exitosamente",
         alertDetails: "La autenticación en dos pasos (2FA) ha sido activada en tu cuenta de Distribuidora Var San.",
       });
@@ -394,10 +400,11 @@ router.post(
 
             // Notificamos por correo el uso del código de respaldo
             if (email) {
-              const userLang = await getUserLanguage(uid, reqLang);
-              const emailLang = resolveEmailLanguage(userLang);
+              const userData = await fetchUserData(uid);
+              const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
+              const recipientName = userData.name || req.user!.name || "Cliente Var San";
               const { subject, html, text } = buildSecurityAlertEmail(emailLang, {
-                recipientName: req.user!.name || "Cliente",
+                recipientName,
                 alertTitle: "Uso de código de respaldo 2FA",
                 alertDetails: `Se utilizó un código de respaldo de un solo uso para acceder a tu cuenta. Te quedan ${remainingBackupCount} códigos de respaldo disponibles.`,
               });
@@ -577,10 +584,11 @@ router.post(
 
       // Enviar correo de alerta por desactivación
       if (email) {
-        const userLang = await getUserLanguage(uid, reqLang);
-        const emailLang = resolveEmailLanguage(userLang);
+        const userData = await fetchUserData(uid);
+        const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
+        const recipientName = userData.name || req.user!.name || "Cliente Var San";
         const { subject, html, text } = buildSecurityAlertEmail(emailLang, {
-          recipientName: req.user!.name || "Cliente",
+          recipientName,
           alertTitle: "2FA Desactivado",
           alertDetails: "La autenticación en dos pasos (2FA) ha sido desactivada en tu cuenta. Si no realizaste esta acción, cambia tu contraseña de inmediato.",
         });
@@ -636,12 +644,13 @@ router.post(
           createdAt: new Date().toISOString(),
         });
 
-      const userLang = await getUserLanguage(uid, reqLang);
-      const emailLang = resolveEmailLanguage(userLang);
+      const userData = await fetchUserData(uid);
+      const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
+      const recipientName = userData.name || req.user!.name || "Cliente Var San";
 
       const { subject, html, text } = buildVerificationCodeEmail(emailLang, {
         code: rescueCode,
-        recipientName: req.user!.name || "Cliente",
+        recipientName,
         expiresInMinutes: 10,
       });
 

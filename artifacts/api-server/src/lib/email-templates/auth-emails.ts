@@ -99,8 +99,18 @@ interface AuthTranslations {
     heading: string;
     greeting: string;
     intro: string;
-    codeLabel: string;
-    warning: string;
+    p1: string;
+    p2: string;
+    p3: string;
+    whatNextTitle: string;
+    point1: string;
+    point2: string;
+    point3: string;
+    point4: string;
+    point5: string;
+    dateLabel: string;
+    supportNotice: string;
+    footerNotice: string;
   };
   common: {
     companyName: string;
@@ -193,17 +203,27 @@ const AUTH_TRANSLATIONS: Record<EmailLanguage, AuthTranslations> = {
       warning: "Si no solicitaste este cambio, comunícate de inmediato con nuestro equipo.",
     },
     accountDeletion: {
-      subject: "Confirmación de eliminación de cuenta — Distribuidora Var San",
+      subject: "Tu cuenta ha sido eliminada — Distribuidora Var San",
       kicker: "GESTIÓN DE CUENTA",
-      heading: "Eliminación de cuenta solicitada",
+      heading: "Tu cuenta ha sido eliminada",
       greeting: "Hola,",
-      intro: "Has solicitado la eliminación de tu cuenta en Distribuidora Var San. Para confirmar esta acción irrevocable, utiliza el siguiente código:",
-      codeLabel: "Código de confirmación:",
-      warning: "Esta acción eliminará de forma definitiva tu información y sesiones activas.",
+      intro: "Te confirmamos que la eliminación de tu cuenta de cliente en Distribuidora Var San se ha completado correctamente conforme a tu solicitud.",
+      p1: "Como parte de este proceso, la cuenta asociada a tus datos ha sido eliminada y las sesiones de acceso relacionadas han sido revocadas.",
+      p2: "También hemos cancelado la suscripción al newsletter asociada a esta cuenta, por lo que ya no recibirás nuevas comunicaciones de newsletter vinculadas a ella.",
+      p3: "La eliminación de la cuenta es definitiva y no puede deshacerse desde el Portal de Cliente. Si en el futuro deseas utilizar nuevamente nuestros servicios, será necesario crear una nueva cuenta, de acuerdo con las condiciones vigentes en ese momento.",
+      whatNextTitle: "¿Qué sucede ahora?",
+      point1: "Tu cuenta de cliente ya no está disponible.",
+      point2: "Las sesiones asociadas han sido cerradas.",
+      point3: "La suscripción al newsletter ha sido cancelada.",
+      point4: "Los datos sujetos al proceso de eliminación han sido tratados conforme a las políticas aplicables de Distribuidora Var San.",
+      point5: "No necesitas realizar ninguna acción adicional.",
+      dateLabel: "Fecha de procesamiento:",
+      supportNotice: "Si consideras que esta eliminación se realizó por error o necesitas asistencia relacionada con tu cuenta, puedes comunicarte mediante nuestros canales oficiales de soporte.",
+      footerNotice: "Este es un mensaje transaccional automático relacionado con la gestión de tu cuenta. No respondas a este correo.",
     },
     common: {
       companyName: "Distribuidora Var San",
-      tagline: "Más que distribución, construimos confianza.",
+      tagline: "CALIDAD Y CONFIANZA EN CADA SUMINISTRO.",
       automatedFooter: "Este es un correo transaccional automático para proteger tu cuenta en Distribuidora Var San.",
       supportEmail: "distribuidora.varsan@outlook.com",
     },
@@ -290,17 +310,27 @@ const AUTH_TRANSLATIONS: Record<EmailLanguage, AuthTranslations> = {
       warning: "If you did not request this update, contact our support team immediately.",
     },
     accountDeletion: {
-      subject: "Account Deletion Confirmation — Distribuidora Var San",
+      subject: "Your account has been deleted — Distribuidora Var San",
       kicker: "ACCOUNT MANAGEMENT",
-      heading: "Account deletion requested",
+      heading: "Your account has been deleted",
       greeting: "Hello,",
-      intro: "You have requested to delete your Distribuidora Var San account. To confirm this permanent action, enter the code below:",
-      codeLabel: "Confirmation code:",
-      warning: "This action will permanently remove your account data and active sessions.",
+      intro: "We confirm that the deletion of your customer account at Distribuidora Var San has been successfully completed in accordance with your request.",
+      p1: "As part of this process, the account associated with your details has been deleted and all related active sessions have been revoked.",
+      p2: "We have also cancelled the newsletter subscription associated with this account, so you will no longer receive newsletter communications linked to it.",
+      p3: "Account deletion is permanent and cannot be undone from the Customer Portal. If you wish to use our services again in the future, you will need to create a new account in accordance with the terms applicable at that time.",
+      whatNextTitle: "What happens now?",
+      point1: "Your customer account is no longer accessible.",
+      point2: "Associated sessions have been closed.",
+      point3: "Your newsletter subscription has been cancelled.",
+      point4: "Data subject to the deletion process has been handled in compliance with applicable Distribuidora Var San policies.",
+      point5: "No further action is required on your part.",
+      dateLabel: "Processing date:",
+      supportNotice: "If you believe this deletion occurred in error or need assistance regarding your account, you may contact our official support channels.",
+      footerNotice: "This is an automated transactional message regarding your account management. Please do not reply to this email.",
     },
     common: {
       companyName: "Distribuidora Var San",
-      tagline: "More than distribution, we build trust.",
+      tagline: "QUALITY AND TRUST IN EVERY SUPPLY.",
       automatedFooter: "This is an automated transactional message sent to safeguard your Distribuidora Var San account.",
       supportEmail: "distribuidora.varsan@outlook.com",
     },
@@ -387,17 +417,27 @@ const AUTH_TRANSLATIONS: Record<EmailLanguage, AuthTranslations> = {
       warning: "Si vous n'avez pas demandé ce changement, veuillez contacter notre équipe immédiatement.",
     },
     accountDeletion: {
-      subject: "Confirmation de suppression de compte — Distribuidora Var San",
+      subject: "Votre compte a été supprimé — Distribuidora Var San",
       kicker: "GESTION DU COMPTE",
-      heading: "Suppression de compte demandée",
+      heading: "Votre compte a été supprimé",
       greeting: "Bonjour,",
-      intro: "Vous avez demandé la suppression de votre compte. Pour confirmer cette action irréversible, utilisez le code ci-dessous :",
-      codeLabel: "Code de confirmation :",
-      warning: "Cette action supprimera définitivement vos données et sessions actives.",
+      intro: "Nous vous confirmons que la suppression de votre compte client chez Distribuidora Var San a été effectuée avec succès conformément à votre demande.",
+      p1: "Dans le cadre de cette démarche, le compte associé à vos données a été supprimé et l'ensemble des sessions associées a été révoqué.",
+      p2: "Nous avons également résilié l'abonnement à la newsletter associé à ce compte, vous ne recevrez donc plus de communications liées à celle-ci.",
+      p3: "La suppression du compte est irréversible et ne peut être annulée depuis le Portail Client. Si vous souhaitez réutiliser nos services à l'avenir, il sera nécessaire de créer un nouveau compte selon les conditions en vigueur.",
+      whatNextTitle: "Que se passe-t-il maintenant ?",
+      point1: "Votre compte client n'est plus accessible.",
+      point2: "Les sessions associées ont été clôturées.",
+      point3: "Votre abonnement à la newsletter a été résilié.",
+      point4: "Les données concernées par la suppression ont été traitées conformément aux politiques applicables de Distribuidora Var San.",
+      point5: "Aucune action supplémentaire n'est requise de votre part.",
+      dateLabel: "Date de traitement :",
+      supportNotice: "Si vous estimez que cette suppression a été effectuée par erreur ou si vous avez besoin d'aide concernant votre compte, vous pouvez contacter notre assistance officielle.",
+      footerNotice: "Ceci est un message transactionnel automatique relatif à la gestion de votre compte. Merci de ne pas répondre à cet e-mail.",
     },
     common: {
       companyName: "Distribuidora Var San",
-      tagline: "Bien plus que de la distribution, nous bâtissons la confiance.",
+      tagline: "QUALITÉ ET CONFIANCE DANS CHAQUE APPROVISIONNEMENT.",
       automatedFooter: "Ceci est un message transactionnel automatique pour protéger votre compte Distribuidora Var San.",
       supportEmail: "distribuidora.varsan@outlook.com",
     },
@@ -484,17 +524,27 @@ const AUTH_TRANSLATIONS: Record<EmailLanguage, AuthTranslations> = {
       warning: "Se você não solicitou esta alteração, entre em contato imediatamente com nossa equipe.",
     },
     accountDeletion: {
-      subject: "Confirmação de exclusão de conta — Distribuidora Var San",
-      kicker: "GESTÃO DA CONTA",
-      heading: "Exclusão de conta solicitada",
+      subject: "Sua conta foi excluída — Distribuidora Var San",
+      kicker: "GESTÃO DE CONTA",
+      heading: "Sua conta foi excluída",
       greeting: "Olá,",
-      intro: "Você solicitou a exclusão da sua conta. Para confirmar esta ação irreversível, use o código abaixo:",
-      codeLabel: "Código de confirmação:",
-      warning: "Esta ação excluirá permanentemente suas informações e sessões ativas.",
+      intro: "Confirmamos que a exclusão da sua conta de cliente na Distribuidora Var San foi concluída com sucesso conforme a sua solicitação.",
+      p1: "Como parte deste processo, a conta associada aos seus dados foi excluída e todas as sessões ativas foram revogadas.",
+      p2: "Também cancelamos a assinatura da newsletter vinculada a esta conta, portanto você não receberá novas comunicações de newsletter associadas a ela.",
+      p3: "A exclusão da conta é definitiva e não pode ser revertida pelo Portal do Cliente. Caso deseje utilizar nossos serviços no futuro, será necessário criar uma nova conta de acordo com as condições vigentes na ocasião.",
+      whatNextTitle: "O que acontece agora?",
+      point1: "Sua conta de cliente não está mais disponível.",
+      point2: "As sessões associadas foram encerradas.",
+      point3: "A assinatura da newsletter foi cancelada.",
+      point4: "Os dados sujeitos ao processo de exclusão foram tratados conforme as políticas aplicáveis da Distribuidora Var San.",
+      point5: "Nenhuma ação adicional é necessária de sua parte.",
+      dateLabel: "Data de processamento:",
+      supportNotice: "Caso considere que esta exclusão foi realizada por engano ou precise de assistência relacionada à sua conta, entre em contato pelos nossos canais oficiais de suporte.",
+      footerNotice: "Esta é uma mensagem transacional automática referente à gestão da sua conta. Por favor, não responda a este e-mail.",
     },
     common: {
       companyName: "Distribuidora Var San",
-      tagline: "Mais do que distribuição, construímos confiança.",
+      tagline: "QUALIDADE E CONFIANÇA EM CADA FORNECIMENTO.",
       automatedFooter: "Esta é uma mensagem transacional automática enviada para proteger sua conta na Distribuidora Var San.",
       supportEmail: "distribuidora.varsan@outlook.com",
     },
@@ -581,17 +631,27 @@ const AUTH_TRANSLATIONS: Record<EmailLanguage, AuthTranslations> = {
       warning: "Se non hai richiesto questa modifica, contatta subito il nostro team.",
     },
     accountDeletion: {
-      subject: "Conferma eliminazione account — Distribuidora Var San",
+      subject: "Il tuo account è stato eliminato — Distribuidora Var San",
       kicker: "GESTIONE ACCOUNT",
-      heading: "Eliminazione account richiesta",
-      greeting: "Ciao,",
-      intro: "Hai richiesto l'eliminazione del tuo account. Per confermare questa azione permanente, usa il codice sottostante:",
-      codeLabel: "Codice di conferma:",
-      warning: "Questa operazione eliminerà definitivamente i tuoi dati e le tue sessioni attive.",
+      heading: "Il tuo account è stato eliminato",
+      greeting: "Gentile cliente,",
+      intro: "Ti confermiamo che l'eliminazione del tuo account cliente su Distribuidora Var San è stata completata con successo come da tua richiesta.",
+      p1: "Come parte di questo processo, l'account associato ai tuoi dati è stato eliminato e tutte le sessioni di accesso attive sono state revocate.",
+      p2: "Abbiamo inoltre annullato l'iscrizione alla newsletter associata a questo account, pertanto non riceverai ulteriori comunicazioni collegate.",
+      p3: "L'eliminazione dell'account è definitiva e non può essere annullata dal Portale Clienti. Se in futuro desideri utilizzare nuovamente i nostri servizi, sarà necessario creare un nuovo account secondo le condizioni vigenti.",
+      whatNextTitle: "Cosa succede adesso?",
+      point1: "Il tuo account cliente non è più accessibile.",
+      point2: "Le sessioni associate sono state chiuse.",
+      point3: "L'iscrizione alla newsletter è stata annullata.",
+      point4: "I dati soggetti alla cancellazione sono stati trattati in conformità con le policy di Distribuidora Var San.",
+      point5: "Non è richiesta alcuna azione aggiuntiva da parte tua.",
+      dateLabel: "Data di elaborazione:",
+      supportNotice: "Se ritieni che questa eliminazione sia avvenuta per errore o necessiti di supporto relativo al tuo account, puoi contattare i nostri canali ufficiali di assistenza.",
+      footerNotice: "Questo è un messaggio transazionale automatico relativo alla gestione del tuo account. Si prega di non rispondere a questa e-mail.",
     },
     common: {
       companyName: "Distribuidora Var San",
-      tagline: "Più che distribuzione, costruiamo fiducia.",
+      tagline: "QUALITÀ E FIDUCIA IN OGNI FORNITURA.",
       automatedFooter: "Questo è un messaggio transazionale automatico inviato per tutelare il tuo account su Distribuidora Var San.",
       supportEmail: "distribuidora.varsan@outlook.com",
     },
@@ -678,17 +738,27 @@ const AUTH_TRANSLATIONS: Record<EmailLanguage, AuthTranslations> = {
       warning: "若非您本人操作，请立即联系我们的团队。",
     },
     accountDeletion: {
-      subject: "账户注销确认 — Distribuidora Var San",
+      subject: "您的账户已成功注销 — Distribuidora Var San",
       kicker: "账户管理",
-      heading: "账户注销申请",
-      greeting: "您好，",
-      intro: "您已申请注销 Distribuidora Var San 账户。请使用以下确认码确认此不可逆操作：",
-      codeLabel: "确认验证码：",
-      warning: "此操作将永久删除您的个人信息与所有活动会话。",
+      heading: "您的账户已成功注销",
+      greeting: "尊敬的客户，您好：",
+      intro: "我们确认，已按照您的申请成功完成您在 Distribuidora Var San 的客户账户注销流程。",
+      p1: "作为此流程的一部分，与您的信息关联的账户已被彻底删除，所有相关的活动会话均已被撤销。",
+      p2: "我们同时已取消与此账户关联的资讯邮件（Newsletter）订阅，您将不会再收到与此账户相关的资讯邮件。",
+      p3: "账户注销为永久操作，无法在客户门户中撤销。如您未来希望再次使用我们的服务，届时需根据当时有效的条款重新注册新账户。",
+      whatNextTitle: "接下来的情况：",
+      point1: "您的客户账户已无法再访问。",
+      point2: "所有关联登录会话均已关闭。",
+      point3: "资讯邮件订阅已同步取消。",
+      point4: "注销范围内的数据已严格按照 Distribuidora Var San 适用政策完成处理。",
+      point5: "您无需执行任何额外操作。",
+      dateLabel: "处理日期：",
+      supportNotice: "如您认为此注销操作系误操作或需要账户相关支持，欢迎通过官方支持渠道与我们联系。",
+      footerNotice: "这是一封关于您账户管理的自动交易通知邮件，请勿直接回复本邮件。",
     },
     common: {
       companyName: "Distribuidora Var San",
-      tagline: "不仅是专业分销，更是信赖的基石。",
+      tagline: "每次供应，品质与信赖相随。",
       automatedFooter: "本邮件为系统自动发送的事务性通知，旨在保护您的 Distribuidora Var San 账户安全。",
       supportEmail: "distribuidora.varsan@outlook.com",
     },
@@ -775,17 +845,27 @@ const AUTH_TRANSLATIONS: Record<EmailLanguage, AuthTranslations> = {
       warning: "若非您本人操作，請立即聯繫我們的團隊。",
     },
     accountDeletion: {
-      subject: "帳戶刪除確認 — Distribuidora Var San",
+      subject: "您的帳戶已成功刪除 — Distribuidora Var San",
       kicker: "帳戶管理",
-      heading: "帳戶刪除申請",
-      greeting: "您好，",
-      intro: "您已申請刪除 Distribuidora Var San 帳戶。請使用以下確認碼確認此不可逆操作：",
-      codeLabel: "確認驗證碼：",
-      warning: "此操作將永久刪除您的個人資訊與所有活動連線。",
+      heading: "您的帳戶已成功刪除",
+      greeting: "親愛的客戶，您好：",
+      intro: "我們確認，已依據您的申請成功完成您在 Distribuidora Var San 的客戶帳戶刪除程序。",
+      p1: "作為此程序的一環，與您的資料關聯之帳戶已被永久刪除，所有相關的登入連線階段均已撤銷。",
+      p2: "我們同時已取消與此帳戶關聯的電子報（Newsletter）訂閱，您將不再收到與此帳戶相關的電子報訊息。",
+      p3: "帳戶刪除為永久性操作，無法在客戶門戶中復原。若您未來期盼再次使用我們的服務，屆時需依據當時適用的條款重新註冊新帳戶。",
+      whatNextTitle: "後續說明：",
+      point1: "您的客戶帳戶已無法再使用。",
+      point2: "所有關聯登入連線均已關閉。",
+      point3: "電子報訂閱已同步取消。",
+      point4: "刪除範圍內之資料已嚴格依照 Distribuidora Var San 相關規範完成處理。",
+      point5: "您無需進行任何額外操作。",
+      dateLabel: "處理日期：",
+      supportNotice: "若您認為此刪除操作係屬誤觸或需要帳戶相關協助，歡迎透過官方支援管道與我們聯繫。",
+      footerNotice: "這是一封關於您帳戶管理的自動交易通知信件，請勿直接回覆本信件。",
     },
     common: {
       companyName: "Distribuidora Var San",
-      tagline: "不僅是專業經銷，更是信賴的堅實基石。",
+      tagline: "每次供應，品質與信賴相隨。",
       automatedFooter: "本信件為系統自動發送的交易通知，旨在保護您的 Distribuidora Var San 帳戶安全。",
       supportEmail: "distribuidora.varsan@outlook.com",
     },
@@ -872,17 +952,27 @@ const AUTH_TRANSLATIONS: Record<EmailLanguage, AuthTranslations> = {
       warning: "직접 요청하지 않으셨다면 지원팀으로 즉시 문의해 주세요.",
     },
     accountDeletion: {
-      subject: "계정 삭제 확인 — Distribuidora Var San",
+      subject: "고객님의 계정이 삭제되었습니다 — Distribuidora Var San",
       kicker: "계정 관리",
-      heading: "계정 삭제 요청",
+      heading: "고객님의 계정이 삭제되었습니다",
       greeting: "안녕하세요,",
-      intro: "Distribuidora Var San 계정 삭제를 요청하셨습니다. 영구적인 삭제를 확인하시려면 아래 코드를 입력해 주세요:",
-      codeLabel: "확인 코드:",
-      warning: "이 작업은 계정 데이터 및 활성 세션을 영구적으로 삭제합니다.",
+      intro: "고객님의 요청에 따라 Distribuidora Var San 고객 계정 삭제가 성공적으로 완료되었음을 확인해 드립니다.",
+      p1: "본 절차의 일환으로 고객님의 정보와 연결된 계정이 영구 삭제되었으며, 모든 활성 로그인 세션이 즉시 취소되었습니다.",
+      p2: "또한 본 계정과 연결된 뉴스레터 구독도 함께 취소되어, 더 이상 관련 뉴스레터가 발송되지 않습니다.",
+      p3: "계정 삭제는 영구적이며 고객 포털에서 복구할 수 없습니다. 향후 당사 서비스를 다시 이용하고자 하실 경우 당시 적용되는 조건에 따라 새 계정을 등록하셔야 합니다.",
+      whatNextTitle: "이후 진행 사항 안내",
+      point1: "고객님의 계정은 더 이상 이용하실 수 없습니다.",
+      point2: "모든 연결된 세션이 안전하게 종료되었습니다.",
+      point3: "뉴스레터 구독이 성공적으로 취소되었습니다.",
+      point4: "삭제 대상 데이터는 Distribuidora Var San 규정에 따라 적법하게 처리되었습니다.",
+      point5: "고객님께서 추가로 취하셔야 할 조치는 없습니다.",
+      dateLabel: "처리 일시:",
+      supportNotice: "본 계정 삭제가 오류로 진행되었거나 계정 관련 도움이 필요하신 경우 공식 고객 지원 채널로 문의해 주시기 바랍니다.",
+      footerNotice: "본 메일은 계정 관리와 관련된 자동 거래 통지 이메일입니다. 본 메일로 회신하지 마십시오.",
     },
     common: {
       companyName: "Distribuidora Var San",
-      tagline: "단순한 유통을 넘어, 신뢰를 만들어갑니다.",
+      tagline: "모든 공급에 품질과 신뢰를 담습니다.",
       automatedFooter: "본 메일은 Distribuidora Var San 계정 보호를 위해 발송되는 자동 트랜잭션 알림입니다.",
       supportEmail: "distribuidora.varsan@outlook.com",
     },
@@ -923,6 +1013,9 @@ function renderBaseEmail({
 <!-- ENCABEZADO -->
 <tr>
 <td style="background:#0a1f44;padding:36px 36px 32px;border-bottom:4px solid #c9a84c;">
+<div style="margin-bottom:20px;">
+  <img src="https://distribuidoravarsan.com.mx/dvs-logo-transparent.png" alt="Distribuidora Var San" width="150" style="display:block;border:0;outline:none;text-decoration:none;max-width:150px;height:auto;" />
+</div>
 <p style="margin:0 0 12px;color:#c9a84c;font-family:Consolas,'Courier New',monospace;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;">
 ${kicker}
 </p>
@@ -1430,39 +1523,71 @@ export function buildAccountDeletedEmail(
   const rawTime = params.deletionDate || new Date().toLocaleString(language === "en-GB" ? "en-GB" : "es-MX");
   const safeTime = escapeHtml(rawTime);
 
-  const deletionSubject = language === "en-GB"
-    ? "Account deleted permanently — Distribuidora Var San"
-    : "Cuenta eliminada permanentemente — Distribuidora Var San";
-  const deletionHeading = language === "en-GB"
-    ? "Your account has been deleted"
-    : "Tu cuenta ha sido eliminada";
-  const deletionMessage = language === "en-GB"
-    ? "Your client account and associated session data at Distribuidora Var San have been permanently deleted in accordance with your request. We thank you for the trust placed in our company."
-    : "Tu cuenta de cliente y los datos de sesión asociados en Distribuidora Var San han sido eliminados de forma definitiva conforme a tu solicitud. Agradecemos la confianza depositada en nosotros.";
-
   const bodyHtml = `
 <p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
 <strong>${greeting}</strong>
 </p>
-<p style="margin:0 0 20px;color:#526274;font-size:15px;line-height:1.6;">
-${deletionMessage}
+<p style="margin:0 0 16px;color:#334155;font-size:15px;line-height:1.65;">
+${tr.intro}
 </p>
-<p style="margin:0 0 20px;color:#64748b;font-size:13px;">
-<strong>Fecha / Date:</strong> ${safeTime}
+<p style="margin:0 0 16px;color:#334155;font-size:15px;line-height:1.65;">
+${tr.p1}
+</p>
+<p style="margin:0 0 16px;color:#334155;font-size:15px;line-height:1.65;">
+${tr.p2}
+</p>
+<p style="margin:0 0 24px;color:#334155;font-size:15px;line-height:1.65;">
+${tr.p3}
+</p>
+
+<!-- BLOQUE QUÉ SUCEDE AHORA -->
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #0a1f44;border-radius:4px;padding:20px;margin:24px 0;">
+<h3 style="margin:0 0 12px;color:#0a1f44;font-size:15px;font-weight:700;">
+${tr.whatNextTitle}
+</h3>
+<ul style="margin:0;padding-left:20px;color:#475569;font-size:14px;line-height:1.75;">
+<li>${tr.point1}</li>
+<li>${tr.point2}</li>
+<li>${tr.point3}</li>
+<li>${tr.point4}</li>
+<li>${tr.point5}</li>
+</ul>
+</div>
+
+<p style="margin:20px 0 12px;color:#64748b;font-size:13px;line-height:1.6;">
+<strong>${tr.dateLabel}</strong> ${safeTime}
+</p>
+<p style="margin:12px 0 0;color:#64748b;font-size:13px;line-height:1.6;">
+${tr.supportNotice}
 </p>`;
 
   const textBody = `${greeting}
 
-${deletionMessage}
+${tr.intro}
 
-Fecha / Date: ${rawTime}`;
+${tr.p1}
+
+${tr.p2}
+
+${tr.p3}
+
+${tr.whatNextTitle}
+- ${tr.point1}
+- ${tr.point2}
+- ${tr.point3}
+- ${tr.point4}
+- ${tr.point5}
+
+${tr.dateLabel} ${rawTime}
+
+${tr.supportNotice}`;
 
   return renderBaseEmail({
     language,
     kicker: tr.kicker,
-    heading: deletionHeading,
+    heading: tr.heading,
     bodyHtml,
     textBody,
-    subject: deletionSubject,
+    subject: tr.subject,
   });
 }

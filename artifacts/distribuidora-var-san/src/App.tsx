@@ -9,6 +9,7 @@ import {
   EmailAuthProvider,
   reauthenticateWithCredential,
   updatePassword,
+  updateProfile,
   type User as FirebaseUser,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -73,6 +74,7 @@ import {
   FileText,
   Bug,
   ChevronDown,
+  Settings,
   ChevronUp,
   Database,
   Cpu,
@@ -210,7 +212,8 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [copiedKey, setCopiedKey] = useState(false);
   const [copiedBackup, setCopiedBackup] = useState(false);
 
-  // FASE 6: Pestañas del Portal y Modales de Cuenta / Almacenamiento / Recursos
+  // FASE 6 & 8.1: Organización del Portal (Vista principal vs Configuración) y Subsecciones
+  const [portalView, setPortalView] = useState<'main' | 'settings'>('main');
   const [portalTab, setPortalTab] = useState<'account' | 'security' | 'storage' | 'resources' | 'legal'>('account');
 
   // Cambiar Contraseña
@@ -475,18 +478,22 @@ window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         const credential = await createUserWithEmailAndPassword(auth, email, password);
+        if (name.trim()) {
+          await updateProfile(credential.user, { displayName: name.trim() }).catch(() => {});
+        }
         await setDoc(doc(db, 'users', credential.user.uid), {
-          name,
-          company,
+          name: name.trim(),
+          company: company.trim(),
           email,
           preferredLanguage: language,
           createdAt: serverTimestamp(),
         }, { merge: true });
 
-        setProfile({ name: name || t.portal.defaultClientName, email, company: company || t.portal.notSpecified });
+        setProfile({ name: name.trim() || t.portal.defaultClientName, email, company: company.trim() || t.portal.notSpecified });
         setAccountMessage(t.account.accountCreated);
         setAccountOpen(false);
         setPortalOpen(true);
+        setPortalView('main');
         return;
       }
 
@@ -717,6 +724,9 @@ t.account.errorGeneric
     if (!currentUser) return;
 
     try {
+      if (profile.name.trim()) {
+        await updateProfile(currentUser, { displayName: profile.name.trim() }).catch(() => {});
+      }
       await setDoc(doc(db, 'users', currentUser.uid), {
         name: profile.name.trim(),
         company: profile.company.trim(),
@@ -742,6 +752,7 @@ t.account.errorGeneric
       setTwoFactorSetupOpen(false);
       setTwoFactorDisableOpen(false);
       setPortalOpen(false);
+      setPortalView('main');
       setProfileOpen(false);
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
@@ -1853,68 +1864,163 @@ t.account.errorGeneric
             </button>
             <div className="portal-header">
               <span className="eyebrow">{t.portal.eyebrow}</span>
-              <h2 id="portal-heading">{t.portal.welcome.replace('{name}', profile.name ? `, ${profile.name}` : '')}</h2>
-              <p className="modal-intro">{t.portal.intro}</p>
+              <h2 id="portal-heading">{t.portal.welcome.replace('{name}', (profile.name || currentUser?.displayName) ? `, ${profile.name || currentUser?.displayName}` : '')}</h2>
+              <p className="modal-intro">{portalView === 'main' ? t.portal.intro : (t.portal.settingsSubtitle || t.portal.intro)}</p>
             </div>
 
-            {/* Pestañas de Navegación del Portal */}
-            <div className="portal-nav-tabs" role="tablist">
-              <button
-                type="button"
-                className={`portal-nav-tab${portalTab === 'account' ? ' active' : ''}`}
-                onClick={() => setPortalTab('account')}
-                role="tab"
-                aria-selected={portalTab === 'account'}
-                data-testid="tab-portal-account"
-              >
-                <UserCheck size={14} />
-                <span>{t.portal.tabAccount}</span>
-              </button>
-              <button
-                type="button"
-                className={`portal-nav-tab${portalTab === 'security' ? ' active' : ''}`}
-                onClick={() => setPortalTab('security')}
-                role="tab"
-                aria-selected={portalTab === 'security'}
-                data-testid="tab-portal-security"
-              >
-                <ShieldCheck size={14} />
-                <span>{t.portal.tabSecurity}</span>
-              </button>
-              <button
-                type="button"
-                className={`portal-nav-tab${portalTab === 'storage' ? ' active' : ''}`}
-                onClick={() => setPortalTab('storage')}
-                role="tab"
-                aria-selected={portalTab === 'storage'}
-                data-testid="tab-portal-storage"
-              >
-                <HardDrive size={14} />
-                <span>{t.portal.tabStorage}</span>
-              </button>
-              <button
-                type="button"
-                className={`portal-nav-tab${portalTab === 'resources' ? ' active' : ''}`}
-                onClick={() => setPortalTab('resources')}
-                role="tab"
-                aria-selected={portalTab === 'resources'}
-                data-testid="tab-portal-resources"
-              >
-                <HelpCircle size={14} />
-                <span>{t.portal.tabResources}</span>
-              </button>
-              <button
-                type="button"
-                className={`portal-nav-tab${portalTab === 'legal' ? ' active' : ''}`}
-                onClick={() => setPortalTab('legal')}
-                role="tab"
-                aria-selected={portalTab === 'legal'}
-                data-testid="tab-portal-legal"
-              >
-                <FileText size={14} />
-                <span>{t.portal.tabLegal}</span>
-              </button>
-            </div>
+            {/* VISTA 1: DASHBOARD PRINCIPAL DEL PORTAL DE CLIENTE */}
+            {portalView === 'main' && (
+              <div className="portal-main-dashboard">
+                <div className="profile-summary">
+                  <div className="profile-row">
+                    <span>{t.portal.fieldNameLabel}</span>
+                    <strong>{profile.name || currentUser?.displayName || t.portal.defaultClientName}</strong>
+                  </div>
+                  <div className="profile-row">
+                    <span>{t.portal.fieldEmailLabel}</span>
+                    <strong>{profile.email || currentUser?.email || t.portal.notAvailable}</strong>
+                  </div>
+                  <div className="profile-row">
+                    <span>{t.portal.fieldCompanyLabel}</span>
+                    <strong>{profile.company || t.portal.notSpecified}</strong>
+                  </div>
+                  <div className="profile-row">
+                    <span>{t.portal.accountStatus || 'Estado de cuenta'}</span>
+                    <strong style={{ color: '#166534', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <CircleCheck size={14} /> {t.portal.activeStatus || 'Activa'}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="portal-quick-status-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, margin: '18px 0' }}>
+                  <div style={{ padding: '14px 16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
+                    {twoFactorStatus?.enabled ? (
+                      <ShieldCheck size={24} style={{ color: '#166534' }} />
+                    ) : (
+                      <ShieldAlert size={24} style={{ color: '#b45309' }} />
+                    )}
+                    <div>
+                      <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>{t.twoFactor.title}</div>
+                      <div style={{ fontSize: '0.88rem', fontWeight: 700, color: twoFactorStatus?.enabled ? '#166534' : '#b45309' }}>
+                        {twoFactorStatus?.enabled ? t.twoFactor.enabledBadge : t.twoFactor.disabledBadge}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ padding: '14px 16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <Laptop size={24} style={{ color: 'var(--navy)' }} />
+                    <div>
+                      <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>{t.portal.tabSecurity}</div>
+                      <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--navy)' }}>
+                        {sessions.length > 0 ? `${sessions.length} sesión(es)` : 'Sesión actual activa'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, margin: '22px 0 14px' }}>
+                  <button
+                    type="button"
+                    className="button button--navy"
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 22px', fontSize: '0.92rem' }}
+                    onClick={() => { setPortalView('settings'); setPortalTab('account'); }}
+                    data-testid="button-open-settings"
+                  >
+                    <Settings size={16} />
+                    <span>{t.portal.settingsButton || 'Configuración'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="button button--outline"
+                    style={{ color: 'var(--navy)', fontSize: '0.88rem', padding: '10px 16px' }}
+                    onClick={() => setProfileOpen(true)}
+                    data-testid="button-edit-profile-main"
+                  >
+                    <UserCheck size={15} /> {t.portal.myProfile}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* VISTA 2: PANEL DE CONFIGURACIÓN Y SUBSECCIONES */}
+            {portalView === 'settings' && (
+              <div className="portal-settings-container">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, borderBottom: '1px solid #e2e8f0', paddingBottom: 12 }}>
+                  <button
+                    type="button"
+                    className="button button--outline"
+                    style={{ color: 'var(--navy)', fontSize: '0.82rem', padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6 }}
+                    onClick={() => setPortalView('main')}
+                    data-testid="button-back-to-portal"
+                  >
+                    <ArrowLeft size={14} />
+                    <span>{t.portal.backToPortal || 'Volver al Portal'}</span>
+                  </button>
+                  <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--navy)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Settings size={16} style={{ color: 'var(--gold)' }} />
+                    <span>{t.portal.settingsButton || 'Configuración'}</span>
+                  </div>
+                </div>
+
+                {/* Pestañas de Navegación de Configuración */}
+                <div className="portal-nav-tabs" role="tablist">
+                  <button
+                    type="button"
+                    className={`portal-nav-tab${portalTab === 'account' ? ' active' : ''}`}
+                    onClick={() => setPortalTab('account')}
+                    role="tab"
+                    aria-selected={portalTab === 'account'}
+                    data-testid="tab-portal-account"
+                  >
+                    <UserCheck size={14} />
+                    <span>{t.portal.tabAccount}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`portal-nav-tab${portalTab === 'security' ? ' active' : ''}`}
+                    onClick={() => setPortalTab('security')}
+                    role="tab"
+                    aria-selected={portalTab === 'security'}
+                    data-testid="tab-portal-security"
+                  >
+                    <ShieldCheck size={14} />
+                    <span>{t.portal.tabSecurity}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`portal-nav-tab${portalTab === 'storage' ? ' active' : ''}`}
+                    onClick={() => setPortalTab('storage')}
+                    role="tab"
+                    aria-selected={portalTab === 'storage'}
+                    data-testid="tab-portal-storage"
+                  >
+                    <HardDrive size={14} />
+                    <span>{t.portal.tabStorage}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`portal-nav-tab${portalTab === 'resources' ? ' active' : ''}`}
+                    onClick={() => setPortalTab('resources')}
+                    role="tab"
+                    aria-selected={portalTab === 'resources'}
+                    data-testid="tab-portal-resources"
+                  >
+                    <HelpCircle size={14} />
+                    <span>{t.portal.tabResources}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`portal-nav-tab${portalTab === 'legal' ? ' active' : ''}`}
+                    onClick={() => setPortalTab('legal')}
+                    role="tab"
+                    aria-selected={portalTab === 'legal'}
+                    data-testid="tab-portal-legal"
+                  >
+                    <FileText size={14} />
+                    <span>{t.portal.tabLegal}</span>
+                  </button>
+                </div>
 
             {/* CONTENIDO DE PESTAÑA: 1. PERFIL Y CUENTA */}
             {portalTab === 'account' && (
@@ -2506,13 +2612,31 @@ t.account.errorGeneric
               </div>
             )}
 
-            <div className="portal-actions" style={{ marginTop: 22 }}>
-              <button className="button button--outline" style={{ color: 'var(--navy)', borderColor: 'var(--line)' }} onClick={handleSignOut} data-testid="button-logout">
-                <LockKeyhole size={15} />{t.portal.logOut}
-              </button>
-              <button className="button button--outline" style={{ color: 'var(--navy)', borderColor: 'var(--line)' }} onClick={() => setPortalOpen(false)} data-testid="button-close-portal-action">
-                {t.portal.closePortal}
-              </button>
+            </div>
+          )}
+
+            <div className="portal-actions" style={{ marginTop: 22, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {portalView === 'settings' && (
+                  <button
+                    type="button"
+                    className="button button--outline"
+                    style={{ color: 'var(--navy)', borderColor: 'var(--line)', fontSize: '0.84rem' }}
+                    onClick={() => setPortalView('main')}
+                    data-testid="button-bottom-back-to-portal"
+                  >
+                    <ArrowLeft size={14} /> {t.portal.backToPortal || 'Volver al Portal'}
+                  </button>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className="button button--outline" style={{ color: 'var(--navy)', borderColor: 'var(--line)' }} onClick={handleSignOut} data-testid="button-logout">
+                  <LockKeyhole size={15} />{t.portal.logOut}
+                </button>
+                <button className="button button--outline" style={{ color: 'var(--navy)', borderColor: 'var(--line)' }} onClick={() => setPortalOpen(false)} data-testid="button-close-portal-action">
+                  {t.portal.closePortal}
+                </button>
+              </div>
             </div>
           </section>
         </div>

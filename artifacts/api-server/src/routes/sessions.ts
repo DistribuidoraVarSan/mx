@@ -39,18 +39,22 @@ const ItWasntMeSchema = z.object({
 });
 
 /**
- * Consulta el idioma preferido guardado en Firestore.
+ * Consulta la información del perfil del usuario (nombre real y preferencia de idioma) en Firestore.
  */
-async function fetchUserPreferredLanguage(uid: string): Promise<string | undefined> {
+async function fetchUserData(uid: string): Promise<{ name?: string; preferredLanguage?: string }> {
   try {
     const doc = await adminDb.collection("users").doc(uid).get();
     if (doc.exists) {
-      return doc.data()?.preferredLanguage;
+      const data = doc.data();
+      return {
+        name: typeof data?.name === "string" && data.name.trim().length > 0 ? data.name.trim() : undefined,
+        preferredLanguage: typeof data?.preferredLanguage === "string" ? data.preferredLanguage : undefined,
+      };
     }
   } catch (err) {
-    logger.warn({ err, uid }, "No se pudo consultar preferredLanguage");
+    logger.warn({ err, uid }, "No se pudo consultar datos de usuario en Firestore");
   }
-  return undefined;
+  return {};
 }
 
 /**
@@ -138,10 +142,11 @@ router.post(
         });
 
         if (email) {
-          const userLang = await fetchUserPreferredLanguage(uid);
-          const emailLang = resolveEmailLanguage(reqLanguage, userLang);
+          const userData = await fetchUserData(uid);
+          const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLanguage);
+          const recipientName = userData.name || req.user!.name || "Cliente Var San";
           const { subject, html, text } = buildNewDeviceLoginEmail(emailLang, {
-            recipientName: req.user!.name || "Cliente",
+            recipientName,
             deviceType: deviceInfo.deviceType === "mobile" ? "Dispositivo Móvil" : "Computadora de Escritorio",
             os: deviceInfo.os,
             browser: deviceInfo.browser,
@@ -549,10 +554,11 @@ router.post(
       });
 
       if (email) {
-        const userLang = await fetchUserPreferredLanguage(uid);
-        const emailLang = resolveEmailLanguage(reqLang, userLang);
+        const userData = await fetchUserData(uid);
+        const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
+        const recipientName = userData.name || req.user!.name || "Cliente Var San";
         const { subject, html, text } = buildSecurityAlertEmail(emailLang, {
-          recipientName: req.user!.name || "Cliente",
+          recipientName,
           alertTitle: "Acceso remoto sospechoso bloqueado ('No fui yo')",
           alertDetails: `Has reportado un acceso no reconocido (${blockedInfo}). Las sesiones remotas sospechosas han sido revocadas de inmediato. Tu sesión actual permanece activa y protegida. Te recomendamos cambiar tu contraseña y asegurar que tu 2FA esté configurado.`,
         });

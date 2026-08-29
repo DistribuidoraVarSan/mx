@@ -41,7 +41,7 @@ const EMILIA_TRANSLATIONS: Record<EmailLanguage, EmiliaTranslation> = {
     closingTitle: "Bienvenido a la familia Var San.",
     closingSubtitle: "Nos alegra tenerte aquí.",
     companyName: "Distribuidora Var San",
-    tagline: "Más que distribución, construimos confianza.",
+    tagline: "CALIDAD Y CONFIANZA EN CADA SUMINISTRO.",
     contactPrompt: "Para cualquier duda o comentario, puedes comunicarte con nosotros:",
     footerNotice: "Recibiste este correo porque te suscribiste al sitio de Distribuidora Var San.",
     unsubscribeLink: "Cancelar mi suscripción",
@@ -63,7 +63,7 @@ const EMILIA_TRANSLATIONS: Record<EmailLanguage, EmiliaTranslation> = {
     closingTitle: "Welcome to the Var San family.",
     closingSubtitle: "We are truly glad to have you here.",
     companyName: "Distribuidora Var San",
-    tagline: "More than distribution, we build trust.",
+    tagline: "QUALITY AND TRUST IN EVERY SUPPLY.",
     contactPrompt: "For any questions or feedback, please feel free to reach out to us:",
     footerNotice: "You received this email because you subscribed to Distribuidora Var San.",
     unsubscribeLink: "Unsubscribe from newsletter",
@@ -85,7 +85,7 @@ const EMILIA_TRANSLATIONS: Record<EmailLanguage, EmiliaTranslation> = {
     closingTitle: "Bienvenue dans la famille Var San.",
     closingSubtitle: "Nous sommes très heureux de vous compter parmi nous.",
     companyName: "Distribuidora Var San",
-    tagline: "Bien plus que de la distribution, nous bâtissons la confiance.",
+    tagline: "QUALITÉ ET CONFIANCE DANS CHAQUE APPROVISIONNEMENT.",
     contactPrompt: "Pour toute question ou demande, n'hésitez pas à nous contacter :",
     footerNotice: "Vous avez reçu cet e-mail car vous vous êtes inscrit sur le site de Distribuidora Var San.",
     unsubscribeLink: "Se désabonner",
@@ -107,7 +107,7 @@ const EMILIA_TRANSLATIONS: Record<EmailLanguage, EmiliaTranslation> = {
     closingTitle: "Bem-vindo à família Var San.",
     closingSubtitle: "É uma grande satisfação ter você aqui.",
     companyName: "Distribuidora Var San",
-    tagline: "Mais do que distribuição, construímos confiança.",
+    tagline: "QUALIDADE E CONFIANÇA EM CADA FORNECIMENTO.",
     contactPrompt: "Para qualquer dúvida ou comentário, entre em contato conosco:",
     footerNotice: "Você recebeu este e-mail porque se cadastrou no site da Distribuidora Var San.",
     unsubscribeLink: "Cancelar minha inscrição",
@@ -129,7 +129,7 @@ const EMILIA_TRANSLATIONS: Record<EmailLanguage, EmiliaTranslation> = {
     closingTitle: "Benvenuto nella famiglia Var San.",
     closingSubtitle: "Siamo lieti di averti con noi.",
     companyName: "Distribuidora Var San",
-    tagline: "Più che distribuzione, costruiamo fiducia.",
+    tagline: "QUALITÀ E FIDUCIA IN OGNI FORNITURA.",
     contactPrompt: "Per qualsiasi dubbio o informazione, puoi contattarci qui:",
     footerNotice: "Hai ricevuto questa e-mail perché ti sei iscritto al sito di Distribuidora Var San.",
     unsubscribeLink: "Annulla iscrizione",
@@ -151,7 +151,7 @@ const EMILIA_TRANSLATIONS: Record<EmailLanguage, EmiliaTranslation> = {
     closingTitle: "欢迎加入 Var San 大家庭。",
     closingSubtitle: "很高兴有您的陪伴。",
     companyName: "Distribuidora Var San",
-    tagline: "不仅是专业分销，更是信赖的基石。",
+    tagline: "每次供应，品质与信赖相随。",
     contactPrompt: "如有任何疑问或建议，欢迎随时与我们联系：",
     footerNotice: "您收到此邮件是因为您订阅了 Distribuidora Var San 官网资讯。",
     unsubscribeLink: "取消订阅",
@@ -173,7 +173,7 @@ const EMILIA_TRANSLATIONS: Record<EmailLanguage, EmiliaTranslation> = {
     closingTitle: "歡迎加入 Var San 大家庭。",
     closingSubtitle: "非常高興能與您同行。",
     companyName: "Distribuidora Var San",
-    tagline: "不僅是專業經銷，更是信賴的堅實基石。",
+    tagline: "每次供應，品質與信賴相隨。",
     contactPrompt: "如有任何疑問或建議，歡迎隨時與我們聯繫：",
     footerNotice: "您收到此信件是因為您訂閱了 Distribuidora Var San 官方資訊。",
     unsubscribeLink: "取消訂閱",
@@ -195,7 +195,7 @@ const EMILIA_TRANSLATIONS: Record<EmailLanguage, EmiliaTranslation> = {
     closingTitle: "Var San 가족이 되신 것을 환영합니다.",
     closingSubtitle: "고객님과 함께하게 되어 대단히 기쁩니다.",
     companyName: "Distribuidora Var San",
-    tagline: "단순한 유통을 넘어, 신뢰를 만들어갑니다.",
+    tagline: "모든 공급에 품질과 신뢰를 담습니다.",
     contactPrompt: "궁금한 점이나 의견이 있으시면 언제든지 문의해 주세요:",
     footerNotice: "본 이메일은 Distribuidora Var San 공식 사이트에서 구독을 신청하셨기에 발송되었습니다.",
     unsubscribeLink: "구독 취소",
@@ -230,6 +230,9 @@ export function buildEmiliaWelcomeEmail(
 <!-- ENCABEZADO INSTITUCIONAL -->
 <tr>
 <td style="background:#0a1f44;padding:48px 44px 42px;border-bottom:4px solid #c9a84c;">
+<div style="margin-bottom:22px;">
+  <img src="https://distribuidoravarsan.com.mx/dvs-logo-transparent.png" alt="Distribuidora Var San" width="160" style="display:block;border:0;outline:none;text-decoration:none;max-width:160px;height:auto;" />
+</div>
 <p style="margin:0 0 18px;color:#c9a84c;font-family:Consolas,'Courier New',monospace;font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;">
 ${tr.kicker}
 </p>

@@ -77,32 +77,39 @@ const SendSecurityAlertSchema = z.object({
       message: "La URL de acción debe pertenecer a un dominio oficial autorizado.",
     })
     .optional(),
+  recipientName: z.string().trim().max(100).optional(),
   language: z.string().optional(),
 });
 
 /**
- * Consulta la preferencia de idioma guardada en Firestore para un usuario o correo dado.
+ * Consulta el perfil del usuario (nombre real y preferencia de idioma) guardada en Firestore.
  */
-async function fetchUserPreferredLanguage(uidOrEmail: { uid?: string; email?: string }): Promise<string | undefined> {
+async function fetchUserData(uidOrEmail: { uid?: string; email?: string }): Promise<{ name?: string; preferredLanguage?: string }> {
   try {
     if (uidOrEmail.uid) {
       const doc = await adminDb.collection("users").doc(uidOrEmail.uid).get();
       if (doc.exists) {
         const data = doc.data();
-        if (data?.preferredLanguage) return data.preferredLanguage;
+        return {
+          name: typeof data?.name === "string" && data.name.trim().length > 0 ? data.name.trim() : undefined,
+          preferredLanguage: typeof data?.preferredLanguage === "string" ? data.preferredLanguage : undefined,
+        };
       }
     }
     if (uidOrEmail.email) {
-      const snap = await adminDb.collection("users").where("email", "==", uidOrEmail.email).limit(1).get();
+      const snap = await adminDb.collection("users").where("email", "==", uidOrEmail.email.toLowerCase().trim()).limit(1).get();
       if (!snap.empty) {
         const data = snap.docs[0].data();
-        if (data?.preferredLanguage) return data.preferredLanguage;
+        return {
+          name: typeof data?.name === "string" && data.name.trim().length > 0 ? data.name.trim() : undefined,
+          preferredLanguage: typeof data?.preferredLanguage === "string" ? data.preferredLanguage : undefined,
+        };
       }
     }
   } catch (err) {
-    logger.warn({ err }, "No se pudo consultar preferredLanguage en Firestore");
+    logger.warn({ err }, "No se pudo consultar datos de usuario en Firestore");
   }
-  return undefined;
+  return {};
 }
 
 /**
@@ -126,11 +133,12 @@ router.post(
     const { email, code, recipientName, language: reqLang } = parseResult.data;
 
     try {
-      const userLang = await fetchUserPreferredLanguage({ email });
-      const emailLang = resolveEmailLanguage(reqLang, userLang);
+      const userData = await fetchUserData({ email });
+      const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
+      const resolvedName = recipientName || userData.name || "Cliente Var San";
       const { subject, html, text } = buildVerificationCodeEmail(emailLang, {
         code,
-        recipientName,
+        recipientName: resolvedName,
         expiresInMinutes: 10,
       });
 
@@ -171,12 +179,13 @@ router.post(
     const { email, resetCode, resetUrl, recipientName, language: reqLang } = parseResult.data;
 
     try {
-      const userLang = await fetchUserPreferredLanguage({ email });
-      const emailLang = resolveEmailLanguage(reqLang, userLang);
+      const userData = await fetchUserData({ email });
+      const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
+      const resolvedName = recipientName || userData.name || "Cliente Var San";
       const { subject, html, text } = buildPasswordResetEmail(emailLang, {
         resetCode,
         resetUrl,
-        recipientName,
+        recipientName: resolvedName,
         expiresInMinutes: 15,
       });
 
@@ -188,21 +197,21 @@ router.post(
         from: EMAIL_SENDERS.security,
       });
 
-      res.status(200).json({ status: "ok", message: "Instrucciones de recuperación enviadas." });
+      res.status(200).json({ status: "ok", message: "Correo de restablecimiento enviado." });
     } catch (err) {
-      logger.error({ err, email }, "Error al enviar correo de recuperación de contraseña");
-      res.status(500).json({ error: "No se pudo enviar el correo de recuperación." });
+      logger.error({ err, email }, "Error al enviar restablecimiento de contraseña");
+      res.status(500).json({ error: "No se pudo enviar el correo de restablecimiento." });
     }
   },
 );
 
 /**
  * POST /api/auth/send-security-alert
- * Envía una alerta de seguridad desde el remitente de seguridad oficial al usuario autenticado.
+ * Envía una alerta de seguridad general al usuario autenticado.
  */
 router.post(
   "/auth/send-security-alert",
-  authRateLimit,
+  strictActionRateLimit,
   requireAuth,
   async (req: Request, res: Response) => {
     const parseResult = SendSecurityAlertSchema.safeParse(req.body);
@@ -215,24 +224,29 @@ router.post(
       return;
     }
 
+    const { alertTitle, alertDetails, recipientName, language: reqLang } = parseResult.data;
     const uid = req.user!.uid;
     const email = req.user!.email;
 
     if (!email) {
-      res.status(400).json({ error: "El usuario no tiene correo asociado." });
+      res.status(400).json({ error: "No hay correo electrónico asociado." });
       return;
     }
 
-    const { alertTitle, alertDetails, actionUrl, language: reqLang } = parseResult.data;
-
     try {
-      const userLang = await fetchUserPreferredLanguage({ uid, email });
-      const emailLang = resolveEmailLanguage(reqLang, userLang);
+      await recordSecurityActivity(uid, {
+        type: "suspicious_activity_reported",
+        title: alertTitle,
+        description: alertDetails,
+      });
+
+      const userData = await fetchUserData({ uid, email });
+      const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
+      const resolvedName = recipientName || userData.name || req.user!.name || "Cliente Var San";
       const { subject, html, text } = buildSecurityAlertEmail(emailLang, {
-        recipientName: req.user!.name,
         alertTitle,
         alertDetails,
-        actionUrl,
+        recipientName: resolvedName,
       });
 
       await sendEmail({
@@ -241,12 +255,6 @@ router.post(
         html,
         text,
         from: EMAIL_SENDERS.security,
-      });
-
-      await recordSecurityActivity(uid, {
-        type: "suspicious_activity_reported",
-        title: alertTitle,
-        description: alertDetails.slice(0, 200),
       });
 
       res.status(200).json({ status: "ok", message: "Alerta de seguridad enviada." });

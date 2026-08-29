@@ -1,9 +1,13 @@
 import { logger } from "./logger";
 
+export const OFFICIAL_SENDER = "Distribuidora Var San <no-reply@distribuidoravarsan.com.mx>";
+
 export const EMAIL_SENDERS = {
-  verification: "Distribuidora Var San <verificacion@distribuidoravarsan.com.mx>",
-  security: "Distribuidora Var San <seguridad@distribuidoravarsan.com.mx>",
-  accounts: "Distribuidora Var San <cuentas@distribuidoravarsan.com.mx>",
+  default: OFFICIAL_SENDER,
+  noReply: OFFICIAL_SENDER,
+  verification: OFFICIAL_SENDER,
+  security: OFFICIAL_SENDER,
+  accounts: OFFICIAL_SENDER,
 } as const;
 
 export type EmailSenderKey = keyof typeof EMAIL_SENDERS;
@@ -22,17 +26,16 @@ const RESEND_API_URL = "https://api.resend.com/emails";
  * Envía un correo transaccional a través de la API de Resend.
  *
  * Requiere la variable de entorno RESEND_API_KEY.
- * Si se especifica `from`, se utiliza dicho remitente; de lo contrario, se
- * utiliza `process.env.RESEND_FROM_EMAIL` como fallback predeterminado.
- * Nunca se exponen credenciales al frontend: solo existen en este proceso de servidor.
+ * Utiliza el remitente único oficial: Distribuidora Var San <no-reply@distribuidoravarsan.com.mx>
+ * o process.env.RESEND_FROM_EMAIL si se encuentra configurado en producción.
  */
 export async function sendEmail({ to, subject, html, text, from }: SendEmailParams): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
-  const sender = from || process.env.RESEND_FROM_EMAIL;
+  const sender = from || process.env.RESEND_FROM_EMAIL || OFFICIAL_SENDER;
 
-  if (!apiKey || !sender) {
+  if (!apiKey) {
     logger.warn(
-      "RESEND_API_KEY o remitente no están configurados; se omite el envío de correo.",
+      "RESEND_API_KEY no está configurada; se omite el envío de correo.",
     );
     return;
   }

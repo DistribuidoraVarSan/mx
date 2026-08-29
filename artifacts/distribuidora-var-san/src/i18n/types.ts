@@ -153,6 +153,11 @@ export type Dictionary = {
     tabStorage: string;
     tabResources: string;
     tabLegal: string;
+    settingsButton?: string;
+    backToPortal?: string;
+    accountStatus?: string;
+    activeStatus?: string;
+    settingsSubtitle?: string;
     changePassword: string;
     changeEmail: string;
     deactivateAccount: string;

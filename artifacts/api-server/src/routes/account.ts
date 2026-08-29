@@ -4,6 +4,7 @@ import { adminAuth, adminDb } from "../lib/firebase-admin";
 import { requireAuth } from "../middlewares/auth";
 import { strictActionRateLimit, authRateLimit } from "../middlewares/rate-limit";
 import { sendEmail, EMAIL_SENDERS } from "../lib/mailer";
+import { db, newsletterSubscribersTable, eq } from "@workspace/db";
 import {
   buildPasswordChangedEmail,
   buildEmailChangedEmail,
@@ -40,19 +41,22 @@ const DeleteAccountSchema = z.object({
 });
 
 /**
- * Consulta la preferencia de idioma guardada en Firestore para el usuario.
+ * Consulta la información del perfil del usuario (nombre real y preferencia de idioma) en Firestore.
  */
-async function fetchUserPreferredLanguage(uid: string): Promise<string | undefined> {
+async function fetchUserData(uid: string): Promise<{ name?: string; preferredLanguage?: string }> {
   try {
     const doc = await adminDb.collection("users").doc(uid).get();
     if (doc.exists) {
       const data = doc.data();
-      if (data?.preferredLanguage) return data.preferredLanguage;
+      return {
+        name: typeof data?.name === "string" && data.name.trim().length > 0 ? data.name.trim() : undefined,
+        preferredLanguage: typeof data?.preferredLanguage === "string" ? data.preferredLanguage : undefined,
+      };
     }
   } catch (err) {
-    logger.warn({ err, uid }, "No se pudo consultar preferredLanguage en Firestore");
+    logger.warn({ err, uid }, "No se pudo consultar información de perfil en Firestore");
   }
-  return undefined;
+  return {};
 }
 
 /**
@@ -131,10 +135,11 @@ router.post(
       });
 
       if (email) {
-        const storedLang = await fetchUserPreferredLanguage(uid);
-        const emailLang = resolveEmailLanguage(storedLang, reqLang);
+        const userData = await fetchUserData(uid);
+        const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
+        const recipientName = userData.name || req.user!.name || "Cliente Var San";
         const { subject, html, text } = buildPasswordChangedEmail(emailLang, {
-          recipientName: req.user!.name || "Cliente",
+          recipientName,
         });
 
         sendEmail({
@@ -213,10 +218,11 @@ router.post(
       });
 
       // 5. Enviar notificación transaccional a ambos correos desde cuentas@
-      const storedLang = await fetchUserPreferredLanguage(uid);
-      const emailLang = resolveEmailLanguage(storedLang, reqLang);
+      const userData = await fetchUserData(uid);
+      const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
+      const recipientName = userData.name || req.user!.name || "Cliente Var San";
       const { subject, html, text } = buildEmailChangedEmail(emailLang, {
-        recipientName: req.user!.name || "Cliente",
+        recipientName,
         oldEmail,
         newEmail,
       });
@@ -248,7 +254,7 @@ router.post(
     } catch (err: any) {
       logger.error({ err, uid }, "Error al cambiar correo electrónico");
       if (err?.code === "auth/email-already-exists") {
-        res.status(409).json({ error: "El correo electrónico proporcionado ya se encuentra registrado." });
+        res.status(409).json({ error: "La nueva dirección de correo ya está en uso." });
         return;
       }
       res.status(500).json({ error: "No se pudo actualizar el correo electrónico." });
@@ -314,10 +320,11 @@ router.post(
 
       // 6. Enviar correo transaccional de confirmación desde cuentas@
       if (email) {
-        const storedLang = await fetchUserPreferredLanguage(uid);
-        const emailLang = resolveEmailLanguage(storedLang, reqLang);
+        const userData = await fetchUserData(uid);
+        const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
+        const recipientName = userData.name || req.user!.name || "Cliente Var San";
         const { subject, html, text } = buildAccountDeactivatedEmail(emailLang, {
-          recipientName: req.user!.name || "Cliente",
+          recipientName,
           deactivationDate: now,
         });
 
@@ -343,7 +350,8 @@ router.post(
 
 /**
  * POST /api/auth/account/delete
- * Elimina definitivamente la cuenta del usuario, purgando sus colecciones y registro de autenticación.
+ * Elimina definitivamente la cuenta del usuario, purgando sus colecciones,
+ * cancelando su suscripción a newsletter y eliminando su registro de autenticación.
  */
 router.post(
   "/auth/account/delete",
@@ -360,7 +368,6 @@ router.post(
     const { twoFactorCode, language: reqLang } = parseResult.data;
     const uid = req.user!.uid;
     const email = req.user!.email;
-    const name = req.user!.name;
     const now = new Date().toISOString();
 
     try {
@@ -371,12 +378,15 @@ router.post(
         return;
       }
 
-      // 2. Enviar correo de confirmación final antes de purgar los datos
+      // 2. Obtener datos reales del usuario antes de purgar
+      const userData = await fetchUserData(uid);
+      const recipientName = userData.name || req.user!.name || "Cliente Var San";
+
+      // 3. Enviar correo de confirmación final antes de purgar los datos
       if (email) {
-        const storedLang = await fetchUserPreferredLanguage(uid);
-        const emailLang = resolveEmailLanguage(storedLang, reqLang);
+        const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
         const { subject, html, text } = buildAccountDeletedEmail(emailLang, {
-          recipientName: name || "Cliente",
+          recipientName,
           deletionDate: now,
         });
 
@@ -389,7 +399,27 @@ router.post(
         }).catch(() => {});
       }
 
-      // 3. Purga exhaustiva de todas las subcolecciones de users/{uid}
+      // 4. Cancelar suscripción a newsletter de forma aislada e idempotente
+      if (email) {
+        try {
+          const [existingSub] = await db
+            .select()
+            .from(newsletterSubscribersTable)
+            .where(eq(newsletterSubscribersTable.email, email.toLowerCase().trim()))
+            .limit(1);
+
+          if (existingSub && existingSub.status !== "unsubscribed") {
+            await db
+              .update(newsletterSubscribersTable)
+              .set({ status: "unsubscribed", unsubscribedAt: new Date() })
+              .where(eq(newsletterSubscribersTable.id, existingSub.id));
+          }
+        } catch (newsletterErr) {
+          logger.warn({ newsletterErr, email }, "No se pudo cancelar suscripción a newsletter durante eliminación de cuenta");
+        }
+      }
+
+      // 5. Purga exhaustiva de todas las subcolecciones de users/{uid}
       const userRef = adminDb.collection("users").doc(uid);
 
       // Purgar subcolección sessions
@@ -413,7 +443,7 @@ router.post(
       // Eliminar el documento raíz de perfil en Firestore
       await userRef.delete();
 
-      // 4. Eliminar el usuario en Firebase Authentication
+      // 6. Eliminar el usuario en Firebase Authentication
       await adminAuth.deleteUser(uid);
 
       res.status(200).json({
