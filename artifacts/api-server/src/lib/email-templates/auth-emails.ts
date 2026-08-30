@@ -1,5 +1,6 @@
 import {
   type AccountDeletionEmailParams,
+  type AccountDeactivationEmailParams,
   type EmailChangeNotificationParams,
   type EmailContent,
   type EmailLanguage,
@@ -10,6 +11,9 @@ import {
   type TwoFactorStatusEmailParams,
   type VerificationCodeEmailParams,
   type BackupCodesEmailParams,
+  type ClientWelcomeEmailParams,
+  type DataExportCodeEmailParams,
+  type DataExportReadyEmailParams,
   escapeHtml,
 } from "./types";
 
@@ -1003,78 +1007,127 @@ function renderBaseEmail({
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
 <title>${subject}</title>
+<!--[if mso]>
+<style type="text/css">
+body, table, td, p, a, h1, h2, h3 { font-family: Arial, sans-serif !important; }
+</style>
+<![endif]-->
+<style type="text/css">
+body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+table { border-collapse: collapse !important; }
+body { margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #F5F7FA; }
+@media screen and (max-width: 600px) {
+  .email-container { width: 100% !important; max-width: 100% !important; margin: 0 auto !important; border-radius: 0 !important; border: none !important; }
+  .header-cell { padding: 28px 20px 24px !important; }
+  .body-cell { padding: 24px 20px 20px !important; }
+  .footer-cell { padding: 20px 20px !important; }
+  .h1-title { font-size: 22px !important; line-height: 1.3 !important; }
+  .code-digit { font-size: 28px !important; letter-spacing: 4px !important; }
+  .button-cta { display: block !important; width: 100% !important; box-sizing: border-box !important; text-align: center !important; }
+  .grid-col { display: block !important; width: 100% !important; box-sizing: border-box !important; }
+}
+</style>
 </head>
-<body style="margin:0;padding:0;background:#f5f7fa;font-family:Arial,Helvetica,sans-serif;color:#2c3e50;">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0;padding:0;background:#f5f7fa;">
+<body style="margin:0;padding:0;background-color:#F5F7FA;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;color:#10233F;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0;padding:0;background-color:#F5F7FA;">
 <tr>
-<td align="center" style="padding:32px 16px;">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:620px;background:#ffffff;margin:0 auto;box-shadow:0 4px 20px rgba(10,31,68,0.06);border-radius:6px;overflow:hidden;">
+<td align="center" style="padding:28px 12px;">
 
-<!-- ENCABEZADO -->
+<!-- CONTENEDOR CENTRAL BLANCO TIPO TARJETA -->
+<table role="presentation" class="email-container" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;background-color:#FFFFFF;margin:0 auto;box-shadow:0 4px 24px rgba(7,29,58,0.07);border-radius:10px;overflow:hidden;border:1px solid #E2E8F0;">
+
+<!-- HEADER AZUL MARINO -->
 <tr>
-<td style="background:#0a1f44;padding:36px 36px 32px;border-bottom:4px solid #c9a84c;">
-<div style="margin-bottom:20px;">
-  <img src="https://distribuidoravarsan.com.mx/dvs-logo-transparent.png" alt="Distribuidora Var San" width="150" style="display:block;border:0;outline:none;text-decoration:none;max-width:150px;height:auto;" />
-</div>
-<p style="margin:0 0 12px;color:#c9a84c;font-family:Consolas,'Courier New',monospace;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;">
-${kicker}
-</p>
-<h1 style="margin:0;color:#ffffff;font-size:26px;line-height:1.25;font-weight:800;">
-${heading}
-</h1>
-</td>
-</tr>
-
-<!-- CUERPO -->
-<tr>
-<td style="padding:36px 36px 32px;">
-${bodyHtml}
-
-<!-- FIRMA INSTITUCIONAL -->
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top:1px solid #e2e8f0;margin-top:32px;padding-top:20px;">
+<td class="header-cell" style="background-color:#071D3A;padding:36px 36px 30px;text-align:left;border-bottom:3px solid #C9A84C;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
 <tr>
 <td>
-<p style="margin:0 0 4px;color:#0a1f44;font-size:15px;font-weight:800;">
-${tr.common.companyName}
-</p>
-<p style="margin:0;color:#a88a3a;font-size:12px;font-weight:700;">
-${tr.common.tagline}
-</p>
+  <img src="https://distribuidoravarsan.com.mx/dvs-logo-transparent.png" alt="Distribuidora Var San" width="140" style="display:block;border:0;outline:none;text-decoration:none;max-width:140px;height:auto;margin-bottom:18px;" />
+  <p style="margin:0 0 10px;color:#C9A84C;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">
+    ${kicker}
+  </p>
+  <h1 class="h1-title" style="margin:0;color:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:24px;line-height:1.28;font-weight:800;letter-spacing:-0.2px;">
+    ${heading}
+  </h1>
 </td>
 </tr>
 </table>
-
 </td>
 </tr>
 
-<!-- PIE -->
+<!-- CONTENIDO BLANCO -->
 <tr>
-<td style="background:#0a1f44;padding:20px 36px;">
-<p style="margin:0 0 4px;color:#cbd5e1;font-size:11px;line-height:1.5;">
-${tr.common.automatedFooter}
+<td class="body-cell" style="background-color:#FFFFFF;padding:36px 36px 28px;color:#10233F;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;">
+${bodyHtml}
+
+<!-- TARJETA DE SOPORTE -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid #C9A84C;border-radius:6px;margin-top:28px;">
+<tr>
+<td style="padding:16px 20px;">
+  <p style="margin:0 0 4px;color:#071D3A;font-size:14px;font-weight:700;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">¿Necesitas ayuda?</p>
+  <p style="margin:0 0 8px;color:#475569;font-size:13px;line-height:1.5;">Nuestro equipo de soporte está para ayudarte.</p>
+  <p style="margin:0;color:#071D3A;font-size:13px;font-weight:600;">
+    <a href="mailto:distribuidora.varsan@outlook.com" style="color:#071D3A;text-decoration:underline;">distribuidora.varsan@outlook.com</a>
+  </p>
+  <p style="margin:4px 0 0;color:#64748B;font-size:12px;">Teléfono: Próximamente</p>
+</td>
+</tr>
+</table>
+
+<!-- FIRMA INSTITUCIONAL -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top:1px solid #E2E8F0;margin-top:28px;padding-top:20px;">
+<tr>
+<td style="padding-top:20px;">
+  <p style="margin:0 0 4px;color:#071D3A;font-size:15px;font-weight:800;letter-spacing:-0.2px;">
+    ${tr.common.companyName}
+  </p>
+  <p style="margin:0;color:#C9A84C;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">
+    ${tr.common.tagline}
+  </p>
+</td>
+</tr>
+</table>
+
+</td>
+</tr>
+
+<!-- FOOTER AZUL MARINO -->
+<tr>
+<td class="footer-cell" style="background-color:#071D3A;padding:24px 36px;border-top:3px solid #C9A84C;text-align:center;">
+<p style="margin:0 0 4px;color:#CBD5E1;font-size:12px;line-height:1.5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  2026 Distribuidora Var San. Todos los derechos reservados.
 </p>
-<p style="margin:0;color:#c9a84c;font-size:11px;">
-${tr.common.supportEmail}
+<p style="margin:0;color:#C9A84C;font-size:11px;font-weight:600;">
+  Portal Oficial de Clientes
 </p>
 </td>
 </tr>
 
 </table>
+
 </td>
 </tr>
 </table>
 </body>
 </html>`;
 
-  const text = `${heading}
+  const text = `${heading.replace(/<br\s*\/?>/gi, " ")}
 ${kicker}
 
 ${textBody}
 
+¿Necesitas ayuda?
+distribuidora.varsan@outlook.com
+Teléfono: Próximamente
+
 ${tr.common.companyName}
 ${tr.common.tagline}
-${tr.common.supportEmail}`;
+2026 Distribuidora Var San. Todos los derechos reservados.`;
 
   return { subject, html, text };
 }
@@ -1092,33 +1145,39 @@ export function buildVerificationCodeEmail(
   const safeCode = escapeHtml(params.code);
 
   const bodyHtml = `
-<p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
-<strong>${greeting}</strong>
+<p style="margin:0 0 16px;color:#071D3A;font-size:16px;font-weight:700;line-height:1.5;">
+${greeting}
 </p>
-<p style="margin:0 0 24px;color:#526274;font-size:15px;line-height:1.6;">
+<p style="margin:0 0 20px;color:#334155;font-size:15px;line-height:1.65;">
 ${tr.intro}
 </p>
 
-<!-- CAJA DEL CÓDIGO -->
+<!-- TARJETA DEL CÓDIGO -->
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;">
 <tr>
-<td align="center" style="background:#f1f5f9;border:2px dashed #0a1f44;border-radius:8px;padding:22px;">
-<p style="margin:0 0 8px;color:#64748b;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">
-${tr.codeLabel}
-</p>
-<div style="font-family:Consolas,'Courier New',monospace;font-size:32px;font-weight:800;letter-spacing:8px;color:#0a1f44;">
-${safeCode}
-</div>
-<p style="margin:8px 0 0;color:#94a3b8;font-size:12px;">
-${tr.expiryNotice.replace("{min}", expiry)}
-</p>
+<td align="center" style="background-color:#F8FAFC;border:2px dashed #071D3A;border-radius:8px;padding:26px 20px;">
+  <p style="margin:0 0 8px;color:#64748B;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">
+    ${tr.codeLabel}
+  </p>
+  <div class="code-digit" style="font-family:Consolas,'Courier New',monospace;font-size:36px;font-weight:800;letter-spacing:8px;color:#071D3A;">
+    ${safeCode}
+  </div>
+  <p style="margin:10px 0 0;color:#64748B;font-size:12px;">
+    ${tr.expiryNotice.replace("{min}", expiry)}
+  </p>
 </td>
 </tr>
 </table>
 
-<p style="margin:20px 0 0;color:#64748b;font-size:13px;line-height:1.5;">
-${tr.securityWarning}
-</p>`;
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid #071D3A;border-radius:6px;margin:20px 0;">
+<tr>
+<td style="padding:14px 18px;">
+  <p style="margin:0;color:#475569;font-size:13px;line-height:1.55;">
+    Este código es temporal. No compartas este código con nadie. ${tr.securityWarning}
+  </p>
+</td>
+</tr>
+</table>`;
 
   const textBody = `${greeting}
 
@@ -1129,12 +1188,13 @@ ${params.code}
 ========================
 (${tr.expiryNotice.replace("{min}", expiry)})
 
+Este código es temporal. No compartas este código con nadie.
 ${tr.securityWarning}`;
 
   return renderBaseEmail({
     language,
-    kicker: tr.kicker,
-    heading: tr.heading,
+    kicker: "VERIFICACIÓN",
+    heading: "Verifica tu cuenta",
     bodyHtml,
     textBody,
     subject: tr.subject,
@@ -1151,70 +1211,70 @@ export function buildPasswordResetEmail(
   const tr = AUTH_TRANSLATIONS[language]?.passwordReset || AUTH_TRANSLATIONS.es.passwordReset;
   const expiry = (params.expiresInMinutes || 15).toString();
   const greeting = params.recipientName ? `${tr.greeting} ${escapeHtml(params.recipientName)}:` : tr.greeting;
-  const safeResetCode = escapeHtml(params.resetCode);
-  const safeResetUrl = escapeHtml(params.resetUrl);
-
-  let codeBlock = "";
-  if (params.resetCode) {
-    codeBlock = `
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:20px 0;">
-<tr>
-<td align="center" style="background:#f1f5f9;border:2px dashed #0a1f44;border-radius:8px;padding:18px;">
-<p style="margin:0 0 6px;color:#64748b;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">
-${tr.codeLabel}
-</p>
-<div style="font-family:Consolas,'Courier New',monospace;font-size:28px;font-weight:800;letter-spacing:6px;color:#0a1f44;">
-${safeResetCode}
-</div>
-</td>
-</tr>
-</table>`;
-  }
-
-  let buttonBlock = "";
-  if (params.resetUrl) {
-    buttonBlock = `
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:22px 0;">
-<tr>
-<td align="center">
-<a href="${safeResetUrl}" style="background:#0a1f44;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:14px 28px;border-radius:6px;display:inline-block;border-bottom:3px solid #c9a84c;">
-${tr.buttonLabel}
-</a>
-</td>
-</tr>
-</table>`;
-  }
+  const safeResetUrl = params.resetUrl ? escapeHtml(params.resetUrl) : "";
+  const safeResetCode = params.resetCode ? escapeHtml(params.resetCode) : "";
 
   const bodyHtml = `
-<p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
-<strong>${greeting}</strong>
+<p style="margin:0 0 16px;color:#071D3A;font-size:16px;font-weight:700;line-height:1.5;">
+${greeting}
 </p>
-<p style="margin:0 0 20px;color:#526274;font-size:15px;line-height:1.6;">
+<p style="margin:0 0 20px;color:#334155;font-size:15px;line-height:1.65;">
 ${tr.intro}
 </p>
-${codeBlock}
-${buttonBlock}
-<p style="margin:16px 0 0;color:#64748b;font-size:13px;line-height:1.5;">
-${tr.expiryNotice.replace("{min}", expiry)}
-</p>
-<p style="margin:8px 0 0;color:#94a3b8;font-size:12px;line-height:1.5;">
-${tr.ignoreWarning}
-</p>`;
+
+${safeResetCode ? `
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;">
+<tr>
+<td align="center" style="background-color:#F8FAFC;border:2px dashed #071D3A;border-radius:8px;padding:26px 20px;">
+  <p style="margin:0 0 8px;color:#64748B;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">
+    ${tr.codeLabel}
+  </p>
+  <div class="code-digit" style="font-family:Consolas,'Courier New',monospace;font-size:36px;font-weight:800;letter-spacing:8px;color:#071D3A;">
+    ${safeResetCode}
+  </div>
+  <p style="margin:10px 0 0;color:#64748B;font-size:12px;">
+    ${tr.expiryNotice.replace("{min}", expiry)}
+  </p>
+</td>
+</tr>
+</table>
+` : ""}
+
+${safeResetUrl ? `
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:26px auto 20px;">
+<tr>
+<td align="center" style="border-radius:6px;background-color:#071D3A;">
+  <a href="${safeResetUrl}" class="button-cta" style="display:inline-block;padding:14px 32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:#FFFFFF;text-decoration:none;border-radius:6px;border-bottom:3px solid #C9A84C;">
+    ${tr.buttonLabel} →
+  </a>
+</td>
+</tr>
+</table>
+` : ""}
+
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid #071D3A;border-radius:6px;margin:20px 0;">
+<tr>
+<td style="padding:14px 18px;">
+  <p style="margin:0;color:#475569;font-size:13px;line-height:1.55;">
+    ${tr.ignoreWarning}
+  </p>
+</td>
+</tr>
+</table>`;
 
   const textBody = `${greeting}
 
 ${tr.intro}
 
-${params.resetCode ? `Código: ${params.resetCode}` : ""}
-${params.resetUrl ? `Enlace: ${params.resetUrl}` : ""}
+${params.resetCode ? `Código: ${params.resetCode}\n` : ""}${params.resetUrl ? `Enlace: ${params.resetUrl}\n` : ""}
+(${tr.expiryNotice.replace("{min}", expiry)})
 
-${tr.expiryNotice.replace("{min}", expiry)}
 ${tr.ignoreWarning}`;
 
   return renderBaseEmail({
     language,
-    kicker: tr.kicker,
-    heading: tr.heading,
+    kicker: "SEGURIDAD",
+    heading: "Recuperación de contraseña",
     bodyHtml,
     textBody,
     subject: tr.subject,
@@ -1222,32 +1282,58 @@ ${tr.ignoreWarning}`;
 }
 
 /**
- * 3. Confirmación de Contraseña Actualizada
+ * 3. Correo de Confirmación de Contraseña Actualizada
  */
 export function buildPasswordChangedEmail(
   language: EmailLanguage = "es",
-  params: PasswordChangedEmailParams,
+  params: PasswordChangedEmailParams = {},
 ): EmailContent {
   const tr = AUTH_TRANSLATIONS[language]?.passwordChanged || AUTH_TRANSLATIONS.es.passwordChanged;
   const greeting = params.recipientName ? `${tr.greeting} ${escapeHtml(params.recipientName)}:` : tr.greeting;
   const rawTime = params.changedAt || new Date().toLocaleString(language === "en-GB" ? "en-GB" : "es-MX");
   const safeTime = escapeHtml(rawTime);
+  const safeContactUrl = params.securityContactUrl ? escapeHtml(params.securityContactUrl) : "mailto:distribuidora.varsan@outlook.com";
 
   const bodyHtml = `
-<p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
-<strong>${greeting}</strong>
+<p style="margin:0 0 16px;color:#071D3A;font-size:16px;font-weight:700;line-height:1.5;">
+${greeting}
 </p>
-<p style="margin:0 0 20px;color:#526274;font-size:15px;line-height:1.6;">
+<p style="margin:0 0 20px;color:#334155;font-size:15px;line-height:1.65;">
 ${tr.message}
 </p>
-<p style="margin:0 0 24px;color:#64748b;font-size:13px;">
-<strong>${tr.timeLabel}</strong> ${safeTime}
-</p>
-<div style="background:#fff7ed;border-left:4px solid #f97316;padding:16px 18px;border-radius:0 4px 4px 0;margin:20px 0;">
-<p style="margin:0;color:#9a3412;font-size:13px;line-height:1.5;font-weight:600;">
-${tr.alertWarning}
-</p>
-</div>`;
+
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid #071D3A;border-radius:6px;margin:20px 0;">
+<tr>
+<td style="padding:14px 18px;">
+  <p style="margin:0;color:#475569;font-size:13px;">
+    <strong>${tr.timeLabel}</strong> ${safeTime}
+  </p>
+</td>
+</tr>
+</table>
+
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#FFF7ED;border:1px solid #FFEDD5;border-left:4px solid #F97316;border-radius:6px;margin:20px 0;">
+<tr>
+<td style="padding:16px 18px;">
+  <p style="margin:0 0 8px;color:#9A3412;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">
+    ADVERTENCIA DE SEGURIDAD
+  </p>
+  <p style="margin:0;color:#9A3412;font-size:13px;line-height:1.55;">
+    ${tr.alertWarning}
+  </p>
+</td>
+</tr>
+</table>
+
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:24px auto 16px;">
+<tr>
+<td align="center" style="border-radius:6px;background-color:#071D3A;">
+  <a href="${safeContactUrl}" class="button-cta" style="display:inline-block;padding:14px 32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:#FFFFFF;text-decoration:none;border-radius:6px;border-bottom:3px solid #C9A84C;">
+    ${tr.contactAction} →
+  </a>
+</td>
+</tr>
+</table>`;
 
   const textBody = `${greeting}
 
@@ -1255,12 +1341,13 @@ ${tr.message}
 
 ${tr.timeLabel} ${rawTime}
 
-${tr.alertWarning}`;
+${tr.alertWarning}
+${params.securityContactUrl ? `${tr.contactAction}: ${params.securityContactUrl}` : ""}`;
 
   return renderBaseEmail({
     language,
-    kicker: tr.kicker,
-    heading: tr.heading,
+    kicker: "SEGURIDAD",
+    heading: "Tu contraseña fue actualizada",
     bodyHtml,
     textBody,
     subject: tr.subject,
@@ -1268,7 +1355,7 @@ ${tr.alertWarning}`;
 }
 
 /**
- * 4. Alerta de Nuevo Dispositivo / Nuevo Inicio de Sesión
+ * 4. Correo de Alerta por Nuevo Inicio de Sesión
  */
 export function buildNewDeviceLoginEmail(
   language: EmailLanguage = "es",
@@ -1278,57 +1365,64 @@ export function buildNewDeviceLoginEmail(
   const greeting = params.recipientName ? `${tr.greeting} ${escapeHtml(params.recipientName)}:` : tr.greeting;
   const rawTime = params.loginTime || new Date().toLocaleString(language === "en-GB" ? "en-GB" : "es-MX");
   const safeTime = escapeHtml(rawTime);
-  const location = [params.region, params.country].filter(Boolean).join(", ") || "No disponible";
+  const location = [params.region, params.country].filter(Boolean).join(", ") || (language === "en-GB" ? "Unknown location" : "Ubicación desconocida");
   const safeLocation = escapeHtml(location);
   const safeDevice = escapeHtml(params.deviceType || "Desktop");
-  const safeOs = escapeHtml(params.os || "Desconocido");
-  const safeBrowser = escapeHtml(params.browser || "Desconocido");
-  const safeIp = escapeHtml(params.ip || "No registrada");
-  const safeRevokeUrl = escapeHtml(params.revokeUrl);
+  const safeOs = escapeHtml(params.os || (language === "en-GB" ? "Unknown" : "Desconocido"));
+  const safeBrowser = escapeHtml(params.browser || (language === "en-GB" ? "Unknown" : "Desconocido"));
+  const safeIp = escapeHtml(params.ip || (language === "en-GB" ? "Not recorded" : "No registrada"));
+  const safeRevokeUrl = params.revokeUrl ? escapeHtml(params.revokeUrl) : "https://distribuidoravarsan.com.mx";
 
   const bodyHtml = `
-<p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
-<strong>${greeting}</strong>
+<p style="margin:0 0 16px;color:#071D3A;font-size:16px;font-weight:700;line-height:1.5;">
+${greeting}
 </p>
-<p style="margin:0 0 20px;color:#526274;font-size:15px;line-height:1.6;">
+<p style="margin:0 0 20px;color:#334155;font-size:15px;line-height:1.65;">
 ${tr.intro}
 </p>
 
-<!-- FICHA TÉCNICA DEL DISPOSITIVO -->
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:16px;margin:20px 0;">
+<!-- TARJETA DE DETALLES DEL DISPOSITIVO -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid #071D3A;border-radius:6px;margin:20px 0;">
 <tr>
-<td>
-<p style="margin:0 0 10px;color:#0a1f44;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;">
-${tr.detailsHeader}
-</p>
-<table width="100%" style="font-size:13px;color:#475569;line-height:1.7;">
-<tr><td style="width:40%;font-weight:600;color:#64748b;">${tr.deviceLabel}</td><td>${safeDevice}</td></tr>
-<tr><td style="font-weight:600;color:#64748b;">${tr.osLabel}</td><td>${safeOs}</td></tr>
-<tr><td style="font-weight:600;color:#64748b;">${tr.browserLabel}</td><td>${safeBrowser}</td></tr>
-<tr><td style="font-weight:600;color:#64748b;">${tr.ipLabel}</td><td>${safeIp}</td></tr>
-<tr><td style="font-weight:600;color:#64748b;">${tr.locationLabel}</td><td>${safeLocation}</td></tr>
-<tr><td style="font-weight:600;color:#64748b;">${tr.timeLabel}</td><td>${safeTime}</td></tr>
-</table>
+<td style="padding:18px 20px;">
+  <p style="margin:0 0 12px;color:#071D3A;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">
+    ${tr.detailsHeader}
+  </p>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size:13px;color:#334155;line-height:1.8;">
+    <tr><td style="width:42%;font-weight:600;color:#64748B;padding:3px 0;">${tr.deviceLabel}</td><td style="color:#071D3A;font-weight:600;padding:3px 0;">${safeDevice}</td></tr>
+    <tr><td style="font-weight:600;color:#64748B;padding:3px 0;">${tr.osLabel}</td><td style="color:#071D3A;padding:3px 0;">${safeOs}</td></tr>
+    <tr><td style="font-weight:600;color:#64748B;padding:3px 0;">${tr.browserLabel}</td><td style="color:#071D3A;padding:3px 0;">${safeBrowser}</td></tr>
+    <tr><td style="font-weight:600;color:#64748B;padding:3px 0;">${tr.ipLabel}</td><td style="color:#071D3A;padding:3px 0;">${safeIp}</td></tr>
+    <tr><td style="font-weight:600;color:#64748B;padding:3px 0;">${tr.locationLabel}</td><td style="color:#071D3A;padding:3px 0;">${safeLocation}</td></tr>
+    <tr><td style="font-weight:600;color:#64748B;padding:3px 0;">${tr.timeLabel}</td><td style="color:#071D3A;padding:3px 0;">${safeTime}</td></tr>
+  </table>
 </td>
 </tr>
 </table>
 
 ${params.revokeUrl ? `
-<p style="margin:24px 0 12px;color:#b91c1c;font-size:13px;font-weight:600;">
-${tr.revokePrompt}
-</p>
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#FFF7ED;border:1px solid #FFEDD5;border-left:4px solid #F97316;border-radius:6px;margin:20px 0;">
 <tr>
-<td>
-<a href="${safeRevokeUrl}" style="background:#dc2626;color:#ffffff;text-decoration:none;font-weight:700;font-size:13px;padding:12px 24px;border-radius:6px;display:inline-block;">
-${tr.revokeButton}
-</a>
+<td style="padding:14px 18px;">
+  <p style="margin:0;color:#9A3412;font-size:13px;line-height:1.55;">
+    ${tr.revokePrompt}
+  </p>
+</td>
+</tr>
+</table>
+
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:24px auto 16px;">
+<tr>
+<td align="center" style="border-radius:6px;background-color:#071D3A;">
+  <a href="${safeRevokeUrl}" class="button-cta" style="display:inline-block;padding:14px 32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:#FFFFFF;text-decoration:none;border-radius:6px;border-bottom:3px solid #C9A84C;">
+    ${tr.revokeButton} →
+  </a>
 </td>
 </tr>
 </table>
 ` : ""}
 
-<p style="margin:20px 0 0;color:#64748b;font-size:12px;line-height:1.5;">
+<p style="margin:18px 0 0;color:#64748B;font-size:12px;line-height:1.5;">
 ${tr.allGoodNotice}
 </p>`;
 
@@ -1350,8 +1444,8 @@ ${tr.allGoodNotice}`;
 
   return renderBaseEmail({
     language,
-    kicker: tr.kicker,
-    heading: tr.heading,
+    kicker: "ACCESO",
+    heading: "Nuevo inicio de sesión",
     bodyHtml,
     textBody,
     subject: tr.subject,
@@ -1371,27 +1465,37 @@ export function buildSecurityAlertEmail(
   const safeTime = escapeHtml(rawTime);
   const safeTitle = escapeHtml(params.alertTitle);
   const safeDetails = escapeHtml(params.alertDetails);
-  const safeActionUrl = escapeHtml(params.actionUrl);
+  const safeActionUrl = params.actionUrl ? escapeHtml(params.actionUrl) : "";
 
   const bodyHtml = `
-<p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
-<strong>${greeting}</strong>
+<p style="margin:0 0 16px;color:#071D3A;font-size:16px;font-weight:700;line-height:1.5;">
+${greeting}
 </p>
-<p style="margin:0 0 16px;color:#0a1f44;font-size:16px;font-weight:700;">
+<p style="margin:0 0 16px;color:#071D3A;font-size:16px;font-weight:700;">
 ${safeTitle}
 </p>
-<div style="background:#fef2f2;border-left:4px solid #ef4444;padding:16px 18px;border-radius:0 4px 4px 0;margin:18px 0;">
-<p style="margin:0;color:#991b1b;font-size:14px;line-height:1.6;">
-${safeDetails}
-</p>
-</div>
-<p style="margin:0 0 20px;color:#64748b;font-size:12px;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#FEF2F2;border:1px solid #FEE2E2;border-left:4px solid #EF4444;border-radius:6px;margin:20px 0;">
+<tr>
+<td style="padding:16px 18px;">
+  <p style="margin:0;color:#991B1B;font-size:14px;line-height:1.6;">
+    ${safeDetails}
+  </p>
+</td>
+</tr>
+</table>
+<p style="margin:0 0 20px;color:#64748B;font-size:12px;">
 <strong>${tr.timeLabel}</strong> ${safeTime}
 </p>
-${params.actionUrl ? `
-<a href="${safeActionUrl}" style="background:#0a1f44;color:#ffffff;text-decoration:none;font-weight:700;font-size:13px;padding:12px 24px;border-radius:6px;display:inline-block;border-bottom:3px solid #c9a84c;">
-${tr.actionButton}
-</a>
+${safeActionUrl ? `
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:24px auto 16px;">
+<tr>
+<td align="center" style="border-radius:6px;background-color:#071D3A;">
+  <a href="${safeActionUrl}" class="button-cta" style="display:inline-block;padding:14px 32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:#FFFFFF;text-decoration:none;border-radius:6px;border-bottom:3px solid #C9A84C;">
+    ${tr.actionButton} →
+  </a>
+</td>
+</tr>
+</table>
 ` : ""}`;
 
   const textBody = `${greeting}
@@ -1405,8 +1509,8 @@ ${params.actionUrl ? `${tr.actionButton}: ${params.actionUrl}` : ""}`;
 
   return renderBaseEmail({
     language,
-    kicker: tr.kicker,
-    heading: tr.heading,
+    kicker: "ALERTA DE SEGURIDAD",
+    heading: "Actividad en tu cuenta",
     bodyHtml,
     textBody,
     subject: tr.subject,
@@ -1428,20 +1532,28 @@ export function buildEmailChangedEmail(
   const safeNewEmail = escapeHtml(params.newEmail);
 
   const bodyHtml = `
-<p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
-<strong>${greeting}</strong>
+<p style="margin:0 0 16px;color:#071D3A;font-size:16px;font-weight:700;line-height:1.5;">
+${greeting}
 </p>
-<p style="margin:0 0 20px;color:#526274;font-size:15px;line-height:1.6;">
+<p style="margin:0 0 20px;color:#334155;font-size:15px;line-height:1.65;">
 ${tr.intro}
 </p>
-<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:18px;margin:20px 0;">
-  <p style="margin:0 0 8px;color:#64748b;font-size:13px;"><strong>${tr.oldEmailLabel}</strong> ${safeOldEmail}</p>
-  <p style="margin:0 0 8px;color:#0a1f44;font-size:13px;font-weight:700;"><strong>${tr.newEmailLabel}</strong> ${safeNewEmail}</p>
-  <p style="margin:0;color:#64748b;font-size:12px;"><strong>${tr.timeLabel}</strong> ${safeTime}</p>
-</div>
-<div style="background:#fff7ed;border-left:4px solid #f97316;padding:14px 16px;border-radius:0 4px 4px 0;margin:18px 0;">
-  <p style="margin:0;color:#9a3412;font-size:13px;line-height:1.5;">${tr.warning}</p>
-</div>`;
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid #071D3A;border-radius:6px;margin:20px 0;">
+<tr>
+<td style="padding:18px 20px;">
+  <p style="margin:0 0 8px;color:#64748B;font-size:13px;"><strong>${tr.oldEmailLabel}</strong> ${safeOldEmail}</p>
+  <p style="margin:0 0 8px;color:#071D3A;font-size:14px;font-weight:700;"><strong>${tr.newEmailLabel}</strong> ${safeNewEmail}</p>
+  <p style="margin:0;color:#64748B;font-size:12px;"><strong>${tr.timeLabel}</strong> ${safeTime}</p>
+</td>
+</tr>
+</table>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#FFF7ED;border:1px solid #FFEDD5;border-left:4px solid #F97316;border-radius:6px;margin:20px 0;">
+<tr>
+<td style="padding:14px 18px;">
+  <p style="margin:0;color:#9A3412;font-size:13px;line-height:1.55;">${tr.warning}</p>
+</td>
+</tr>
+</table>`;
 
   const textBody = `${greeting}
 
@@ -1455,8 +1567,8 @@ ${tr.warning}`;
 
   return renderBaseEmail({
     language,
-    kicker: tr.kicker,
-    heading: tr.heading,
+    kicker: "CUENTA",
+    heading: "Tu información ha sido actualizada",
     bodyHtml,
     textBody,
     subject: tr.subject,
@@ -1464,11 +1576,11 @@ ${tr.warning}`;
 }
 
 /**
- * 7. Notificación / Confirmación de Cuenta Desactivada
+ * 7. Notificación de Cuenta Desactivada
  */
 export function buildAccountDeactivatedEmail(
   language: EmailLanguage = "es",
-  params: { recipientName?: string; deactivationDate?: string },
+  params: AccountDeactivationEmailParams = {},
 ): EmailContent {
   const tr = AUTH_TRANSLATIONS[language]?.accountDeletion || AUTH_TRANSLATIONS.es.accountDeletion;
   const greeting = params.recipientName ? `${tr.greeting} ${escapeHtml(params.recipientName)}:` : tr.greeting;
@@ -1486,15 +1598,21 @@ export function buildAccountDeactivatedEmail(
     : "Tu cuenta de cliente en Distribuidora Var San ha sido desactivada exitosamente conforme a tu solicitud. Todas tus sesiones activas han sido cerradas. Si deseas reactivar tu cuenta en el futuro, por favor contáctanos.";
 
   const bodyHtml = `
-<p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
-<strong>${greeting}</strong>
+<p style="margin:0 0 16px;color:#071D3A;font-size:16px;font-weight:700;line-height:1.5;">
+${greeting}
 </p>
-<p style="margin:0 0 20px;color:#526274;font-size:15px;line-height:1.6;">
+<p style="margin:0 0 20px;color:#334155;font-size:15px;line-height:1.65;">
 ${deactivationMessage}
 </p>
-<p style="margin:0 0 20px;color:#64748b;font-size:13px;">
-<strong>Fecha / Date:</strong> ${safeTime}
-</p>`;
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid #071D3A;border-radius:6px;margin:20px 0;">
+<tr>
+<td style="padding:14px 18px;">
+  <p style="margin:0;color:#475569;font-size:13px;">
+    <strong>Fecha / Date:</strong> ${safeTime}
+  </p>
+</td>
+</tr>
+</table>`;
 
   const textBody = `${greeting}
 
@@ -1504,7 +1622,7 @@ Fecha / Date: ${rawTime}`;
 
   return renderBaseEmail({
     language,
-    kicker: tr.kicker,
+    kicker: "CUENTA",
     heading: deactivationHeading,
     bodyHtml,
     textBody,
@@ -1513,11 +1631,11 @@ Fecha / Date: ${rawTime}`;
 }
 
 /**
- * 8. Notificación / Confirmación de Cuenta Eliminada
+ * 8. Notificación de Cuenta Eliminada
  */
 export function buildAccountDeletedEmail(
   language: EmailLanguage = "es",
-  params: { recipientName?: string; deletionDate?: string },
+  params: AccountDeletionEmailParams = {},
 ): EmailContent {
   const tr = AUTH_TRANSLATIONS[language]?.accountDeletion || AUTH_TRANSLATIONS.es.accountDeletion;
   const greeting = params.recipientName ? `${tr.greeting} ${escapeHtml(params.recipientName)}:` : tr.greeting;
@@ -1525,8 +1643,8 @@ export function buildAccountDeletedEmail(
   const safeTime = escapeHtml(rawTime);
 
   const bodyHtml = `
-<p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
-<strong>${greeting}</strong>
+<p style="margin:0 0 16px;color:#071D3A;font-size:16px;font-weight:700;line-height:1.5;">
+${greeting}
 </p>
 <p style="margin:0 0 16px;color:#334155;font-size:15px;line-height:1.65;">
 ${tr.intro}
@@ -1542,8 +1660,8 @@ ${tr.p3}
 </p>
 
 <!-- BLOQUE QUÉ SUCEDE AHORA -->
-<div style="background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #0a1f44;border-radius:4px;padding:20px;margin:24px 0;">
-<h3 style="margin:0 0 12px;color:#0a1f44;font-size:15px;font-weight:700;">
+<div style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid #071D3A;border-radius:6px;padding:20px;margin:24px 0;">
+<h3 style="margin:0 0 12px;color:#071D3A;font-size:15px;font-weight:700;">
 ${tr.whatNextTitle}
 </h3>
 <ul style="margin:0;padding-left:20px;color:#475569;font-size:14px;line-height:1.75;">
@@ -1555,10 +1673,10 @@ ${tr.whatNextTitle}
 </ul>
 </div>
 
-<p style="margin:20px 0 12px;color:#64748b;font-size:13px;line-height:1.6;">
+<p style="margin:20px 0 12px;color:#64748B;font-size:13px;line-height:1.6;">
 <strong>${tr.dateLabel}</strong> ${safeTime}
 </p>
-<p style="margin:12px 0 0;color:#64748b;font-size:13px;line-height:1.6;">
+<p style="margin:12px 0 0;color:#64748B;font-size:13px;line-height:1.6;">
 ${tr.supportNotice}
 </p>`;
 
@@ -1567,9 +1685,7 @@ ${tr.supportNotice}
 ${tr.intro}
 
 ${tr.p1}
-
 ${tr.p2}
-
 ${tr.p3}
 
 ${tr.whatNextTitle}
@@ -1580,13 +1696,12 @@ ${tr.whatNextTitle}
 - ${tr.point5}
 
 ${tr.dateLabel} ${rawTime}
-
 ${tr.supportNotice}`;
 
   return renderBaseEmail({
     language,
-    kicker: tr.kicker,
-    heading: tr.heading,
+    kicker: "CUENTA",
+    heading: "Cuenta eliminada",
     bodyHtml,
     textBody,
     subject: tr.subject,
@@ -1594,53 +1709,76 @@ ${tr.supportNotice}`;
 }
 
 /**
- * 8. Bienvenida a Nuevo Cliente Registrado en el Portal
+ * 9. Bienvenida a Nuevo Cliente Registrado en el Portal
  */
 export function buildClientWelcomeEmail(
   language: EmailLanguage = "es",
-  params: { recipientName?: string; email?: string; company?: string; portalUrl?: string } = {},
+  params: ClientWelcomeEmailParams = {},
 ): EmailContent {
   const greeting = params.recipientName ? `Hola, ${escapeHtml(params.recipientName)}:` : "Hola:";
   const safeCompany = params.company ? escapeHtml(params.company) : "";
+  const safeCountry = params.country ? escapeHtml(params.country) : "";
   const portalUrl = params.portalUrl || "https://distribuidoravarsan.com.mx";
 
   const bodyHtml = `
-<p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
-<strong>${greeting}</strong>
+<p style="margin:0 0 16px;color:#071D3A;font-size:16px;font-weight:700;line-height:1.5;">
+${greeting}
 </p>
 <p style="margin:0 0 16px;color:#334155;font-size:15px;line-height:1.65;">
-Te damos la más cordial bienvenida al <strong>Portal de Cliente de Distribuidora Var San</strong>. Tu cuenta ha sido creada exitosamente.
+Nos alegra tenerte como parte de nuestra comunidad. Tu cuenta ha sido creada exitosamente.
 </p>
-${safeCompany ? `
-<p style="margin:0 0 16px;color:#334155;font-size:15px;line-height:1.65;">
-Empresa / Institución vinculada: <strong>${safeCompany}</strong>
-</p>
-` : ""}
 <p style="margin:0 0 20px;color:#334155;font-size:15px;line-height:1.65;">
-Desde tu portal podrás consultar información de tu cuenta, gestionar tus sesiones activas, configurar la seguridad en dos pasos (2FA), descargar tus datos y acceder a todos nuestros catálogos de soluciones industriales y médicas.
+Te damos la más cordial bienvenida al <strong>Portal de Cliente de Distribuidora Var San</strong>. Desde tu portal podrás consultar información de tu cuenta, gestionar tus sesiones activas, configurar la seguridad en dos pasos (2FA), descargar tus datos y acceder a todos nuestros catálogos de productos.
 </p>
-<div style="margin:26px 0;text-align:center;">
-<a href="${escapeHtml(portalUrl)}" style="background:#0a1f44;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:14px 28px;border-radius:6px;display:inline-block;border-bottom:3px solid #c9a84c;">
-Acceder al Portal de Cliente
-</a>
-</div>
-<p style="margin:20px 0 0;color:#64748b;font-size:13px;line-height:1.6;">
-Si tienes dudas o necesitas atención personalizada, nuestro equipo de soporte está siempre listo para ayudarte.
-</p>`;
+
+${safeCompany ? `
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid #071D3A;border-radius:6px;margin:20px 0 12px;">
+<tr>
+<td style="padding:16px 20px;">
+  <p style="margin:0 0 4px;color:#64748B;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">EMPRESA / INSTITUCIÓN VINCULADA</p>
+  <p style="margin:0 0 4px;color:#071D3A;font-size:16px;font-weight:700;">${safeCompany}</p>
+  <p style="margin:0;color:#C9A84C;font-size:12px;font-weight:600;">Tu proveedor de confianza en limpieza y protección.</p>
+</td>
+</tr>
+</table>
+` : ""}
+
+${safeCountry ? `
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid #C9A84C;border-radius:6px;margin:0 0 20px;">
+<tr>
+<td style="padding:14px 20px;">
+  <p style="margin:0 0 2px;color:#64748B;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">PAÍS</p>
+  <p style="margin:0;color:#071D3A;font-size:14px;font-weight:700;">${safeCountry}</p>
+</td>
+</tr>
+</table>
+` : ""}
+
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:28px auto 16px;">
+<tr>
+<td align="center" style="border-radius:6px;background-color:#071D3A;">
+  <a href="${escapeHtml(portalUrl)}" class="button-cta" style="display:inline-block;padding:14px 32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:#FFFFFF;text-decoration:none;border-radius:6px;border-bottom:3px solid #C9A84C;">
+    Ir a mi portal →
+  </a>
+</td>
+</tr>
+</table>`;
 
   const textBody = `${greeting}
 
-Te damos la más cordial bienvenida al Portal de Cliente de Distribuidora Var San. Tu cuenta ha sido creada exitosamente.
+Nos alegra tenerte como parte de nuestra comunidad. Tu cuenta ha sido creada exitosamente.
 
-${params.company ? `Empresa / Institución: ${params.company}\n\n` : ""}Accede a tu portal en: ${portalUrl}
+Te damos la más cordial bienvenida al Portal de Cliente de Distribuidora Var San. Desde tu portal podrás consultar información de tu cuenta, gestionar tus sesiones activas, configurar la seguridad en dos pasos (2FA), descargar tus datos y acceder a todos nuestros catálogos de productos.
 
-CALIDAD Y CONFIANZA EN CADA SUMINISTRO.
-Distribuidora Var San`;
+${params.company ? `Empresa / Institución: ${params.company}\n` : ""}${params.country ? `País: ${params.country}\n` : ""}
+Accede a tu portal en: ${portalUrl}
+
+Tu proveedor de confianza en limpieza y protección.`;
 
   return renderBaseEmail({
     language,
     kicker: "PORTAL DE CLIENTES",
-    heading: "¡Bienvenido a Distribuidora Var San!",
+    heading: "¡Bienvenido a<br />Distribuidora Var San!",
     bodyHtml,
     textBody,
     subject: "Bienvenido a Distribuidora Var San — Tu cuenta está lista",
@@ -1648,35 +1786,50 @@ Distribuidora Var San`;
 }
 
 /**
- * 9. Código de Verificación para Descarga de Datos
+ * 10. Código de Verificación para Descarga de Datos
  */
 export function buildDataExportCodeEmail(
   language: EmailLanguage = "es",
-  params: { code: string; recipientName?: string; expiresInMinutes?: number },
+  params: DataExportCodeEmailParams,
 ): EmailContent {
   const greeting = params.recipientName ? `Hola, ${escapeHtml(params.recipientName)}:` : "Hola:";
   const safeCode = escapeHtml(params.code);
   const minutes = params.expiresInMinutes || 15;
 
   const bodyHtml = `
-<p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
-<strong>${greeting}</strong>
+<p style="margin:0 0 16px;color:#071D3A;font-size:16px;font-weight:700;line-height:1.5;">
+${greeting}
 </p>
-<p style="margin:0 0 20px;color:#526274;font-size:15px;line-height:1.6;">
-Hemos recibido una solicitud para descargar una copia de tus datos almacenados en Distribuidora Var San. Para verificar tu identidad, utiliza el siguiente código de seguridad:
+<p style="margin:0 0 20px;color:#334155;font-size:15px;line-height:1.65;">
+Hemos recibido una solicitud para descargar una copia de la información asociada a tu cuenta en Distribuidora Var San. Para confirmar tu identidad, utiliza el siguiente código de seguridad:
 </p>
-<div style="background:#f8fafc;border:2px dashed #0a1f44;border-radius:8px;padding:24px;text-align:center;margin:24px 0;">
-  <p style="margin:0 0 6px;color:#64748b;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700;">Código de verificación</p>
-  <span style="color:#0a1f44;font-family:Consolas,'Courier New',monospace;font-size:34px;font-weight:800;letter-spacing:8px;">${safeCode}</span>
-</div>
-<p style="margin:0 0 12px;color:#64748b;font-size:13px;">
-Este código expirará en <strong>${minutes} minutos</strong> y es de un solo uso.
-</p>
-<div style="background:#fff7ed;border-left:4px solid #f97316;padding:12px 16px;border-radius:0 4px 4px 0;margin:18px 0;">
-  <p style="margin:0;color:#9a3412;font-size:13px;line-height:1.5;">
-    Si tú no solicitaste este archivo con tus datos, te recomendamos cambiar tu contraseña y revisar tus sesiones de inmediato.
+
+<!-- TARJETA DEL CÓDIGO -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;">
+<tr>
+<td align="center" style="background-color:#F8FAFC;border:2px dashed #071D3A;border-radius:8px;padding:26px 20px;">
+  <p style="margin:0 0 8px;color:#64748B;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">
+    CÓDIGO DE VERIFICACIÓN
   </p>
-</div>`;
+  <div class="code-digit" style="font-family:Consolas,'Courier New',monospace;font-size:36px;font-weight:800;letter-spacing:8px;color:#071D3A;">
+    ${safeCode}
+  </div>
+  <p style="margin:10px 0 0;color:#64748B;font-size:12px;">
+    Este código expira en <strong>${minutes} minutos</strong> y es de un solo uso.
+  </p>
+</td>
+</tr>
+</table>
+
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#FFF7ED;border:1px solid #FFEDD5;border-left:4px solid #F97316;border-radius:6px;margin:20px 0;">
+<tr>
+<td style="padding:14px 18px;">
+  <p style="margin:0;color:#9A3412;font-size:13px;line-height:1.55;">
+    Si no solicitaste este archivo de datos, te recomendamos cambiar tu contraseña y verificar la seguridad de tus sesiones de inmediato.
+  </p>
+</td>
+</tr>
+</table>`;
 
   const textBody = `${greeting}
 
@@ -1689,8 +1842,8 @@ Si tú no solicitaste este código, por favor protege tu cuenta de inmediato.`;
 
   return renderBaseEmail({
     language,
-    kicker: "VERIFICACIÓN DE IDENTIDAD",
-    heading: "Verifica tu identidad para descargar tus datos",
+    kicker: "DATOS DE TU CUENTA",
+    heading: "Descarga de tu información",
     bodyHtml,
     textBody,
     subject: "Código de verificación para descarga de datos — Distribuidora Var San",
@@ -1698,7 +1851,69 @@ Si tú no solicitaste este código, por favor protege tu cuenta de inmediato.`;
 }
 
 /**
- * 10. Correo de Códigos de Respaldo para Autenticación en Dos Pasos (2FA)
+ * 11. Descarga de Información Lista
+ */
+export function buildDataExportReadyEmail(
+  language: EmailLanguage = "es",
+  params: DataExportReadyEmailParams,
+): EmailContent {
+  const greeting = params.recipientName ? `Hola, ${escapeHtml(params.recipientName)}:` : "Hola:";
+  const safeDownloadUrl = params.downloadUrl ? escapeHtml(params.downloadUrl) : "https://distribuidoravarsan.com.mx";
+  const hours = params.expiresInHours || 24;
+
+  const bodyHtml = `
+<p style="margin:0 0 16px;color:#071D3A;font-size:16px;font-weight:700;line-height:1.5;">
+${greeting}
+</p>
+<p style="margin:0 0 20px;color:#334155;font-size:15px;line-height:1.65;">
+Tu solicitud para descargar la información asociada a tu cuenta está lista.
+</p>
+
+<!-- TARJETA DE INFORMACIÓN -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid #071D3A;border-radius:6px;margin:20px 0;">
+<tr>
+<td style="padding:18px 20px;">
+  <p style="margin:0 0 4px;color:#071D3A;font-size:14px;font-weight:700;">INFORMACIÓN DE TU CUENTA</p>
+  <p style="margin:0 0 8px;color:#475569;font-size:13px;line-height:1.55;">
+    Tu archivo contiene los datos disponibles asociados a tu cuenta (perfil, sesiones de acceso y registro de actividad).
+  </p>
+  <p style="margin:0;color:#64748B;font-size:12px;">
+    El enlace de descarga estará disponible durante las próximas <strong>${hours} horas</strong>.
+  </p>
+</td>
+</tr>
+</table>
+
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:28px auto 16px;">
+<tr>
+<td align="center" style="border-radius:6px;background-color:#071D3A;">
+  <a href="${safeDownloadUrl}" class="button-cta" style="display:inline-block;padding:14px 32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:#FFFFFF;text-decoration:none;border-radius:6px;border-bottom:3px solid #C9A84C;">
+    Descargar mi información →
+  </a>
+</td>
+</tr>
+</table>`;
+
+  const textBody = `${greeting}
+
+Tu solicitud para descargar la información asociada a tu cuenta está lista.
+
+Tu archivo contiene los datos disponibles asociados a tu cuenta.
+Enlace de descarga (válido por ${hours} horas):
+${params.downloadUrl || "https://distribuidoravarsan.com.mx"}`;
+
+  return renderBaseEmail({
+    language,
+    kicker: "DATOS DE TU CUENTA",
+    heading: "Tu información está lista",
+    bodyHtml,
+    textBody,
+    subject: "Tu descarga de información está lista — Distribuidora Var San",
+  });
+}
+
+/**
+ * 12. Correo de Códigos de Respaldo para Autenticación en Dos Pasos (2FA)
  */
 export function buildBackupCodesEmail(
   language: EmailLanguage = "es",
@@ -1707,46 +1922,85 @@ export function buildBackupCodesEmail(
   const greeting = params.recipientName ? `Hola, ${escapeHtml(params.recipientName)}:` : "Hola:";
   const codes = params.backupCodes || [];
 
-  const codesHtml = codes
+  // Agrupar códigos en pares para layout responsive
+  const codePairs: string[][] = [];
+  for (let i = 0; i < codes.length; i += 2) {
+    codePairs.push(codes.slice(i, i + 2));
+  }
+
+  const codesGridHtml = codePairs
     .map(
-      (code) => `
-      <div style="background:#ffffff;border:1px solid #cbd5e1;border-radius:6px;padding:10px 14px;text-align:center;font-family:Consolas,'Courier New',monospace;font-size:16px;font-weight:700;letter-spacing:2px;color:#0a1f44;">
-        ${escapeHtml(code)}
-      </div>`
+      (pair) => `
+      <tr>
+        <td class="grid-col" style="padding:5px;width:50%;">
+          <div style="background-color:#FFFFFF;border:1px solid #CBD5E1;border-radius:6px;padding:12px 14px;text-align:center;font-family:Consolas,'Courier New',monospace;font-size:16px;font-weight:700;letter-spacing:2px;color:#071D3A;">
+            ${escapeHtml(pair[0] || "")}
+          </div>
+        </td>
+        ${pair[1] ? `
+        <td class="grid-col" style="padding:5px;width:50%;">
+          <div style="background-color:#FFFFFF;border:1px solid #CBD5E1;border-radius:6px;padding:12px 14px;text-align:center;font-family:Consolas,'Courier New',monospace;font-size:16px;font-weight:700;letter-spacing:2px;color:#071D3A;">
+            ${escapeHtml(pair[1])}
+          </div>
+        </td>
+        ` : `<td class="grid-col" style="padding:5px;width:50%;">&nbsp;</td>`}
+      </tr>`
     )
     .join("");
 
   const bodyHtml = `
-<p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
-<strong>${greeting}</strong>
+<p style="margin:0 0 16px;color:#071D3A;font-size:16px;font-weight:700;line-height:1.5;">
+${greeting}
 </p>
-<p style="margin:0 0 16px;color:#526274;font-size:15px;line-height:1.6;">
+<p style="margin:0 0 16px;color:#334155;font-size:15px;line-height:1.65;">
 La autenticación en dos fases (2FA) ha sido activada en tu cuenta de <strong>Distribuidora Var San</strong>. A continuación te proporcionamos tus <strong>códigos de respaldo</strong> oficiales.
 </p>
-<p style="margin:0 0 16px;color:#526274;font-size:14px;line-height:1.6;">
-Puedes utilizar cada uno de estos códigos una única vez para acceder a tu cuenta si no tienes acceso a tu número celular o no puedes recibir el mensaje SMS de seguridad.
-</p>
-<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:20px;margin:20px 0;">
-  <p style="margin:0 0 12px;color:#0a1f44;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;text-align:center;">
-    Tus códigos de respaldo de un solo uso
+
+<!-- TARJETA INFORMATIVA -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#FFFBEB;border:1px solid #FDE68A;border-left:4px solid #F59E0B;border-radius:6px;margin:20px 0;">
+<tr>
+<td style="padding:16px 20px;">
+  <p style="margin:0 0 4px;color:#92400E;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">IMPORTANTE</p>
+  <p style="margin:0;color:#92400E;font-size:14px;line-height:1.55;">
+    Puedes utilizar cada uno de estos códigos una única vez para acceder a tu cuenta si no tienes acceso a tu número celular o no puedes recibir el mensaje SMS de seguridad.
   </p>
-  <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:10px;">
-    ${codesHtml}
-  </div>
+</td>
+</tr>
+</table>
+
+<!-- SECCIÓN DE CÓDIGOS -->
+<div style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:22px 18px;margin:24px 0;">
+  <p style="margin:0 0 14px;color:#071D3A;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;text-align:center;">
+    TUS CÓDIGOS DE RESPALDO DE UN SOLO USO
+  </p>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+    ${codesGridHtml}
+  </table>
 </div>
-<div style="background:#fffbeb;border-left:4px solid #f59e0b;padding:12px 16px;border-radius:0 4px 4px 0;margin:18px 0;">
-  <p style="margin:0 0 6px;color:#92400e;font-size:13px;font-weight:700;">
-    Recomendaciones de seguridad importantes:
-  </p>
-  <ul style="margin:0;padding-left:18px;color:#92400e;font-size:13px;line-height:1.5;">
+
+<!-- CONSEJOS DE SEGURIDAD -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid #071D3A;border-radius:6px;margin:20px 0;">
+<tr>
+<td style="padding:16px 20px;">
+  <p style="margin:0 0 6px;color:#071D3A;font-size:13px;font-weight:700;">CONSEJOS DE SEGURIDAD</p>
+  <ul style="margin:0;padding-left:18px;color:#475569;font-size:13px;line-height:1.6;">
     <li>Cada código solo puede utilizarse <strong>una sola vez</strong>.</li>
-    <li>Guarda estos códigos en un lugar seguro (por ejemplo, un gestor de contraseñas).</li>
-    <li><strong>Nunca compartas estos códigos con nadie</strong>. El personal de Distribuidora Var San jamás te pedirá tus códigos de respaldo.</li>
+    <li>Guarda estos códigos en un lugar seguro (por ejemplo, en un administrador de contraseñas).</li>
+    <li><strong>No los compartas con nadie</strong>. El personal de Distribuidora Var San jamás te pedirá tus códigos de respaldo.</li>
   </ul>
-</div>
-<p style="margin:0 0 10px;color:#64748b;font-size:13px;line-height:1.5;">
-Si sospechas que alguien ha tenido acceso no autorizado a tus códigos, puedes generar un nuevo conjunto en cualquier momento desde la sección de <strong>Seguridad</strong> en tu Portal de Cliente.
-</p>`;
+</td>
+</tr>
+</table>
+
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:26px auto 16px;">
+<tr>
+<td align="center" style="border-radius:6px;background-color:#071D3A;">
+  <a href="https://distribuidoravarsan.com.mx" class="button-cta" style="display:inline-block;padding:14px 32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:#FFFFFF;text-decoration:none;border-radius:6px;border-bottom:3px solid #C9A84C;">
+    Ir a mi portal →
+  </a>
+</td>
+</tr>
+</table>`;
 
   const codesText = codes.map((c, i) => `  ${i + 1}. ${c}`).join("\n");
   const textBody = `${greeting}
@@ -1757,20 +2011,96 @@ Tus códigos de respaldo de un solo uso son:
 
 ${codesText}
 
-INSTRUCCIONES DE SEGURIDAD:
-- Cada código puede utilizarse una sola vez si no tienes acceso a tu teléfono celular.
-- Guárdalos en un lugar seguro y no los compartas con nadie.
-- El personal de Distribuidora Var San nunca te solicitará tus códigos de respaldo.
+IMPORTANTE:
+- Puedes utilizar cada uno de estos códigos una única vez para acceder a tu cuenta si no tienes acceso a tu número celular o no puedes recibir el mensaje SMS de seguridad.
 
-CALIDAD Y CONFIANZA EN CADA SUMINISTRO.
-Distribuidora Var San`;
+CONSEJOS DE SEGURIDAD:
+- Guarda estos códigos en un lugar seguro. No los compartas con nadie.
+- El personal de Distribuidora Var San jamás te pedirá tus códigos de respaldo.
+
+Accede a tu portal en: https://distribuidoravarsan.com.mx`;
 
   return renderBaseEmail({
     language,
-    kicker: "SEGURIDAD Y PROTECCIÓN",
+    kicker: "SEGURIDAD",
     heading: "Tus códigos de respaldo de autenticación en dos pasos",
     bodyHtml,
     textBody,
     subject: "Mis códigos de respaldo — Distribuidora Var San",
+  });
+}
+
+/**
+ * 13. Notificación de Estado de Autenticación en Dos Pasos (2FA)
+ */
+export function buildTwoFactorStatusEmail(
+  language: EmailLanguage = "es",
+  params: TwoFactorStatusEmailParams,
+): EmailContent {
+  const tr = AUTH_TRANSLATIONS[language]?.twoFactor || AUTH_TRANSLATIONS.es.twoFactor;
+  const greeting = params.recipientName ? `${tr.greeting} ${escapeHtml(params.recipientName)}:` : tr.greeting;
+  const isEnabled = params.enabled;
+  const rawTime = params.timestamp || new Date().toLocaleString(language === "en-GB" ? "en-GB" : "es-MX");
+  const safeTime = escapeHtml(rawTime);
+
+  const heading = isEnabled ? tr.enabledHeading : tr.disabledHeading;
+  const message = isEnabled ? tr.enabledMessage : tr.disabledMessage;
+  const subject = isEnabled ? tr.enabledSubject : tr.disabledSubject;
+
+  const bodyHtml = `
+<p style="margin:0 0 16px;color:#071D3A;font-size:16px;font-weight:700;line-height:1.5;">
+${greeting}
+</p>
+<p style="margin:0 0 20px;color:#334155;font-size:15px;line-height:1.65;">
+${message}
+</p>
+
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid ${isEnabled ? "#071D3A" : "#F59E0B"};border-radius:6px;margin:20px 0;">
+<tr>
+<td style="padding:14px 18px;">
+  <p style="margin:0 0 4px;color:#071D3A;font-size:13px;font-weight:700;">ESTADO DE SEGURIDAD</p>
+  <p style="margin:0;color:#475569;font-size:13px;">
+    <strong>2FA:</strong> ${isEnabled ? "Activado (SMS / Códigos)" : "Desactivado"} | <strong>Fecha:</strong> ${safeTime}
+  </p>
+</td>
+</tr>
+</table>
+
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#FFF7ED;border:1px solid #FFEDD5;border-left:4px solid #F97316;border-radius:6px;margin:20px 0;">
+<tr>
+<td style="padding:14px 18px;">
+  <p style="margin:0;color:#9A3412;font-size:13px;line-height:1.55;">
+    ${tr.warning}
+  </p>
+</td>
+</tr>
+</table>
+
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:26px auto 16px;">
+<tr>
+<td align="center" style="border-radius:6px;background-color:#071D3A;">
+  <a href="https://distribuidoravarsan.com.mx" class="button-cta" style="display:inline-block;padding:14px 32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:#FFFFFF;text-decoration:none;border-radius:6px;border-bottom:3px solid #C9A84C;">
+    Ir a mi portal →
+  </a>
+</td>
+</tr>
+</table>`;
+
+  const textBody = `${greeting}
+
+${message}
+
+2FA: ${isEnabled ? "Activado" : "Desactivado"}
+Fecha: ${rawTime}
+
+${tr.warning}`;
+
+  return renderBaseEmail({
+    language,
+    kicker: "SEGURIDAD",
+    heading,
+    bodyHtml,
+    textBody,
+    subject,
   });
 }

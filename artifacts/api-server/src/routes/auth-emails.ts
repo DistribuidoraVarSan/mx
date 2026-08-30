@@ -209,6 +209,7 @@ router.post("/auth/welcome-email", authRateLimit, async (req: Request, res: Resp
   const email = String(req.body?.email || "").trim().toLowerCase();
   const name = String(req.body?.name || "").trim();
   const company = String(req.body?.company || "").trim();
+  const country = req.body?.country ? String(req.body.country).trim() : undefined;
   const language = req.body?.language;
 
   if (!email || !email.includes("@")) {
@@ -222,6 +223,7 @@ router.post("/auth/welcome-email", authRateLimit, async (req: Request, res: Resp
       recipientName: name || undefined,
       email,
       company: company || undefined,
+      country: country || undefined,
     });
 
     const mailResult = await sendEmail({

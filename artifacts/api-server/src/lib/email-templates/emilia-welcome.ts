@@ -217,111 +217,141 @@ export function buildEmiliaWelcomeEmail(
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
 <title>${tr.subject}</title>
+<!--[if mso]>
+<style type="text/css">
+body, table, td, p, a, h1, h2, h3 { font-family: Arial, sans-serif !important; }
+</style>
+<![endif]-->
+<style type="text/css">
+body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+table { border-collapse: collapse !important; }
+body { margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #F5F7FA; }
+@media screen and (max-width: 600px) {
+  .email-container { width: 100% !important; max-width: 100% !important; margin: 0 auto !important; border-radius: 0 !important; border: none !important; }
+  .header-cell { padding: 28px 20px 24px !important; }
+  .body-cell { padding: 24px 20px 20px !important; }
+  .footer-cell { padding: 20px 20px !important; }
+  .h1-title { font-size: 22px !important; line-height: 1.3 !important; }
+}
+</style>
 </head>
-<body style="margin:0;padding:0;background:#f5f7fa;font-family:Arial,Helvetica,sans-serif;color:#2c3e50;">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0;padding:0;background:#f5f7fa;">
+<body style="margin:0;padding:0;background-color:#F5F7FA;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;color:#10233F;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0;padding:0;background-color:#F5F7FA;">
 <tr>
-<td align="center" style="padding:32px 16px;">
+<td align="center" style="padding:28px 12px;">
 
-<!-- CONTENEDOR PRINCIPAL -->
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:720px;background:#ffffff;margin:0 auto;box-shadow:0 4px 20px rgba(10,31,68,0.06);border-radius:6px;overflow:hidden;">
+<!-- CONTENEDOR CENTRAL BLANCO TIPO TARJETA -->
+<table role="presentation" class="email-container" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:620px;background-color:#FFFFFF;margin:0 auto;box-shadow:0 4px 24px rgba(7,29,58,0.07);border-radius:10px;overflow:hidden;border:1px solid #E2E8F0;">
 
-<!-- ENCABEZADO INSTITUCIONAL -->
+<!-- HEADER AZUL MARINO -->
 <tr>
-<td style="background:#0a1f44;padding:48px 44px 42px;border-bottom:4px solid #c9a84c;">
-<div style="margin-bottom:22px;">
-  <img src="https://distribuidoravarsan.com.mx/dvs-logo-transparent.png" alt="Distribuidora Var San" width="160" style="display:block;border:0;outline:none;text-decoration:none;max-width:160px;height:auto;" />
-</div>
-<p style="margin:0 0 18px;color:#c9a84c;font-family:Consolas,'Courier New',monospace;font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;">
-${tr.kicker}
-</p>
-<h1 style="margin:0;color:#ffffff;font-size:34px;line-height:1.2;font-weight:800;letter-spacing:-0.5px;">
-${tr.heading}
-</h1>
+<td class="header-cell" style="background-color:#071D3A;padding:36px 36px 30px;text-align:left;border-bottom:3px solid #C9A84C;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+<tr>
+<td>
+  <img src="https://distribuidoravarsan.com.mx/dvs-logo-transparent.png" alt="Distribuidora Var San" width="140" style="display:block;border:0;outline:none;text-decoration:none;max-width:140px;height:auto;margin-bottom:18px;" />
+  <p style="margin:0 0 10px;color:#C9A84C;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">
+    ${tr.kicker}
+  </p>
+  <h1 class="h1-title" style="margin:0;color:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:26px;line-height:1.25;font-weight:800;letter-spacing:-0.2px;">
+    ${tr.heading}
+  </h1>
+</td>
+</tr>
+</table>
 </td>
 </tr>
 
-<!-- CUERPO DE EMILIA -->
+<!-- CONTENIDO EDITORIAL BLANCO -->
 <tr>
-<td style="padding:46px 44px 42px;">
+<td class="body-cell" style="background-color:#FFFFFF;padding:36px 36px 28px;color:#10233F;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.75;">
 
-<p style="margin:0 0 24px;color:#2c3e50;font-size:17px;line-height:1.75;">
-<strong>${tr.welcomeIntro}</strong>
+<p style="margin:0 0 20px;color:#071D3A;font-size:16px;font-weight:700;line-height:1.5;">
+${tr.welcomeIntro}
 </p>
 
-<p style="margin:0 0 24px;color:#526274;font-size:16px;line-height:1.8;">
+<p style="margin:0 0 18px;color:#334155;">
 ${tr.p1}
 </p>
 
-<p style="margin:0 0 24px;color:#526274;font-size:16px;line-height:1.8;">
+<p style="margin:0 0 18px;color:#334155;">
 ${tr.p2}
 </p>
 
-<p style="margin:0 0 24px;color:#526274;font-size:16px;line-height:1.8;">
+<p style="margin:0 0 18px;color:#334155;">
 ${tr.p3}
 </p>
 
-<p style="margin:0 0 24px;color:#526274;font-size:16px;line-height:1.8;">
+<p style="margin:0 0 20px;color:#334155;">
 ${tr.p4}
 </p>
 
-<!-- FRASE DESTACADA INSTITUCIONAL -->
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:34px 0;">
+<!-- FRASE DESTACADA INSTITUCIONAL CON BORDE DORADO -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;">
 <tr>
-<td style="border-left:4px solid #c9a84c;background:#f8fafc;padding:24px 26px;border-radius:0 4px 4px 0;">
-<p style="margin:0;color:#0a1f44;font-size:17px;line-height:1.6;font-weight:700;font-style:italic;">
-“${tr.quote}”
-</p>
+<td style="border-left:4px solid #C9A84C;background-color:#F8FAFC;padding:18px 22px;border-radius:0 6px 6px 0;border-top:1px solid #E2E8F0;border-right:1px solid #E2E8F0;border-bottom:1px solid #E2E8F0;">
+  <p style="margin:0;color:#071D3A;font-size:15px;line-height:1.6;font-weight:700;font-style:italic;">
+    “${tr.quote}”
+  </p>
 </td>
 </tr>
 </table>
 
-<p style="margin:0 0 24px;color:#526274;font-size:16px;line-height:1.8;">
+<p style="margin:0 0 18px;color:#334155;">
 ${tr.p5}
 </p>
 
-<p style="margin:0 0 24px;color:#526274;font-size:16px;line-height:1.8;">
+<p style="margin:0 0 18px;color:#334155;">
 ${tr.p6}
 </p>
 
-<p style="margin:0 0 24px;color:#526274;font-size:16px;line-height:1.8;">
-<strong style="color:#0a1f44;">
+<p style="margin:0 0 18px;color:#071D3A;font-weight:700;">
 ${tr.p7}
-</strong>
 </p>
 
-<p style="margin:0 0 28px;color:#526274;font-size:16px;line-height:1.8;">
+<p style="margin:0 0 24px;color:#334155;">
 ${tr.p8}
 </p>
 
 <!-- CIERRE -->
-<p style="margin:0 0 8px;color:#0a1f44;font-size:22px;line-height:1.4;font-weight:800;">
-${tr.closingTitle}
-</p>
+<div style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid #071D3A;border-radius:6px;padding:18px 20px;margin:24px 0;">
+  <p style="margin:0 0 4px;color:#071D3A;font-size:16px;font-weight:800;">
+    ${tr.closingTitle}
+  </p>
+  <p style="margin:0;color:#64748B;font-size:14px;">
+    ${tr.closingSubtitle}
+  </p>
+</div>
 
-<p style="margin:0 0 34px;color:#66758a;font-size:16px;line-height:1.7;">
-${tr.closingSubtitle}
-</p>
-
-<!-- FIRMA -->
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top:1px solid #dce3eb;padding-top:24px;">
+<!-- TARJETA DE SOPORTE -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid #C9A84C;border-radius:6px;margin-top:24px;">
 <tr>
-<td>
-<p style="margin:0 0 5px;color:#0a1f44;font-size:16px;font-weight:800;">
-${tr.companyName}
-</p>
-<p style="margin:0 0 22px;color:#a88a3a;font-size:13px;font-weight:700;letter-spacing:.3px;">
-${tr.tagline}
-</p>
-<p style="margin:0 0 8px;color:#66758a;font-size:13px;line-height:1.6;">
-${tr.contactPrompt}
-</p>
-<p style="margin:0;">
-<a href="mailto:distribuidora.varsan@outlook.com" style="color:#0a1f44;font-size:14px;font-weight:700;text-decoration:underline;">
-distribuidora.varsan@outlook.com
-</a>
-</p>
+<td style="padding:16px 20px;">
+  <p style="margin:0 0 4px;color:#071D3A;font-size:14px;font-weight:700;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">¿Necesitas ayuda?</p>
+  <p style="margin:0 0 8px;color:#475569;font-size:13px;line-height:1.5;">Nuestro equipo de soporte está para ayudarte.</p>
+  <p style="margin:0;color:#071D3A;font-size:13px;font-weight:600;">
+    <a href="mailto:distribuidora.varsan@outlook.com" style="color:#071D3A;text-decoration:underline;">distribuidora.varsan@outlook.com</a>
+  </p>
+  <p style="margin:4px 0 0;color:#64748B;font-size:12px;">Teléfono: Próximamente</p>
+</td>
+</tr>
+</table>
+
+<!-- FIRMA INSTITUCIONAL -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top:1px solid #E2E8F0;margin-top:24px;padding-top:20px;">
+<tr>
+<td style="padding-top:20px;">
+  <p style="margin:0 0 4px;color:#071D3A;font-size:15px;font-weight:800;letter-spacing:-0.2px;">
+    ${tr.companyName}
+  </p>
+  <p style="margin:0;color:#C9A84C;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">
+    ${tr.tagline}
+  </p>
 </td>
 </tr>
 </table>
@@ -329,16 +359,19 @@ distribuidora.varsan@outlook.com
 </td>
 </tr>
 
-<!-- PIE DE CORREO -->
+<!-- FOOTER AZUL MARINO -->
 <tr>
-<td style="background:#0a1f44;padding:28px 44px;">
-<p style="margin:0 0 10px;color:#ffffff;font-size:12px;line-height:1.6;">
-${tr.footerNotice}
+<td class="footer-cell" style="background-color:#071D3A;padding:24px 36px;border-top:3px solid #C9A84C;text-align:center;">
+<p style="margin:0 0 6px;color:#CBD5E1;font-size:12px;line-height:1.5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  2026 Distribuidora Var San. Todos los derechos reservados.
+</p>
+<p style="margin:0 0 8px;color:#94A3B8;font-size:11px;line-height:1.4;">
+  ${tr.footerNotice}
 </p>
 <p style="margin:0;">
-<a href="${escapeHtml(params.unsubscribeUrl)}" style="color:#c9a84c;font-size:12px;text-decoration:underline;">
-${tr.unsubscribeLink}
-</a>
+  <a href="${escapeHtml(params.unsubscribeUrl)}" style="color:#C9A84C;font-size:11px;text-decoration:underline;">
+    ${tr.unsubscribeLink}
+  </a>
 </p>
 </td>
 </tr>
@@ -381,11 +414,14 @@ ${tr.closingSubtitle}
 ${tr.companyName}
 ${tr.tagline}
 
-${tr.contactPrompt}
+¿Necesitas ayuda?
 distribuidora.varsan@outlook.com
+Teléfono: Próximamente
 
-${tr.unsubscribeLink}:
-${params.unsubscribeUrl}`;
+${tr.footerNotice}
+${tr.unsubscribeLink}: ${params.unsubscribeUrl}
+
+2026 Distribuidora Var San. Todos los derechos reservados.`;
 
   return { subject: tr.subject, html, text };
 }

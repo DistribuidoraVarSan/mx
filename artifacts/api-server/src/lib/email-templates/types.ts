@@ -100,6 +100,7 @@ export interface ClientWelcomeEmailParams {
   recipientName?: string;
   email?: string;
   company?: string;
+  country?: string;
   portalUrl?: string;
 }
 
