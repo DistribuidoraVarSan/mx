@@ -775,15 +775,28 @@ t.account.errorGeneric
     if (!currentUser) return;
 
     try {
-      if (profile.name.trim()) {
-        await updateProfile(currentUser, { displayName: profile.name.trim() }).catch(() => {});
+      const cleanName = profile.name.trim();
+      const cleanLastName = (profile.lastName || '').trim();
+      const cleanCompany = (profile.company || '').trim();
+      const cleanCountry = (profile.country || 'México').trim();
+      const cleanPhone = (profile.phone || '').trim();
+
+      const fullName = `${cleanName} ${cleanLastName}`.trim();
+      if (fullName) {
+        await updateProfile(currentUser, { displayName: fullName }).catch(() => {});
       }
+
       await setDoc(doc(db, 'users', currentUser.uid), {
-        name: profile.name.trim(),
-        company: (profile.company || '').trim(),
-        email: currentUser.email || profile.email,
+        name: cleanName,
+        lastName: cleanLastName,
+        company: cleanCompany,
+        country: cleanCountry,
+        phone: cleanPhone,
+        email: currentUser.email || profile.email || '',
         preferredLanguage: language,
+        updatedAt: serverTimestamp(),
       }, { merge: true });
+
       setProfileOpen(false);
       setPortalOpen(true);
     } catch (error) {

@@ -56,14 +56,28 @@ export const AccountInfoScreen: React.FC<AccountInfoScreenProps> = ({
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  // Sincronizar estado local si el perfil se actualiza o carga de forma asíncrona
+  // Sincronizar estado local de forma atómica e independiente si el perfil cambia
   useEffect(() => {
-    if (profile.name !== undefined) setName(profile.name || '');
-    if (profile.lastName !== undefined) setLastName(profile.lastName || '');
-    if (profile.phone !== undefined) setPhone(profile.phone || '');
-    if (profile.company !== undefined) setCompany(profile.company || '');
-    if (profile.country !== undefined) setCountry(profile.country || 'México');
-  }, [profile.name, profile.lastName, profile.phone, profile.company, profile.country]);
+    if (typeof profile.name === 'string') setName(profile.name);
+  }, [profile.name]);
+
+  useEffect(() => {
+    if (typeof profile.lastName === 'string') setLastName(profile.lastName);
+  }, [profile.lastName]);
+
+  useEffect(() => {
+    if (typeof profile.phone === 'string') setPhone(profile.phone);
+  }, [profile.phone]);
+
+  useEffect(() => {
+    if (typeof profile.company === 'string') setCompany(profile.company);
+  }, [profile.company]);
+
+  useEffect(() => {
+    if (typeof profile.country === 'string' && profile.country.trim().length > 0) {
+      setCountry(profile.country.trim());
+    }
+  }, [profile.country]);
 
   const displayUsername = profile.username ? `@${profile.username.replace(/^@/, '')}` : (currentUser?.email ? `@${currentUser.email.split('@')[0]}` : '@usuario');
 

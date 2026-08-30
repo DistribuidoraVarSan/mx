@@ -35,7 +35,8 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
       setCustomValue('');
     } else {
       setIsCustom(true);
-      setCustomValue(value === 'Otros' ? '' : value);
+      const isGenericOtros = value.trim() === 'Otros' || value.startsWith('Otros (') || value.toLowerCase().includes('especificar empresa');
+      setCustomValue(isGenericOtros ? '' : value);
     }
   }, [value]);
 

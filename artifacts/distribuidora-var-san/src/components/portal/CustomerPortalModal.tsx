@@ -85,8 +85,12 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
     return 'Buenas noches';
   };
 
-  const displayName = profile.name || currentUser?.displayName || '';
-  const displayGreetingTitle = displayName ? `Hola, ${displayName}` : 'Hola';
+  // 2. Construcción de Saludo utilizando Nombre + Apellido desde users/{uid}
+  const cleanFirstName = typeof profile.name === 'string' ? profile.name.trim() : '';
+  const cleanLastName = typeof profile.lastName === 'string' ? profile.lastName.trim() : '';
+  const fullProfileName = [cleanFirstName, cleanLastName].filter(Boolean).join(' ');
+  const userDisplayName = fullProfileName || (currentUser?.displayName ? currentUser.displayName.trim() : '');
+  const displayGreetingTitle = userDisplayName ? `¡Hola, ${userDisplayName}!` : '¡Hola!';
   const displayGreetingSubtitle = `${getTimeGreeting()}, un gusto tenerte aquí de nuevo.`;
 
   const displayUsername = profile.username
