@@ -13,16 +13,19 @@ import {
   Eye,
   EyeOff,
   KeyRound,
+  MessageSquare,
+  ArrowLeft,
 } from 'lucide-react';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
   updateProfile,
+  signOut,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../../firebase';
-import { getApiBaseUrl } from '../../lib/session-client';
+import { getApiBaseUrl, send2FALoginCode, verify2FALoginCode } from '../../lib/session-client';
 import { OrganizationSelector } from './OrganizationSelector';
 import { PasswordStrengthMeter, isPasswordValid } from './PasswordStrengthMeter';
 import { validateUsernameFormat, checkUsernameAvailability } from './usernameValidator';
@@ -50,7 +53,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onAuthSuccess,
   onRequires2FA,
 }) => {
-  const [tab, setTab] = useState<'login' | 'register' | 'forgot-password'>(initialTab);
+  const [tab, setTab] = useState<'login' | 'register' | 'forgot-password' | '2fa-challenge'>(initialTab);
 
   // Campos de formulario
   const [email, setEmail] = useState('');
@@ -61,6 +64,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [company, setCompany] = useState('');
   const [phone, setPhone] = useState('');
   const [username, setUsername] = useState('');
+
+  // Estados de reto 2FA en login
+  const [pending2FAUser, setPending2FAUser] = useState<any>(null);
+  const [pending2FAUid, setPending2FAUid] = useState('');
+  const [pending2FAMethod, setPending2FAMethod] = useState<'email' | 'sms'>('email');
+  const [pending2FATarget, setPending2FATarget] = useState('');
+  const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [twoFactorCooldown, setTwoFactorCooldown] = useState(0);
 
   // Estados de recuperación de contraseña con código de 6 dígitos
   const [resetStep, setResetStep] = useState<1 | 2>(1);
@@ -88,6 +99,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     | 'phone'
     | 'reset-code'
     | 'reset-password'
+    | 'two-factor-code'
     | null
   >(null);
 
@@ -101,6 +113,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
   const [isSuccessAnim, setIsSuccessAnim] = useState(false);
 
+  // Cooldown de reenvío para 2FA
+  useEffect(() => {
+    if (twoFactorCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setTwoFactorCooldown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [twoFactorCooldown]);
+
   useEffect(() => {
     setTab(initialTab);
     setFeedback(null);
@@ -112,6 +133,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setResetCode('');
     setResetNewPassword('');
     setResetConfirmPassword('');
+    setTwoFactorCode('');
+    setPending2FAUser(null);
+    setPending2FAUid('');
   }, [initialTab, isOpen]);
 
   // Debounce para validación de disponibilidad de username
@@ -241,7 +265,31 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         const credential = await signInWithEmailAndPassword(auth, loginEmail, password);
 
-        // Desencadenar animación de celebración antes de entrar
+        // Comprobar si el usuario tiene autenticación en dos fases activa
+        try {
+          const userDocSnap = await getDoc(doc(db, 'users', credential.user.uid));
+          const twoFactorData = userDocSnap.exists() ? userDocSnap.data()?.twoFactor : null;
+
+          if (twoFactorData?.enabled === true) {
+            setLoading(true);
+            const res2fa = await send2FALoginCode(credential.user.uid, language);
+            if (res2fa.success && res2fa.enabled !== false) {
+              setPending2FAUser(credential.user);
+              setPending2FAUid(credential.user.uid);
+              setPending2FAMethod((twoFactorData.method as 'email' | 'sms') || 'email');
+              setPending2FATarget(res2fa.maskedTarget || (twoFactorData.method === 'sms' ? twoFactorData.phone : credential.user.email) || '');
+              setTab('2fa-challenge');
+              setTwoFactorCode('');
+              setTwoFactorCooldown(30);
+              setLoading(false);
+              return;
+            }
+          }
+        } catch (twoFactorErr) {
+          console.warn('No se pudo verificar 2FA:', twoFactorErr);
+        }
+
+        // Si no tiene 2FA activado, completar inicio de sesión normalmente
         setIsSuccessAnim(true);
 
         setTimeout(() => {
@@ -437,6 +485,65 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
+  // Manejador de verificación de código 2FA en login
+  const handleVerify2FALogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pending2FAUid || twoFactorCode.trim().length !== 6) return;
+    setLoading(true);
+    setFeedback(null);
+    try {
+      const res = await verify2FALoginCode(pending2FAUid, twoFactorCode.trim());
+      if (res.success) {
+        setIsSuccessAnim(true);
+        setTimeout(() => {
+          if (onRequires2FA && pending2FAUser) {
+            onRequires2FA(pending2FAUser);
+          }
+          onAuthSuccess();
+          onClose();
+        }, 550);
+      } else {
+        setFeedback({ type: 'error', message: res.error || 'Código de seguridad incorrecto o expirado.' });
+      }
+    } catch (err) {
+      setFeedback({ type: 'error', message: 'Error de conexión al verificar el código.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Reenviar código 2FA en login
+  const handleResend2FALoginCode = async () => {
+    if (twoFactorCooldown > 0 || !pending2FAUid) return;
+    setLoading(true);
+    setFeedback(null);
+    try {
+      const res = await send2FALoginCode(pending2FAUid, language);
+      if (res.success) {
+        setTwoFactorCooldown(30);
+        setFeedback({ type: 'success', message: 'Nuevo código de verificación enviado.' });
+      } else {
+        setFeedback({ type: 'error', message: res.error || 'No se pudo reenviar el código.' });
+      }
+    } catch (err) {
+      setFeedback({ type: 'error', message: 'Error al reenviar el código de verificación.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Cancelar login 2FA
+  const handleCancel2FALogin = async () => {
+    try {
+      await signOut(auth);
+    } catch {}
+    setPending2FAUser(null);
+    setPending2FAUid('');
+    setTwoFactorCode('');
+    setTab('login');
+    setFeedback(null);
+  };
+
   // Inicio de sesión con Google
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
@@ -547,6 +654,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             ? 'Iniciar sesión'
             : tab === 'register'
             ? 'Crear una cuenta'
+            : tab === '2fa-challenge'
+            ? 'Verificación en dos fases'
             : 'Recuperar contraseña'}
         </h2>
         <p className="modal-intro" style={{ margin: '0 0 16px', fontSize: '0.86rem', color: '#64748b', textAlign: 'center' }}>
@@ -554,11 +663,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             ? 'Accede a tu cuenta para consultar catálogos, pedidos y gestionar tu seguridad.'
             : tab === 'register'
             ? 'Completa tus datos para obtener acceso al portal corporativo de suministros.'
+            : tab === '2fa-challenge'
+            ? `Introduce el código de 6 dígitos enviado mediante ${pending2FAMethod === 'sms' ? 'Mensaje SMS' : 'Correo electrónico'}.`
             : 'Te enviaremos un código de 6 dígitos para restablecer tu contraseña con seguridad.'}
         </p>
 
         {/* Pestañas de Acceso (Solo en login/register) */}
-        {tab !== 'forgot-password' && (
+        {tab !== 'forgot-password' && tab !== '2fa-challenge' && (
           <div className="account-tabs" style={{ marginBottom: 18 }}>
             <button
               type="button"
@@ -1035,8 +1146,94 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         )}
 
+        {/* VISTA 4: RETO DE AUTENTICACIÓN EN DOS FASES EN LOGIN */}
+        {tab === '2fa-challenge' && (
+          <form onSubmit={handleVerify2FALogin} noValidate className="auth-forgot-flow" style={{ marginTop: 6 }}>
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: 14, marginBottom: 18, textAlign: 'center' }}>
+              <p style={{ fontSize: '0.86rem', color: '#475569', margin: 0, lineHeight: 1.5 }}>
+                Hemos enviado un código de 6 dígitos mediante{' '}
+                <strong style={{ color: 'var(--navy)' }}>
+                  {pending2FAMethod === 'sms' ? `Mensaje SMS a ${pending2FATarget}` : `Correo electrónico (${pending2FATarget})`}
+                </strong>.
+              </p>
+            </div>
+
+            <div className="form-field" style={{ marginBottom: 18 }}>
+              <label className="form-label" htmlFor="login-2fa-code" style={{ textAlign: 'center', display: 'block', marginBottom: 8 }}>
+                Código de verificación <span style={{ color: '#b91c1c' }}>*</span>
+              </label>
+              <div style={{ maxWidth: 280, margin: '0 auto' }}>
+                <input
+                  id="login-2fa-code"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  className="form-input"
+                  placeholder="_ _ _ _ _ _"
+                  value={twoFactorCode}
+                  onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  onFocus={() => setFocusedField('two-factor-code')}
+                  onBlur={() => setFocusedField(null)}
+                  required
+                  autoFocus
+                  style={{
+                    textAlign: 'center',
+                    letterSpacing: 8,
+                    fontWeight: 800,
+                    fontSize: '1.25rem',
+                    padding: '12px 14px',
+                  }}
+                  data-testid="input-login-2fa-code"
+                />
+              </div>
+            </div>
+
+            <div style={{ textAlign: 'center', marginBottom: 20 }}>
+              <button
+                type="button"
+                className="btn-link"
+                onClick={handleResend2FALoginCode}
+                disabled={loading || twoFactorCooldown > 0}
+                style={{ fontSize: '0.84rem', color: twoFactorCooldown > 0 ? '#94a3b8' : 'var(--gold)', fontWeight: 600 }}
+              >
+                {twoFactorCooldown > 0
+                  ? `¿No recibiste el código? Reenviar en ${twoFactorCooldown}s`
+                  : '¿No recibiste el código? Reenviar código'}
+              </button>
+            </div>
+
+            <button
+              type="submit"
+              className="button button--navy"
+              style={{ width: '100%', padding: '12px 20px', fontSize: '0.92rem', marginBottom: 14 }}
+              disabled={loading || twoFactorCode.trim().length !== 6}
+              data-testid="button-submit-2fa-login"
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  <span>Verificando...</span>
+                </>
+              ) : (
+                <span>Verificar e iniciar sesión</span>
+              )}
+            </button>
+
+            <div style={{ textAlign: 'center' }}>
+              <button
+                type="button"
+                className="link-button"
+                style={{ fontSize: '0.84rem' }}
+                onClick={handleCancel2FALogin}
+              >
+                ← Cancelar e iniciar con otra cuenta
+              </button>
+            </div>
+          </form>
+        )}
+
         {/* Separador y Google Sign-In (Solo en login/register) */}
-        {tab !== 'forgot-password' && (
+        {tab !== 'forgot-password' && tab !== '2fa-challenge' && (
           <>
             <div className="modal-divider" style={{ margin: '18px 0 14px' }}>
               <span>o</span>

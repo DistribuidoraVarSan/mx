@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Mail, Phone, Globe, Save, Loader2, CheckCircle2 } from 'lucide-react';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
-import type { User as FirebaseUser } from 'firebase/auth';
+import { updateProfile, type User as FirebaseUser } from 'firebase/auth';
+import { OrganizationSelector } from './OrganizationSelector';
 
 interface AccountInfoScreenProps {
   currentUser: FirebaseUser | null;
@@ -55,6 +56,15 @@ export const AccountInfoScreen: React.FC<AccountInfoScreenProps> = ({
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+  // Sincronizar estado local si el perfil se actualiza o carga de forma asíncrona
+  useEffect(() => {
+    if (profile.name !== undefined) setName(profile.name);
+    if (profile.lastName !== undefined) setLastName(profile.lastName);
+    if (profile.phone !== undefined) setPhone(profile.phone);
+    if (profile.company !== undefined) setCompany(profile.company);
+    if (profile.country !== undefined) setCountry(profile.country || 'México');
+  }, [profile]);
+
   const displayUsername = profile.username ? `@${profile.username.replace(/^@/, '')}` : (currentUser?.email ? `@${currentUser.email.split('@')[0]}` : '@usuario');
 
   const handleSave = async (e: React.FormEvent) => {
@@ -73,6 +83,10 @@ export const AccountInfoScreen: React.FC<AccountInfoScreenProps> = ({
         country: country.trim(),
         updatedAt: serverTimestamp(),
       };
+
+      if (name.trim()) {
+        await updateProfile(currentUser, { displayName: name.trim() }).catch(() => {});
+      }
 
       await setDoc(userRef, updateData, { merge: true });
 
@@ -224,19 +238,11 @@ export const AccountInfoScreen: React.FC<AccountInfoScreenProps> = ({
             <span className="form-field-hint">Utilizado para verificación en dos pasos y contacto de pedidos.</span>
           </div>
 
-          {/* Empresa / Institución */}
-          <div className="form-field">
-            <label className="form-label" htmlFor="info-company">
-              Empresa / Institución:
-            </label>
-            <input
-              id="info-company"
-              type="text"
-              className="form-input"
+          {/* Empresa / Institución (Selector categorizado con opción Otros) */}
+          <div style={{ marginBottom: 16 }}>
+            <OrganizationSelector
               value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              placeholder="Empresa, universidad o colegio"
-              data-testid="input-info-company"
+              onChange={(val) => setCompany(val)}
             />
           </div>
 

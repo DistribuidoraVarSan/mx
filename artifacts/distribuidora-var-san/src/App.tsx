@@ -12,7 +12,7 @@ import {
   updateProfile,
   type User as FirebaseUser,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider } from './firebase';
 import { useLanguage } from './i18n/LanguageContext';
 import LanguageSelector from './components/LanguageSelector';
@@ -327,12 +327,20 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
   }, [t]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    let unsubscribeDoc: (() => void) | null = null;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
+
+      if (unsubscribeDoc) {
+        unsubscribeDoc();
+        unsubscribeDoc = null;
+      }
 
       if (!user) {
         setProfile({ name: '', lastName: '', email: '', company: '', phone: '', username: '', country: 'México' });
         setSessions([]);
+        setTwoFactorStatus(null);
         return;
       }
 
@@ -341,42 +349,51 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
         console.warn('No se pudo registrar la sesión del dispositivo:', err);
       });
 
-      try {
-        const profileSnapshot = await getDoc(doc(db, 'users', user.uid));
-        const data = profileSnapshot.exists() ? profileSnapshot.data() : {};
+      // Escucha reactiva en tiempo real del documento users/{uid}
+      const userDocRef = doc(db, 'users', user.uid);
+      unsubscribeDoc = onSnapshot(
+        userDocRef,
+        (snap) => {
+          if (snap.exists()) {
+            const data = snap.data();
+            const rawDisplayName = user.displayName || '';
+            const nameParts = rawDisplayName.trim().split(' ');
+            const fallbackFirstName = nameParts[0] || '';
+            const fallbackLastName = nameParts.slice(1).join(' ');
 
-        const rawDisplayName = user.displayName || '';
-        const nameParts = rawDisplayName.trim().split(' ');
-        const fallbackFirstName = nameParts[0] || '';
-        const fallbackLastName = nameParts.slice(1).join(' ');
+            setProfile({
+              name: typeof data.name === 'string' && data.name.trim().length > 0 ? data.name.trim() : (fallbackFirstName || ''),
+              lastName: typeof data.lastName === 'string' ? data.lastName.trim() : (fallbackLastName || ''),
+              email: (data.email as string) || user.email || '',
+              company: typeof data.company === 'string' ? data.company.trim() : '',
+              phone: typeof data.phone === 'string' ? data.phone.trim() : '',
+              username: (data.username as string) || (user.email ? user.email.split('@')[0] : 'usuario'),
+              country: (data.country as string) || 'México',
+              preferredLanguage: (data.preferredLanguage as string) || language,
+              autoBugReport: data.autoBugReport ?? true,
+              createdAt: data.createdAt,
+            });
 
-        setProfile({
-          name: typeof data.name === 'string' && data.name.trim().length > 0 ? data.name.trim() : (fallbackFirstName || ''),
-          lastName: typeof data.lastName === 'string' ? data.lastName.trim() : (fallbackLastName || ''),
-          email: (data.email as string) || user.email || '',
-          company: typeof data.company === 'string' ? data.company.trim() : '',
-          phone: typeof data.phone === 'string' ? data.phone.trim() : '',
-          username: (data.username as string) || (user.email ? user.email.split('@')[0] : 'usuario'),
-          country: (data.country as string) || 'México',
-          preferredLanguage: (data.preferredLanguage as string) || language,
-          autoBugReport: data.autoBugReport ?? true,
-          createdAt: data.createdAt,
-        });
-      } catch (error) {
-        console.error('Error al cargar el perfil de Firebase:', error);
-        setProfile({
-          name: user.displayName || '',
-          lastName: '',
-          email: user.email || '',
-          company: '',
-          phone: '',
-          username: user.email ? user.email.split('@')[0] : 'usuario',
-          country: 'México',
-        });
-      }
+            if (data.twoFactor) {
+              setTwoFactorStatus({
+                enabled: data.twoFactor.enabled === true,
+                method: data.twoFactor.method || 'email',
+                phone: data.twoFactor.phone || data.phone || '',
+                verifiedAt: data.twoFactor.updatedAt?.toDate?.()?.toISOString?.(),
+              });
+            }
+          }
+        },
+        (error) => {
+          console.warn('Error en snapshot reactivo de perfil:', error);
+        }
+      );
     });
 
-    return unsubscribe;
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeDoc) unsubscribeDoc();
+    };
   }, [language]);
 
   useEffect(() => {
@@ -1958,7 +1975,7 @@ t.account.errorGeneric
                     className="button button--outline"
                     style={{ padding: '6px 12px', fontSize: '0.8rem', color: 'var(--navy)' }}
                     onClick={() => {
-                      navigator.clipboard.writeText(twoFactorSetupData.secretKey);
+                      navigator.clipboard.writeText(twoFactorSetupData.secretKey || '');
                       setCopiedKey(true);
                       setTimeout(() => setCopiedKey(false), 3000);
                     }}
@@ -1980,7 +1997,7 @@ t.account.errorGeneric
                     className="button button--outline"
                     style={{ padding: '4px 10px', fontSize: '0.78rem', color: 'var(--navy)' }}
                     onClick={() => {
-                      const text = twoFactorSetupData.backupCodes.join('\n');
+                      const text = twoFactorSetupData.backupCodes?.join('\n') || '';
                       navigator.clipboard.writeText(text);
                       setCopiedBackup(true);
                       setTimeout(() => setCopiedBackup(false), 3000);
@@ -1994,7 +2011,7 @@ t.account.errorGeneric
                   {t.twoFactor.step3BackupIntro}
                 </p>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 8 }}>
-                  {twoFactorSetupData.backupCodes.map((code, idx) => (
+                  {twoFactorSetupData.backupCodes?.map((code: string, idx: number) => (
                     <div key={idx} style={{ padding: '6px 10px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 6, fontFamily: 'monospace', fontSize: '0.88rem', textAlign: 'center', fontWeight: 600, color: '#334155' }}>
                       {code}
                     </div>

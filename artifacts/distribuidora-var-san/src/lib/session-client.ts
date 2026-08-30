@@ -341,15 +341,10 @@ export async function fetchSecurityActivity(user: FirebaseUser): Promise<Securit
 
 export interface TwoFactorStatus {
   enabled: boolean;
+  method?: "email" | "sms";
+  phone?: string;
   enabledAt?: string;
-  backupCodesRemaining?: number;
-}
-
-export interface TwoFactorSetupData {
-  status: string;
-  secretKey: string;
-  otpauthUri: string;
-  backupCodes: string[];
+  verifiedAt?: string;
 }
 
 /**
@@ -362,7 +357,7 @@ export async function fetch2FAStatus(user: FirebaseUser): Promise<TwoFactorStatu
     const idToken = await user.getIdToken();
     const currentSessionId = getOrCreateSessionId();
 
-    const response = await fetch(`${API_BASE_URL}/auth/2fa/status`, {
+    const response = await fetch(`${getApiBaseUrl()}/auth/2fa/status`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${idToken}`,
@@ -379,47 +374,55 @@ export async function fetch2FAStatus(user: FirebaseUser): Promise<TwoFactorStatu
 }
 
 /**
- * Inicia el proceso de configuración de 2FA obteniendo secreto y códigos de respaldo.
+ * Inicia el proceso de configuración de 2FA enviando un código de 6 dígitos al correo o celular.
  */
-export async function setup2FA(user: FirebaseUser): Promise<TwoFactorSetupData | null> {
-  if (!user) return null;
+export async function request2FASetupCode(
+  user: FirebaseUser,
+  params: { phone: string; method: "email" | "sms"; language?: string },
+): Promise<{ success: boolean; message?: string; error?: string; method?: string; phone?: string }> {
+  if (!user) return { success: false, error: "Usuario no autenticado." };
 
   try {
     const idToken = await user.getIdToken();
     const currentSessionId = getOrCreateSessionId();
 
-    const response = await fetch(`${API_BASE_URL}/auth/2fa/setup`, {
+    const response = await fetch(`${getApiBaseUrl()}/auth/2fa/request-setup-code`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${idToken}`,
         "x-session-id": currentSessionId,
       },
+      body: JSON.stringify(params),
     });
 
-    if (!response.ok) return null;
-    return await response.json();
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { success: false, error: data.message || data.error || "No se pudo solicitar el código de 2FA." };
+    }
+
+    return { success: true, message: data.message, method: data.method, phone: data.phone };
   } catch (error) {
-    console.error("Error al iniciar setup 2FA:", error);
-    return null;
+    console.error("Error al solicitar código 2FA:", error);
+    return { success: false, error: "Error de conexión al solicitar el código." };
   }
 }
 
 /**
- * Confirma la activación de 2FA con el primer código TOTP ingresado por el usuario.
+ * Confirma la activación de 2FA con el código de 6 dígitos recibido por el usuario.
  */
-export async function enable2FA(
+export async function verifyAndEnable2FA(
   user: FirebaseUser,
   code: string,
   language?: string,
-): Promise<{ success: boolean; message?: string; error?: string }> {
+): Promise<{ success: boolean; message?: string; error?: string; twoFactor?: any }> {
   if (!user || !code) return { success: false, error: "Código requerido." };
 
   try {
     const idToken = await user.getIdToken();
     const currentSessionId = getOrCreateSessionId();
 
-    const response = await fetch(`${API_BASE_URL}/auth/2fa/enable`, {
+    const response = await fetch(`${getApiBaseUrl()}/auth/2fa/verify-and-enable`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -434,7 +437,7 @@ export async function enable2FA(
       return { success: false, error: data.error || "No se pudo activar 2FA." };
     }
 
-    return { success: true, message: data.message };
+    return { success: true, message: data.message, twoFactor: data.twoFactor };
   } catch (error) {
     console.error("Error al activar 2FA:", error);
     return { success: false, error: "Error de conexión al activar 2FA." };
@@ -442,50 +445,73 @@ export async function enable2FA(
 }
 
 /**
- * Valida el reto 2FA en el login mediante TOTP, código de respaldo o código de rescate.
+ * Envía el código de seguridad 2FA durante el inicio de sesión.
  */
-export async function verify2FAChallenge(
-  user: FirebaseUser,
-  params: { code?: string; backupCode?: string; rescueCode?: string; language?: string },
-): Promise<{ success: boolean; message?: string; error?: string; remainingAttempts?: number }> {
-  if (!user) return { success: false, error: "Usuario no autenticado." };
-
+export async function send2FALoginCode(
+  uid: string,
+  language?: string,
+): Promise<{ success: boolean; enabled?: boolean; message?: string; error?: string; method?: string; maskedTarget?: string }> {
   try {
-    const idToken = await user.getIdToken();
-    const currentSessionId = getOrCreateSessionId();
-
-    const response = await fetch(`${API_BASE_URL}/auth/2fa/verify`, {
+    const response = await fetch(`${getApiBaseUrl()}/auth/2fa/send-login-code`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`,
-        "x-session-id": currentSessionId,
       },
-      body: JSON.stringify(params),
+      body: JSON.stringify({ uid, language }),
     });
 
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      return {
-        success: false,
-        error: data.error || "Código de verificación inválido.",
-        remainingAttempts: data.remainingAttempts,
-      };
+      return { success: false, error: data.error || "No se pudo enviar el código 2FA." };
     }
 
-    return { success: true, message: data.message };
+    return {
+      success: true,
+      enabled: data.enabled !== false,
+      message: data.message,
+      method: data.method,
+      maskedTarget: data.maskedTarget,
+    };
   } catch (error) {
-    console.error("Error al verificar 2FA:", error);
-    return { success: false, error: "Error de conexión con el servidor de autenticación." };
+    console.error("Error al enviar código 2FA de login:", error);
+    return { success: false, error: "Error de conexión al solicitar código de verificación." };
   }
 }
 
 /**
- * Desactiva 2FA previa validación de código de seguridad.
+ * Valida el código 2FA de 6 dígitos durante el inicio de sesión.
+ */
+export async function verify2FALoginCode(
+  uid: string,
+  code: string,
+): Promise<{ success: boolean; message?: string; error?: string }> {
+  try {
+    const response = await fetch(`${getApiBaseUrl()}/auth/2fa/verify-login-code`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ uid, code }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { success: false, error: data.error || "Código incorrecto o expirado." };
+    }
+
+    return { success: true, message: data.message };
+  } catch (error) {
+    console.error("Error al verificar código 2FA de login:", error);
+    return { success: false, error: "Error de conexión al verificar el código." };
+  }
+}
+
+/**
+ * Desactiva 2FA del usuario autenticado.
  */
 export async function disable2FA(
   user: FirebaseUser,
-  params: { code?: string; backupCode?: string; language?: string },
+  params?: { language?: string },
 ): Promise<{ success: boolean; message?: string; error?: string }> {
   if (!user) return { success: false, error: "Usuario no autenticado." };
 
@@ -493,14 +519,14 @@ export async function disable2FA(
     const idToken = await user.getIdToken();
     const currentSessionId = getOrCreateSessionId();
 
-    const response = await fetch(`${API_BASE_URL}/auth/2fa/disable`, {
+    const response = await fetch(`${getApiBaseUrl()}/auth/2fa/disable`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${idToken}`,
         "x-session-id": currentSessionId,
       },
-      body: JSON.stringify(params),
+      body: JSON.stringify(params || {}),
     });
 
     const data = await response.json().catch(() => ({}));
@@ -513,6 +539,39 @@ export async function disable2FA(
     console.error("Error al desactivar 2FA:", error);
     return { success: false, error: "Error de red al desactivar 2FA." };
   }
+}
+
+export interface TwoFactorSetupData {
+  status?: string;
+  secretKey?: string;
+  otpauthUri?: string;
+  totpUri?: string;
+  backupCodes?: string[];
+  method?: string;
+  phone?: string;
+}
+
+// Aliases para compatibilidad con código existente
+export async function setup2FA(
+  user: FirebaseUser,
+  params?: { phone?: string; method?: "email" | "sms"; language?: string },
+): Promise<any> {
+  return request2FASetupCode(user, {
+    phone: params?.phone || (user as any).phoneNumber || "+525500000000",
+    method: params?.method || "email",
+    language: params?.language,
+  });
+}
+
+export const enable2FA = verifyAndEnable2FA;
+
+export async function verify2FAChallenge(
+  userOrUid: FirebaseUser | string,
+  params?: { code?: string; backupCode?: string; rescueCode?: string; language?: string } | string,
+): Promise<{ success: boolean; message?: string; error?: string; remainingAttempts?: number }> {
+  const uid = typeof userOrUid === "string" ? userOrUid : userOrUid?.uid;
+  const code = typeof params === "string" ? params : (params?.code || params?.backupCode || params?.rescueCode || "");
+  return verify2FALoginCode(uid, code);
 }
 
 /**

@@ -20,7 +20,7 @@ service cloud.firestore {
       let allowedKeys = [
         'name', 'lastName', 'company', 'email', 'phone',
         'username', 'country', 'preferredLanguage', 'autoBugReport',
-        'createdAt', 'updatedAt'
+        'createdAt', 'updatedAt', 'twoFactor', 'status', 'deactivatedAt'
       ];
       let data = request.resource.data;
       return data.keys().hasOnly(allowedKeys)
@@ -33,6 +33,8 @@ service cloud.firestore {
         && (!('country' in data) || (data.country is string && data.country.size() <= 100))
         && (!('autoBugReport' in data) || data.autoBugReport is bool)
         && (!('preferredLanguage' in data) || (data.preferredLanguage is string && isSupportedLanguage(data.preferredLanguage)))
+        && (!('twoFactor' in data) || data.twoFactor is map || data.twoFactor is bool)
+        && (!('status' in data) || data.status is string)
         && (!('createdAt' in data) || data.createdAt is timestamp)
         && (!('updatedAt' in data) || data.updatedAt is timestamp);
     }

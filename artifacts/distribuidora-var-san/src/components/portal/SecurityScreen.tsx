@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, ShieldAlert, KeyRound, QrCode, Loader2, CheckCircle2, Copy, Check } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, Phone, Mail, MessageSquare, Loader2, CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
 import type { User as FirebaseUser } from 'firebase/auth';
 import {
-  setup2FA,
-  enable2FA,
+  request2FASetupCode,
+  verifyAndEnable2FA,
   disable2FA,
   fetch2FAStatus,
-  getApiBaseUrl,
 } from '../../lib/session-client';
 
 interface SecurityScreenProps {
   currentUser: FirebaseUser | null;
   username?: string;
-  twoFactorStatus: { enabled: boolean; method?: string; verifiedAt?: string } | null;
+  twoFactorStatus: { enabled: boolean; method?: string; phone?: string; verifiedAt?: string } | null;
   onStatusChange: (status: any) => void;
   onBack: () => void;
 }
@@ -24,18 +23,18 @@ export const SecurityScreen: React.FC<SecurityScreenProps> = ({
   onStatusChange,
   onBack,
 }) => {
-  const [setupStep, setSetupStep] = useState<'idle' | 'prompt' | 'qr' | 'code' | 'success'>('idle');
-  const [qrUri, setQrUri] = useState('');
-  const [secretKey, setSecretKey] = useState('');
-  const [backupCodes, setBackupCodes] = useState<string[]>([]);
+  // Pasos de pantalla: 'main' (estado inicial), 'configure' (teléfono y método), 'verify' (código 6 dígitos), 'success'
+  const [view, setView] = useState<'main' | 'configure' | 'verify' | 'success'>('main');
+  const [phonePrefix, setPhonePrefix] = useState('+52');
+  const [phoneNumber, setPhoneNumber] = useState(twoFactorStatus?.phone ? twoFactorStatus.phone.replace(/^\+52/, '') : '');
+  const [selectedMethod, setSelectedMethod] = useState<'email' | 'sms'>('email');
   const [verifyCode, setVerifyCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const [copiedKey, setCopiedKey] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   // Modal para desactivar
   const [disableModalOpen, setDisableModalOpen] = useState(false);
-  const [disableCode, setDisableCode] = useState('');
   const [disabling, setDisabling] = useState(false);
 
   const displayUsername = username ? `@${username.replace(/^@/, '')}` : (currentUser?.email ? `@${currentUser.email.split('@')[0]}` : '@usuario');
@@ -46,50 +45,112 @@ export const SecurityScreen: React.FC<SecurityScreenProps> = ({
       fetch2FAStatus(currentUser).then((status) => {
         if (status) {
           onStatusChange(status);
+          if (status.phone) {
+            setPhoneNumber(status.phone.replace(/^\+52/, ''));
+          }
         }
       }).catch(() => {});
     }
   }, [currentUser]);
 
-  const handleStartSetup = async () => {
+  // Cooldown de reenvío
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  const handleStartConfigure = () => {
+    setFeedback(null);
+    setView('configure');
+  };
+
+  const handleRequestCode = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!currentUser) return;
+
+    const fullPhone = `${phonePrefix}${phoneNumber.replace(/\s+/g, '')}`;
+    if (phoneNumber.replace(/\D/g, '').length < 10) {
+      setFeedback({ type: 'error', message: 'Introduce un número celular válido de 10 dígitos.' });
+      return;
+    }
+
     setLoading(true);
     setFeedback(null);
+
     try {
-      const setup = await setup2FA(currentUser);
-      if (setup && (setup.otpauthUri || (setup as any).totpUri)) {
-        setQrUri(setup.otpauthUri || (setup as any).totpUri);
-        setSecretKey(setup.secretKey || '');
-        setBackupCodes(setup.backupCodes || []);
-        setSetupStep('code');
+      const result = await request2FASetupCode(currentUser, {
+        phone: fullPhone,
+        method: selectedMethod,
+      });
+
+      if (result.success) {
+        setView('verify');
+        setVerifyCode('');
+        setResendCooldown(30);
+        setFeedback({ type: 'success', message: result.message || 'Código de verificación enviado.' });
       } else {
-        setFeedback({ type: 'error', message: 'No se pudo iniciar la configuración 2FA. Intenta de nuevo.' });
+        setFeedback({ type: 'error', message: result.error || 'No se pudo enviar el código. Intenta de nuevo.' });
       }
-    } catch (err) {
-      console.error('Error start 2FA setup:', err);
-      setFeedback({ type: 'error', message: 'Error de conexión al configurar 2FA.' });
+    } catch (err: any) {
+      console.error('Error al solicitar código 2FA:', err);
+      setFeedback({ type: 'error', message: 'Error de conexión al solicitar el código.' });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVerify2FA = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentUser || verifyCode.trim().length < 6) return;
+  const handleResendCode = async () => {
+    if (resendCooldown > 0 || !currentUser) return;
+    const fullPhone = `${phonePrefix}${phoneNumber.replace(/\s+/g, '')}`;
     setLoading(true);
     setFeedback(null);
 
     try {
-      const result = await enable2FA(currentUser, verifyCode.trim());
+      const result = await request2FASetupCode(currentUser, {
+        phone: fullPhone,
+        method: selectedMethod,
+      });
+
       if (result.success) {
-        onStatusChange({ enabled: true, method: 'totp', verifiedAt: new Date().toISOString() });
-        setSetupStep('success');
+        setResendCooldown(30);
+        setFeedback({ type: 'success', message: 'Nuevo código enviado exitosamente.' });
       } else {
-        setFeedback({ type: 'error', message: result.error || 'Código 2FA incorrecto. Intenta de nuevo.' });
+        setFeedback({ type: 'error', message: result.error || 'No se pudo reenviar el código.' });
       }
     } catch (err) {
-      console.error('Error verify 2FA:', err);
-      setFeedback({ type: 'error', message: 'Error de red al verificar el código.' });
+      setFeedback({ type: 'error', message: 'Error de red al reenviar el código.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyAndActivate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser || verifyCode.trim().length !== 6) return;
+
+    setLoading(true);
+    setFeedback(null);
+
+    try {
+      const result = await verifyAndEnable2FA(currentUser, verifyCode.trim());
+      if (result.success) {
+        const fullPhone = `${phonePrefix}${phoneNumber.replace(/\s+/g, '')}`;
+        onStatusChange({
+          enabled: true,
+          method: selectedMethod,
+          phone: fullPhone,
+          verifiedAt: new Date().toISOString(),
+        });
+        setView('success');
+      } else {
+        setFeedback({ type: 'error', message: result.error || 'Código incorrecto o expirado.' });
+      }
+    } catch (err) {
+      console.error('Error al verificar código 2FA:', err);
+      setFeedback({ type: 'error', message: 'Error de conexión al verificar el código.' });
     } finally {
       setLoading(false);
     }
@@ -99,53 +160,45 @@ export const SecurityScreen: React.FC<SecurityScreenProps> = ({
     if (!currentUser) return;
     setDisabling(true);
     try {
-      const result = await disable2FA(currentUser, { code: disableCode.trim() });
+      const result = await disable2FA(currentUser);
       if (result.success) {
         onStatusChange({ enabled: false });
         setDisableModalOpen(false);
-        setDisableCode('');
+        setView('main');
         setFeedback({ type: 'success', message: 'La autenticación en dos fases ha sido desactivada.' });
       } else {
         setFeedback({ type: 'error', message: result.error || 'No se pudo desactivar 2FA.' });
       }
     } catch (err) {
-      console.error('Error disable 2FA:', err);
+      console.error('Error al desactivar 2FA:', err);
       setFeedback({ type: 'error', message: 'Error al desactivar 2FA.' });
     } finally {
       setDisabling(false);
     }
   };
 
-  const handleCopySecret = () => {
-    if (!secretKey) return;
-    navigator.clipboard.writeText(secretKey);
-    setCopiedKey(true);
-    setTimeout(() => setCopiedKey(false), 2000);
-  };
-
   return (
     <div className="subscreen-container">
+      {/* Encabezado */}
       <div className="subscreen-header">
         <button
           type="button"
           className="subscreen-back-btn"
-          onClick={onBack}
-          aria-label="Regresar a configuración"
+          onClick={view === 'main' ? onBack : () => setView('main')}
+          aria-label="Regresar"
           data-testid="button-back-security"
         >
           ←
         </button>
         <div className="subscreen-title-wrap">
-          <h2 className="subscreen-title">Seguridad</h2>
+          <h2 className="subscreen-title">
+            {view === 'configure' ? 'Configurar autenticación en dos fases' : view === 'verify' ? 'Verifica tu identidad' : 'Seguridad'}
+          </h2>
           <span className="subscreen-subtitle">{displayUsername}</span>
         </div>
       </div>
 
       <div className="subscreen-body">
-        <p className="subscreen-intro">
-          Administra la seguridad de tu cuenta y los métodos de autenticación adicionales.
-        </p>
-
         {feedback && (
           <div
             className={`account-message account-message--${feedback.type === 'success' ? 'success' : 'warning'}`}
@@ -153,158 +206,344 @@ export const SecurityScreen: React.FC<SecurityScreenProps> = ({
             aria-live="polite"
             style={{ marginBottom: 16 }}
           >
-            {feedback.type === 'success' ? <CheckCircle2 size={15} /> : <ShieldAlert size={15} />}
+            {feedback.type === 'success' ? <CheckCircle2 size={15} /> : <AlertCircle size={15} />}
             <span>{feedback.message}</span>
           </div>
         )}
 
-        {/* Tarjeta de Autenticación en dos fases */}
-        <div className="two-factor-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 10, padding: 22, marginBottom: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 14 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <ShieldCheck size={24} style={{ color: twoFactorStatus?.enabled ? '#166534' : 'var(--gold)' }} />
-              <div>
-                <h3 style={{ margin: 0, color: 'var(--navy)', fontSize: '1.02rem', fontWeight: 700 }}>
-                  Autenticación en dos fases
-                </h3>
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    padding: '2px 8px',
-                    borderRadius: 9999,
-                    background: twoFactorStatus?.enabled ? '#dcfce7' : '#fef3c7',
-                    color: twoFactorStatus?.enabled ? '#15803d' : '#b45309',
-                    display: 'inline-block',
-                    marginTop: 3,
-                  }}
-                >
-                  {twoFactorStatus?.enabled ? 'ACTIVADA' : 'DESACTIVADA'}
-                </span>
-              </div>
-            </div>
+        {/* ============================================================ */}
+        {/* VISTA 1: PRINCIPAL DE SEGURIDAD (ESTADO ACTIVADA / DESACTIVADA) */}
+        {/* ============================================================ */}
+        {view === 'main' && (
+          <div>
+            <p className="subscreen-intro" style={{ marginBottom: 20 }}>
+              Protege tu cuenta del acceso no autorizado utilizando un segundo método de autenticación además de tu contraseña.
+            </p>
 
-            <div>
-              {twoFactorStatus?.enabled ? (
-                <button
-                  type="button"
-                  className="button button--outline"
-                  style={{ color: '#b91c1c', borderColor: '#fca5a5', fontSize: '0.82rem', padding: '6px 14px' }}
-                  onClick={() => setDisableModalOpen(true)}
-                  data-testid="button-open-disable-2fa"
-                >
-                  Desactivar 2FA
-                </button>
-              ) : (
-                setupStep === 'idle' && (
-                  <button
-                    type="button"
-                    className="button button--navy"
-                    style={{ fontSize: '0.84rem', padding: '7px 16px' }}
-                    onClick={handleStartSetup}
-                    disabled={loading}
-                    data-testid="button-start-2fa"
-                  >
-                    {loading ? <Loader2 size={14} className="animate-spin" /> : <QrCode size={14} />}
-                    <span>Activar 2FA</span>
-                  </button>
-                )
-              )}
-            </div>
-          </div>
-
-          <p style={{ margin: 0, fontSize: '0.86rem', color: '#475569', lineHeight: 1.6 }}>
-            Protege tu cuenta del acceso no autorizado utilizando un segundo método de autenticación, además de tu contraseña de Var San. Puedes elegir entre una app de autenticación (Google Authenticator, Microsoft Authenticator) o un código de seguridad.
-          </p>
-
-          {/* PASO DE CONFIGURACIÓN 2FA */}
-          {setupStep === 'code' && (
-            <div className="two-factor-setup-flow animate-fade-in" style={{ marginTop: 20, paddingTop: 18, borderTop: '1px solid #e2e8f0' }}>
-              <strong style={{ color: 'var(--navy)', display: 'block', marginBottom: 8, fontSize: '0.92rem' }}>
-                Configura tu aplicación de autenticación:
-              </strong>
-              <p style={{ fontSize: '0.84rem', color: '#64748b', marginBottom: 14 }}>
-                1. Escanea el código o introduce la siguiente clave secreta en tu aplicación (Google Authenticator, Authy o Microsoft Authenticator):
-              </p>
-
-              {secretKey && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f8fafc', border: '1px solid #cbd5e1', padding: '10px 14px', borderRadius: 6, marginBottom: 16 }}>
-                  <code style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '0.92rem', color: 'var(--navy)', letterSpacing: 2 }}>
-                    {secretKey}
-                  </code>
-                  <button
-                    type="button"
-                    className="button button--outline"
-                    style={{ padding: '4px 10px', fontSize: '0.76rem', marginLeft: 'auto' }}
-                    onClick={handleCopySecret}
-                  >
-                    {copiedKey ? <Check size={12} /> : <Copy size={12} />}
-                    <span>{copiedKey ? 'Copiada' : 'Copiar'}</span>
-                  </button>
+            <div className="two-factor-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 10, padding: 22, marginBottom: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <ShieldCheck size={26} style={{ color: twoFactorStatus?.enabled ? '#166534' : 'var(--gold)' }} />
+                  <div>
+                    <h3 style={{ margin: 0, color: 'var(--navy)', fontSize: '1.05rem', fontWeight: 700 }}>
+                      Autenticación en dos fases
+                    </h3>
+                    <span
+                      style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        padding: '2px 8px',
+                        borderRadius: 9999,
+                        background: twoFactorStatus?.enabled ? '#dcfce7' : '#fef3c7',
+                        color: twoFactorStatus?.enabled ? '#15803d' : '#b45309',
+                        display: 'inline-block',
+                        marginTop: 4,
+                      }}
+                    >
+                      {twoFactorStatus?.enabled ? 'ACTIVADA' : 'DESACTIVADA'}
+                    </span>
+                  </div>
                 </div>
-              )}
 
-              <form onSubmit={handleVerify2FA}>
-                <label className="form-label" htmlFor="two-factor-code" style={{ marginBottom: 6, display: 'block' }}>
-                  2. Introduce el código de 6 dígitos que muestra tu app:
-                </label>
-                <div style={{ display: 'flex', gap: 10, maxWidth: 320 }}>
-                  <input
-                    id="two-factor-code"
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={8}
-                    className="form-input"
-                    placeholder="000 000"
-                    value={verifyCode}
-                    onChange={(e) => setVerifyCode(e.target.value.replace(/[^0-9]/g, ''))}
-                    style={{ textAlign: 'center', letterSpacing: 4, fontWeight: 700 }}
-                    required
-                    autoFocus
-                    data-testid="input-2fa-verify-code"
-                  />
-                  <button
-                    type="submit"
-                    className="button button--navy"
-                    disabled={loading || verifyCode.trim().length < 6}
-                    data-testid="button-submit-2fa-verify"
-                  >
-                    {loading ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-                    <span>Confirmar</span>
-                  </button>
+                <div>
+                  {twoFactorStatus?.enabled ? (
+                    <button
+                      type="button"
+                      className="button button--outline"
+                      style={{ color: '#b91c1c', borderColor: '#fca5a5', fontSize: '0.84rem', padding: '6px 14px' }}
+                      onClick={() => setDisableModalOpen(true)}
+                      data-testid="button-open-disable-2fa"
+                    >
+                      Desactivar 2FA
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="button button--navy"
+                      style={{ fontSize: '0.86rem', padding: '8px 18px' }}
+                      onClick={handleStartConfigure}
+                      data-testid="button-start-2fa"
+                    >
+                      <span>Activar autenticación en dos fases</span>
+                    </button>
+                  )}
                 </div>
-              </form>
-            </div>
-          )}
-
-          {/* ÉXITO DE ACTIVACIÓN */}
-          {setupStep === 'success' && (
-            <div className="two-factor-success-box animate-fade-in" style={{ marginTop: 20, paddingTop: 18, borderTop: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#15803d', marginBottom: 10 }}>
-                <CheckCircle2 size={20} />
-                <strong style={{ fontSize: '0.95rem' }}>La autenticación en dos fases está activada.</strong>
               </div>
-              <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.5, marginBottom: 14 }}>
-                A partir de ahora, cada vez que inicies sesión en un nuevo dispositivo, se te solicitará un código de tu aplicación de autenticación.
-              </p>
 
-              {backupCodes.length > 0 && (
-                <div style={{ background: '#f8fafc', padding: 14, borderRadius: 6, border: '1px solid #e2e8f0' }}>
-                  <strong style={{ fontSize: '0.82rem', color: 'var(--navy)', display: 'block', marginBottom: 6 }}>
-                    Guarda tus códigos de respaldo de emergencia:
-                  </strong>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontFamily: 'monospace', fontSize: '0.84rem' }}>
-                    {backupCodes.map((c, i) => (
-                      <div key={i} style={{ background: '#ffffff', padding: '4px 8px', borderRadius: 4, border: '1px solid #cbd5e1' }}>
-                        {c}
+              {twoFactorStatus?.enabled && (
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: 14, marginTop: 12 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: '0.84rem' }}>
+                    <div>
+                      <span style={{ color: '#64748b', display: 'block', fontSize: '0.74rem', textTransform: 'uppercase', fontWeight: 600 }}>Método</span>
+                      <strong style={{ color: 'var(--navy)' }}>
+                        {twoFactorStatus.method === 'sms' ? 'Mensaje SMS' : 'Correo electrónico'}
+                      </strong>
+                    </div>
+                    {twoFactorStatus.phone && (
+                      <div>
+                        <span style={{ color: '#64748b', display: 'block', fontSize: '0.74rem', textTransform: 'uppercase', fontWeight: 600 }}>Número</span>
+                        <strong style={{ color: 'var(--navy)' }}>{twoFactorStatus.phone}</strong>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
               )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* ============================================================ */}
+        {/* VISTA 2: CONFIGURAR 2FA (TELÉFONO + MÉTODO DE VERIFICACIÓN) */}
+        {/* ============================================================ */}
+        {view === 'configure' && (
+          <form onSubmit={handleRequestCode} className="animate-fade-in">
+            <p className="subscreen-intro" style={{ marginBottom: 18 }}>
+              Agrega un número celular para proteger tu cuenta.
+            </p>
+
+            {/* Número celular con selector de país */}
+            <div className="form-field" style={{ marginBottom: 20 }}>
+              <label className="form-label" htmlFor="2fa-phone">
+                Número celular <span style={{ color: '#b91c1c' }}>*</span>
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr', gap: 10 }}>
+                <select
+                  className="form-select"
+                  value={phonePrefix}
+                  onChange={(e) => setPhonePrefix(e.target.value)}
+                  style={{ fontWeight: 600 }}
+                >
+                  <option value="+52">+52 (MX)</option>
+                  <option value="+1">+1 (US/CA)</option>
+                  <option value="+34">+34 (ES)</option>
+                  <option value="+57">+57 (CO)</option>
+                  <option value="+54">+54 (AR)</option>
+                  <option value="+56">+56 (CL)</option>
+                  <option value="+51">+51 (PE)</option>
+                </select>
+                <div className="input-with-icon">
+                  <Phone size={15} className="input-icon" />
+                  <input
+                    id="2fa-phone"
+                    type="tel"
+                    className="form-input"
+                    placeholder="55 1234 5678"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    required
+                    autoFocus
+                    data-testid="input-2fa-phone"
+                  />
+                </div>
+              </div>
+              <span className="form-field-hint">Introduce tus 10 dígitos sin espacios ni guiones.</span>
+            </div>
+
+            {/* Selector de método: Correo electrónico o Mensaje SMS */}
+            <div className="form-field" style={{ marginBottom: 24 }}>
+              <label className="form-label" style={{ marginBottom: 10, display: 'block' }}>
+                ¿Cómo quieres recibir tu código de seguridad?
+              </label>
+
+              <div style={{ display: 'grid', gap: 12 }}>
+                {/* Opción 1: Correo electrónico */}
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 12,
+                    padding: 14,
+                    borderRadius: 8,
+                    border: `1.5px solid ${selectedMethod === 'email' ? 'var(--gold)' : '#e2e8f0'}`,
+                    background: selectedMethod === 'email' ? '#fffdf7' : '#ffffff',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="2fa-method"
+                    value="email"
+                    checked={selectedMethod === 'email'}
+                    onChange={() => setSelectedMethod('email')}
+                    style={{ marginTop: 3 }}
+                  />
+                  <div>
+                    <strong style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--navy)', fontSize: '0.92rem' }}>
+                      <Mail size={15} /> Correo electrónico
+                    </strong>
+                    <span style={{ fontSize: '0.82rem', color: '#64748b', display: 'block', marginTop: 2 }}>
+                      Recibir un código de 6 dígitos en tu correo electrónico registrado ({currentUser?.email || 'asociado a la cuenta'}).
+                    </span>
+                  </div>
+                </label>
+
+                {/* Opción 2: Mensaje SMS */}
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 12,
+                    padding: 14,
+                    borderRadius: 8,
+                    border: `1.5px solid ${selectedMethod === 'sms' ? 'var(--gold)' : '#e2e8f0'}`,
+                    background: selectedMethod === 'sms' ? '#fffdf7' : '#ffffff',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="2fa-method"
+                    value="sms"
+                    checked={selectedMethod === 'sms'}
+                    onChange={() => setSelectedMethod('sms')}
+                    style={{ marginTop: 3 }}
+                  />
+                  <div>
+                    <strong style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--navy)', fontSize: '0.92rem' }}>
+                      <MessageSquare size={15} /> Mensaje SMS
+                    </strong>
+                    <span style={{ fontSize: '0.82rem', color: '#64748b', display: 'block', marginTop: 2 }}>
+                      Recibir un código de 6 dígitos en tu número celular vía SMS.
+                    </span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              <button
+                type="button"
+                className="button button--outline"
+                onClick={() => setView('main')}
+                disabled={loading}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="button button--navy"
+                disabled={loading || phoneNumber.replace(/\D/g, '').length < 10}
+                data-testid="button-request-2fa-code"
+              >
+                {loading ? <Loader2 size={15} className="animate-spin" /> : null}
+                <span>Continuar</span>
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* ============================================================ */}
+        {/* VISTA 3: INTRODUCCIÓN Y VERIFICACIÓN DEL CÓDIGO DE 6 DÍGITOS */}
+        {/* ============================================================ */}
+        {view === 'verify' && (
+          <form onSubmit={handleVerifyAndActivate} className="animate-fade-in">
+            <p className="subscreen-intro" style={{ marginBottom: 18 }}>
+              Hemos enviado un código de 6 dígitos mediante:{' '}
+              <strong style={{ color: 'var(--navy)' }}>
+                {selectedMethod === 'sms' ? `Mensaje SMS a ${phonePrefix} ${phoneNumber}` : `Correo electrónico (${currentUser?.email})`}
+              </strong>.
+            </p>
+
+            <div className="form-field" style={{ marginBottom: 20 }}>
+              <label className="form-label" htmlFor="verify-2fa-code" style={{ textAlign: 'center', display: 'block', marginBottom: 8 }}>
+                Código de verificación
+              </label>
+              <div style={{ maxWidth: 280, margin: '0 auto' }}>
+                <input
+                  id="verify-2fa-code"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  className="form-input"
+                  placeholder="_ _ _ _ _ _"
+                  value={verifyCode}
+                  onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  style={{
+                    textAlign: 'center',
+                    letterSpacing: 8,
+                    fontWeight: 800,
+                    fontSize: '1.25rem',
+                    padding: '12px 14px',
+                  }}
+                  required
+                  autoFocus
+                  data-testid="input-verify-2fa-code"
+                />
+              </div>
+            </div>
+
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+              <button
+                type="button"
+                className="btn-link"
+                onClick={handleResendCode}
+                disabled={loading || resendCooldown > 0}
+                style={{ fontSize: '0.84rem', color: resendCooldown > 0 ? '#94a3b8' : 'var(--gold)', fontWeight: 600 }}
+              >
+                {resendCooldown > 0
+                  ? `¿No recibiste el código? Reenviar en ${resendCooldown}s`
+                  : '¿No recibiste el código? Reenviar código'}
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button
+                type="button"
+                className="button button--outline"
+                onClick={() => setView('configure')}
+                disabled={loading}
+              >
+                <ArrowLeft size={14} /> Regresar
+              </button>
+              <button
+                type="submit"
+                className="button button--navy"
+                disabled={loading || verifyCode.trim().length !== 6}
+                data-testid="button-verify-2fa"
+              >
+                {loading ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
+                <span>Verificar</span>
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* ============================================================ */}
+        {/* VISTA 4: ÉXITO DE ACTIVACIÓN */}
+        {/* ============================================================ */}
+        {view === 'success' && (
+          <div className="animate-fade-in" style={{ textAlign: 'center', padding: '16px 0' }}>
+            <div style={{ display: 'inline-flex', padding: 14, background: '#dcfce7', borderRadius: '50%', color: '#16a34a', marginBottom: 14 }}>
+              <CheckCircle2 size={36} />
+            </div>
+            <h3 style={{ color: 'var(--navy)', fontSize: '1.2rem', fontWeight: 800, margin: '0 0 6px' }}>
+              Autenticación en dos fases ACTIVADA
+            </h3>
+            <p style={{ fontSize: '0.86rem', color: '#64748b', lineHeight: 1.5, maxWidth: 380, margin: '0 auto 20px' }}>
+              Tu cuenta ahora cuenta con una capa de seguridad reforzada. Se te solicitará un código de 6 dígitos cada vez que inicies sesión.
+            </p>
+
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: 14, maxWidth: 360, margin: '0 auto 24px', textAlign: 'left' }}>
+              <div style={{ fontSize: '0.84rem', marginBottom: 6 }}>
+                <span style={{ color: '#64748b' }}>Método: </span>
+                <strong style={{ color: 'var(--navy)' }}>{selectedMethod === 'sms' ? 'Mensaje SMS' : 'Correo electrónico'}</strong>
+              </div>
+              <div style={{ fontSize: '0.84rem' }}>
+                <span style={{ color: '#64748b' }}>Número: </span>
+                <strong style={{ color: 'var(--navy)' }}>{phonePrefix} {phoneNumber}</strong>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="button button--navy"
+              onClick={() => setView('main')}
+              style={{ minWidth: 160 }}
+            >
+              Listo
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Modal Desactivar 2FA */}
@@ -315,7 +554,7 @@ export const SecurityScreen: React.FC<SecurityScreenProps> = ({
               Desactivar autenticación en dos fases
             </h3>
             <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.5, marginBottom: 18 }}>
-              Al desactivar 2FA, tu cuenta solo estará protegida por tu contraseña. ¿Deseas continuar?
+              Al desactivar la autenticación en dos fases, tu cuenta solo estará protegida por tu contraseña. ¿Estás seguro de que deseas desactivarla?
             </p>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
               <button

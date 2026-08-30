@@ -1,19 +1,10 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import crypto from "crypto";
 import { z } from "zod";
 import { adminDb } from "../lib/firebase-admin";
 import { requireAuth } from "../middlewares/auth";
 import { strictActionRateLimit, authRateLimit } from "../middlewares/rate-limit";
 import { sendEmail, EMAIL_SENDERS } from "../lib/mailer";
-import {
-  generateTotpSecret,
-  generateOtpauthUri,
-  generateBackupCodes,
-  hashSecurityCode,
-  verifyTotp,
-  encryptTotpSecret,
-  decryptTotpSecret,
-  generateRescueCode,
-} from "../lib/totp";
 import {
   buildVerificationCodeEmail,
   buildSecurityAlertEmail,
@@ -21,62 +12,54 @@ import {
 } from "../lib/email-templates";
 import { recordSecurityActivity } from "../lib/security-activity";
 import { logger } from "../lib/logger";
+import {
+  getTwilioVerifyConfig,
+  sendTwilioVerification,
+  checkTwilioVerification,
+} from "../lib/twilio-verify";
 
 const router: IRouter = Router();
 
-const Enable2FASchema = z.object({
-  code: z.string().trim().optional(),
-  token: z.string().trim().optional(),
-  language: z.string().optional(),
-}).transform((d) => ({
-  code: (d.code || d.token || '').trim(),
-  language: d.language,
-})).refine((data) => data.code.length >= 6 && data.code.length <= 8, {
-  message: "Código de verificación requerido (6 dígitos).",
-});
+// Helper para generar hash SHA-256 seguro de un código numérico
+function hashSecurityCode(code: string, salt: string): string {
+  return crypto.createHash("sha256").update(`${salt}:${code}`).digest("hex");
+}
 
-const Verify2FASchema = z.object({
-  code: z.string().trim().optional(),
-  token: z.string().trim().optional(),
-  backupCode: z.string().trim().optional(),
-  rescueCode: z.string().trim().optional(),
-  language: z.string().optional(),
-}).transform((d) => ({
-  code: d.code || d.token,
-  backupCode: d.backupCode,
-  rescueCode: d.rescueCode,
-  language: d.language,
-})).refine((data) => data.code || data.backupCode || data.rescueCode, {
-  message: "Debes proporcionar un código TOTP, un código de respaldo o un código de rescate.",
-});
+// Normaliza un número telefónico (e.g. +52 55 1234 5678 -> +525512345678)
+function normalizePhoneNumber(rawPhone: string): string {
+  const trimmed = rawPhone.trim();
+  const digitsOnly = trimmed.replace(/\D/g, "");
+  if (trimmed.startsWith("+")) {
+    return `+${digitsOnly}`;
+  }
+  if (digitsOnly.length === 10) {
+    return `+52${digitsOnly}`;
+  }
+  return `+${digitsOnly}`;
+}
 
-const Disable2FASchema = z.object({
-  code: z.string().trim().optional(),
-  token: z.string().trim().optional(),
-  backupCode: z.string().trim().optional(),
-  language: z.string().optional(),
-}).transform((d) => ({
-  code: d.code || d.token,
-  backupCode: d.backupCode,
-  language: d.language,
-})).refine((data) => data.code || data.backupCode, {
-  message: "Debes proporcionar tu código 2FA actual o un código de respaldo para desactivar.",
-});
+// Oculta caracteres sensibles para mostrar en la interfaz (e.g. m***@ejemplo.com o +52 *** *** 5678)
+function maskIdentifier(target: string, isPhone = false): string {
+  if (!target) return "";
+  if (isPhone) {
+    const clean = target.replace(/\s+/g, "");
+    if (clean.length <= 4) return clean;
+    return `${clean.slice(0, 3)} *** *** ${clean.slice(-4)}`;
+  }
+  const [user, domain] = target.split("@");
+  if (!domain) return target;
+  const maskedUser = user.length <= 2 ? `${user[0]}*` : `${user[0]}${"*".repeat(Math.min(user.length - 2, 5))}${user.slice(-1)}`;
+  return `${maskedUser}@${domain}`;
+}
 
-const RequestRescueSchema = z.object({
-  language: z.string().optional(),
-});
-
-/**
- * Consulta la información de perfil del usuario en Firestore (nombre real y preferencia de idioma).
- */
-async function fetchUserData(uid: string): Promise<{ name?: string; preferredLanguage?: string }> {
+async function fetchUserData(uid: string): Promise<{ name?: string; email?: string; preferredLanguage?: string }> {
   try {
     const doc = await adminDb.collection("users").doc(uid).get();
     if (doc.exists) {
       const data = doc.data();
       return {
         name: typeof data?.name === "string" && data.name.trim().length > 0 ? data.name.trim() : undefined,
+        email: typeof data?.email === "string" ? data.email.trim() : undefined,
         preferredLanguage: typeof data?.preferredLanguage === "string" ? data.preferredLanguage : undefined,
       };
     }
@@ -87,9 +70,8 @@ async function fetchUserData(uid: string): Promise<{ name?: string; preferredLan
 }
 
 /**
- * GET /api/auth/2fa/status
- * Consulta el estado actual de 2FA para el usuario autenticado.
- * IMPORTANTE: NUNCA devuelve secretos, claves ni códigos en texto plano.
+ * GET /api/auth/2fa/status (y /api/auth/two-factor/status)
+ * Consulta el estado actual de 2FA del usuario autenticado.
  */
 router.get(
   ["/auth/2fa/status", "/auth/two-factor/status"],
@@ -98,29 +80,23 @@ router.get(
     const uid = req.user!.uid;
 
     try {
-      const secDoc = await adminDb
-        .collection("users")
-        .doc(uid)
-        .collection("security")
-        .doc("2fa")
-        .get();
+      // Consultar documento de seguridad 2fa y doc principal users
+      const secDoc = await adminDb.collection("users").doc(uid).collection("security").doc("2fa").get();
+      const userDoc = await adminDb.collection("users").doc(uid).get();
 
-      if (!secDoc.exists) {
-        res.status(200).json({
-          enabled: false,
-        });
-        return;
-      }
+      const secData = secDoc.exists ? secDoc.data() : null;
+      const userData = userDoc.exists ? userDoc.data() : null;
 
-      const data = secDoc.data();
-      const enabled = data?.enabled === true;
-      const enabledAt = (data?.enabledAt as string) || undefined;
-      const backupCodesRemaining = Array.isArray(data?.backupCodes) ? data.backupCodes.length : 0;
+      const enabled = secData?.enabled === true || userData?.twoFactor?.enabled === true;
+      const method = secData?.method || userData?.twoFactor?.method || "email";
+      const phone = secData?.phone || userData?.twoFactor?.phone || userData?.phone || "";
+      const enabledAt = secData?.enabledAt || userData?.twoFactor?.updatedAt?.toDate?.()?.toISOString?.() || undefined;
 
       res.status(200).json({
         enabled,
+        method,
+        phone,
         enabledAt,
-        backupCodesRemaining,
       });
     } catch (err) {
       logger.error({ err, uid }, "Error al consultar estado de 2FA");
@@ -129,536 +105,111 @@ router.get(
   },
 );
 
+const RequestSetupCodeSchema = z.object({
+  phone: z.string().min(8, "Número celular requerido (mínimo 8 dígitos)."),
+  method: z.enum(["email", "sms"]).default("email"),
+  language: z.string().optional(),
+});
+
 /**
- * POST /api/auth/2fa/setup (y /api/auth/two-factor/setup)
- * Inicia el proceso de configuración de 2FA generando secreto temporal y códigos de respaldo.
- * ÚNICA vez que se retornan los códigos y el secreto para que el usuario los guarde y configure su app.
+ * POST /api/auth/2fa/request-setup-code (y /api/auth/2fa/setup)
+ * Inicia la activación de 2FA enviando un código de verificación al método elegido.
  */
 router.post(
-  ["/auth/2fa/setup", "/auth/two-factor/setup"],
+  ["/auth/2fa/request-setup-code", "/auth/two-factor/request-setup-code", "/auth/2fa/setup", "/auth/two-factor/setup"],
   strictActionRateLimit,
   requireAuth,
   async (req: Request, res: Response) => {
-    const uid = req.user!.uid;
-    const email = req.user!.email;
-
-    try {
-      const secretBase32 = generateTotpSecret();
-      const otpauthUri = generateOtpauthUri(email || "cliente", secretBase32);
-      const backupCodes = generateBackupCodes(8);
-
-      const encryptedSecret = encryptTotpSecret(secretBase32);
-      const hashedBackupCodes = backupCodes.map((code) => hashSecurityCode(code, uid));
-
-      const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 min
-
-      // Guardamos la configuración temporal pendiente de confirmación
-      await adminDb
-        .collection("users")
-        .doc(uid)
-        .collection("security")
-        .doc("2fa_setup")
-        .set({
-          encryptedSecret,
-          hashedBackupCodes,
-          expiresAt,
-          createdAt: new Date().toISOString(),
-        });
-
-      res.status(200).json({
-        status: "ok",
-        secretKey: secretBase32,
-        otpauthUri,
-        totpUri: otpauthUri,
-        backupCodes,
-      });
-    } catch (err) {
-      logger.error({ err, uid }, "Error al iniciar configuración de 2FA");
-      res.status(500).json({ error: "No se pudo generar la configuración de 2FA." });
-    }
-  },
-);
-
-/**
- * POST /api/auth/2fa/enable
- * Confirma y activa permanentemente 2FA tras verificar el primer código OTP.
- */
-router.post(
-  ["/auth/2fa/enable", "/auth/two-factor/enable"],
-  strictActionRateLimit,
-  requireAuth,
-  async (req: Request, res: Response) => {
-    const parseResult = Enable2FASchema.safeParse(req.body);
+    const parseResult = RequestSetupCodeSchema.safeParse(req.body);
     if (!parseResult.success) {
-      res.status(400).json({ error: "Código de verificación de 6 dígitos requerido." });
+      const err = parseResult.error.errors[0]?.message || "Datos de teléfono inválidos.";
+      res.status(400).json({ error: err });
       return;
     }
 
     const uid = req.user!.uid;
-    const email = req.user!.email;
-    const { code, language: reqLang } = parseResult.data;
+    const userEmail = req.user!.email;
+    const { phone: rawPhone, method, language: reqLang } = parseResult.data;
+    const phone = normalizePhoneNumber(rawPhone);
 
-    try {
-      const setupDocRef = adminDb
-        .collection("users")
-        .doc(uid)
-        .collection("security")
-        .doc("2fa_setup");
-
-      const setupDoc = await setupDocRef.get();
-      if (!setupDoc.exists) {
-        res.status(400).json({
-          error: "No hay una configuración de 2FA pendiente o ya expiró. Por favor genera una nueva.",
+    // ==========================================
+    // MÉTODO 1: MENSAJE SMS CON TWILIO VERIFY
+    // ==========================================
+    if (method === "sms") {
+      const twilioConfig = getTwilioVerifyConfig();
+      if (!twilioConfig) {
+        res.status(503).json({
+          error: "SMS_PROVIDER_NOT_CONFIGURED",
+          message: "El servicio de mensajes SMS no está configurado en el servidor. Por favor selecciona la opción de verificación por Correo electrónico.",
         });
         return;
       }
 
-      const setupData = setupDoc.data()!;
-      const expiresAtMs = new Date(setupData.expiresAt).getTime();
-      if (Date.now() > expiresAtMs) {
-        await setupDocRef.delete();
-        res.status(400).json({
-          error: "La sesión de configuración de 2FA ha expirado. Por favor inicia el proceso nuevamente.",
-        });
-        return;
-      }
-
-      const secretBase32 = decryptTotpSecret(setupData.encryptedSecret);
-      const verifyResult = verifyTotp(secretBase32, code, { window: 1 });
-
-      if (!verifyResult.valid) {
-        res.status(400).json({
-          error: "El código ingresado no coincide con el autenticador. Verifica la hora de tu dispositivo e intenta de nuevo.",
-        });
-        return;
-      }
-
-      const nowIso = new Date().toISOString();
-
-      // Guardamos la configuración definitiva
-      await adminDb
-        .collection("users")
-        .doc(uid)
-        .collection("security")
-        .doc("2fa")
-        .set({
-          enabled: true,
-          encryptedSecret: setupData.encryptedSecret,
-          backupCodes: setupData.hashedBackupCodes,
-          enabledAt: nowIso,
-          lastVerifiedStep: verifyResult.step ?? 0,
-        });
-
-      // Eliminamos el setup temporal
-      await setupDocRef.delete();
-
-      // Marcamos la sesión activa como verificada con 2FA
-      if (req.sessionId) {
-        await adminDb
-          .collection("users")
-          .doc(uid)
-          .collection("sessions")
-          .doc(req.sessionId)
-          .set({ twoFactorVerified: true, twoFactorVerifiedAt: nowIso }, { merge: true });
-      }
-
-      await recordSecurityActivity(uid, {
-        type: "2fa_enabled",
-        title: "Autenticación en dos pasos activada",
-        description: "Se configuró y activó correctamente la protección 2FA TOTP en tu cuenta.",
-      });
-
-      // Enviar correo de confirmación de activación
-      const userData = await fetchUserData(uid);
-      const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
-      const recipientName = userData.name || req.user!.name || "Cliente Var San";
-      const { subject, html, text } = buildSecurityAlertEmail(emailLang, {
-        recipientName,
-        alertTitle: "2FA Activado exitosamente",
-        alertDetails: "La autenticación en dos pasos (2FA) ha sido activada en tu cuenta de Distribuidora Var San.",
-      });
-
-      if (email) {
-        sendEmail({
-          to: email,
-          subject,
-          html,
-          text,
-          from: EMAIL_SENDERS.security,
-        }).catch((emailErr) => {
-          logger.warn({ err: emailErr, uid }, "No se pudo enviar correo de confirmación de 2FA");
-        });
-      }
-
-      res.status(200).json({
-        status: "ok",
-        message: "¡Autenticación en dos pasos activada exitosamente!",
-      });
-    } catch (err) {
-      logger.error({ err, uid }, "Error al activar 2FA");
-      res.status(500).json({ error: "No se pudo activar el segundo factor." });
-    }
-  },
-);
-
-/**
- * POST /api/auth/2fa/verify
- * Valida el reto 2FA en login mediante TOTP, código de respaldo o código de rescate por correo.
- */
-router.post(
-  ["/auth/2fa/verify", "/auth/two-factor/verify"],
-  strictActionRateLimit,
-  requireAuth,
-  async (req: Request, res: Response) => {
-    const parseResult = Verify2FASchema.safeParse(req.body);
-    if (!parseResult.success) {
-      res.status(400).json({ error: "Parámetros de verificación inválidos." });
-      return;
-    }
-
-    const uid = req.user!.uid;
-    const email = req.user!.email;
-    const { code, backupCode, rescueCode, language: reqLang } = parseResult.data;
-
-    try {
-      const secDocRef = adminDb
-        .collection("users")
-        .doc(uid)
-        .collection("security")
-        .doc("2fa");
-
-      const secDoc = await secDocRef.get();
-      if (!secDoc.exists || secDoc.data()?.enabled !== true) {
-        // Si no tiene 2FA activado, marcamos verificado automáticamente
-        if (req.sessionId) {
-          await adminDb
-            .collection("users")
-            .doc(uid)
-            .collection("sessions")
-            .doc(req.sessionId)
-            .set({ twoFactorVerified: true }, { merge: true });
-        }
-        res.status(200).json({ status: "ok", twoFactorVerified: true, message: "2FA no requerido." });
-        return;
-      }
-
-      const secData = secDoc.data()!;
-      const attemptsDocRef = adminDb
-        .collection("users")
-        .doc(uid)
-        .collection("security")
-        .doc("2fa_attempts");
-
-      const attemptsDoc = await attemptsDocRef.get();
-      const attemptsData = attemptsDoc.exists ? attemptsDoc.data() : null;
-      const failedCount = attemptsData?.failedCount || 0;
-      const lockedUntilMs = attemptsData?.lockedUntil ? new Date(attemptsData.lockedUntil).getTime() : 0;
-
-      if (Date.now() < lockedUntilMs) {
-        res.status(429).json({
-          error: "Demasiados intentos fallidos. Por favor espera 15 minutos antes de intentar de nuevo.",
-          code: "2FA_LOCKED",
-        });
-        return;
-      }
-
-      let isVerified = false;
-      let usedMethod = "totp";
-
-      // 1. Verificación por TOTP
-      if (code) {
-        const secretBase32 = decryptTotpSecret(secData.encryptedSecret);
-        const lastStep = secData.lastVerifiedStep;
-        const result = verifyTotp(secretBase32, code, { window: 1, lastVerifiedStep: lastStep });
-
-        if (result.valid) {
-          isVerified = true;
-          usedMethod = "totp";
-          await secDocRef.update({ lastVerifiedStep: result.step });
-        }
-      }
-
-      // 2. Verificación por Backup Code (Consumo Atómico con Transacción)
-      if (!isVerified && backupCode) {
-        const hashedInput = hashSecurityCode(backupCode, uid);
-        let remainingBackupCount = 0;
-
-        try {
-          const transactionResult = await adminDb.runTransaction(async (transaction) => {
-            const secDoc = await transaction.get(secDocRef);
-            if (!secDoc.exists || secDoc.data()?.enabled !== true) {
-              return { success: false, reason: "not_enabled" };
-            }
-
-            const secData = secDoc.data()!;
-            const storedHashes: string[] = Array.isArray(secData.backupCodes) ? [...secData.backupCodes] : [];
-            const index = storedHashes.indexOf(hashedInput);
-
-            if (index === -1) {
-              return { success: false, reason: "invalid_code" };
-            }
-
-            // Eliminación atómica dentro de la transacción (un solo uso sin race conditions)
-            storedHashes.splice(index, 1);
-            transaction.update(secDocRef, { backupCodes: storedHashes });
-
-            remainingBackupCount = storedHashes.length;
-            return { success: true };
+      try {
+        const twilioRes = await sendTwilioVerification(phone, "sms");
+        if (!twilioRes.success) {
+          res.status(400).json({
+            error: twilioRes.error || "No se pudo enviar el código por SMS. Verifica que el número sea válido.",
           });
-
-          if (transactionResult.success) {
-            isVerified = true;
-            usedMethod = "backup_code";
-
-            await recordSecurityActivity(uid, {
-              type: "backup_code_used",
-              title: "Código de respaldo 2FA utilizado",
-              description: `Se utilizó un código de respaldo de un solo uso. Quedan ${remainingBackupCount} códigos disponibles.`,
-            });
-
-            // Notificamos por correo el uso del código de respaldo
-            if (email) {
-              const userData = await fetchUserData(uid);
-              const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
-              const recipientName = userData.name || req.user!.name || "Cliente Var San";
-              const { subject, html, text } = buildSecurityAlertEmail(emailLang, {
-                recipientName,
-                alertTitle: "Uso de código de respaldo 2FA",
-                alertDetails: `Se utilizó un código de respaldo de un solo uso para acceder a tu cuenta. Te quedan ${remainingBackupCount} códigos de respaldo disponibles.`,
-              });
-              sendEmail({ to: email, subject, html, text, from: EMAIL_SENDERS.security }).catch(() => {});
-            }
-          }
-        } catch (txErr) {
-          logger.warn({ err: txErr, uid }, "Conflicto o error en transacción de backup code");
+          return;
         }
-      }
 
-      // 3. Verificación por Código de Rescate (Transacción Atómica con límite de 3 intentos y expiración)
-      if (!isVerified && rescueCode) {
-        const rescueDocRef = adminDb
+        // Guardar registro de activación pendiente SMS
+        await adminDb
           .collection("users")
           .doc(uid)
           .collection("security")
-          .doc("2fa_rescue");
-
-        const hashedInput = hashSecurityCode(rescueCode, uid);
-
-        try {
-          const rescueResult = await adminDb.runTransaction(async (transaction) => {
-            const rescueDoc = await transaction.get(rescueDocRef);
-            if (!rescueDoc.exists) {
-              return { success: false, reason: "not_found" };
-            }
-
-            const rescueData = rescueDoc.data()!;
-            const expiresMs = new Date(rescueData.expiresAt).getTime();
-            const attempts = typeof rescueData.attempts === "number" ? rescueData.attempts : 0;
-
-            // Si expiró o alcanzó el límite de intentos, invalidar/eliminar de inmediato
-            if (Date.now() > expiresMs || attempts >= 3) {
-              transaction.delete(rescueDocRef);
-              return { success: false, reason: "expired_or_locked" };
-            }
-
-            if (rescueData.hashedCode === hashedInput) {
-              // Código correcto: eliminar inmediatamente el documento de rescate (un solo uso atómico)
-              transaction.delete(rescueDocRef);
-              return { success: true };
-            } else {
-              // Intento incorrecto: incrementar contador de intentos
-              const newAttempts = attempts + 1;
-              if (newAttempts >= 3) {
-                transaction.delete(rescueDocRef); // Invalida definitivamente al 3er fallo
-              } else {
-                transaction.update(rescueDocRef, { attempts: newAttempts });
-              }
-              return { success: false, reason: "invalid_code", attemptsRemaining: Math.max(0, 3 - newAttempts) };
-            }
+          .doc("2fa_setup_code")
+          .set({
+            phone,
+            method: "sms",
+            attempts: 0,
+            maxAttempts: 5,
+            expiresAt: Date.now() + 15 * 60 * 1000,
+            createdAt: new Date().toISOString(),
           });
 
-          if (rescueResult.success) {
-            isVerified = true;
-            usedMethod = "rescue_email";
-
-            await recordSecurityActivity(uid, {
-              type: "rescue_code_used",
-              title: "Código de rescate 2FA utilizado",
-              description: "Se verificó el acceso de emergencia mediante el código enviado por correo.",
-            });
-          }
-
-        } catch (rescueErr) {
-          logger.warn({ err: rescueErr, uid }, "Error en transacción de código de rescate");
-        }
-      }
-
-
-      if (!isVerified) {
-        const newFailedCount = failedCount + 1;
-        const lockUpdates: Record<string, any> = { failedCount: newFailedCount };
-
-        if (newFailedCount >= 5) {
-          lockUpdates.lockedUntil = new Date(Date.now() + 15 * 60 * 1000).toISOString();
-        }
-
-        await attemptsDocRef.set(lockUpdates, { merge: true });
-
-        res.status(400).json({
-          error: "Código de autenticación incorrecto o expirado.",
-          code: "INVALID_2FA_CODE",
-          remainingAttempts: Math.max(0, 5 - newFailedCount),
+        res.status(200).json({
+          status: "ok",
+          message: `Código de verificación enviado por SMS a ${maskIdentifier(phone, true)}.`,
+          method: "sms",
+          phone,
         });
         return;
-      }
-
-      // Si fue exitoso, limpiamos intentos fallidos
-      await attemptsDocRef.delete().catch(() => {});
-
-      const nowIso = new Date().toISOString();
-
-      // Marcamos la sesión activa como verificada
-      if (req.sessionId) {
-        await adminDb
-          .collection("users")
-          .doc(uid)
-          .collection("sessions")
-          .doc(req.sessionId)
-          .set({ twoFactorVerified: true, twoFactorVerifiedAt: nowIso }, { merge: true });
-      }
-
-      res.status(200).json({
-        status: "ok",
-        twoFactorVerified: true,
-        method: usedMethod,
-        message: "Verificación de dos pasos completada correctamente.",
-      });
-    } catch (err) {
-      logger.error({ err, uid }, "Error al verificar código 2FA");
-      res.status(500).json({ error: "No se pudo procesar la verificación 2FA." });
-    }
-  },
-);
-
-/**
- * POST /api/auth/2fa/disable
- * Desactiva 2FA previa validación de código de seguridad.
- */
-router.post(
-  ["/auth/2fa/disable", "/auth/two-factor/disable"],
-  strictActionRateLimit,
-  requireAuth,
-  async (req: Request, res: Response) => {
-    const parseResult = Disable2FASchema.safeParse(req.body);
-    if (!parseResult.success) {
-      res.status(400).json({ error: "Se requiere un código 2FA válido para desactivar la protección." });
-      return;
-    }
-
-    const uid = req.user!.uid;
-    const email = req.user!.email;
-    const { code, backupCode, language: reqLang } = parseResult.data;
-
-    try {
-      const secDocRef = adminDb
-        .collection("users")
-        .doc(uid)
-        .collection("security")
-        .doc("2fa");
-
-      const secDoc = await secDocRef.get();
-      if (!secDoc.exists || secDoc.data()?.enabled !== true) {
-        res.status(400).json({ error: "La autenticación en dos pasos no está activa." });
+      } catch (smsErr: any) {
+        logger.error({ err: smsErr, uid }, "Error al solicitar código SMS con Twilio Verify");
+        res.status(500).json({ error: "Error al enviar el mensaje SMS de verificación." });
         return;
       }
-
-      const secData = secDoc.data()!;
-      let isValid = false;
-
-      if (code) {
-        const secretBase32 = decryptTotpSecret(secData.encryptedSecret);
-        const verifyRes = verifyTotp(secretBase32, code, { window: 1 });
-        if (verifyRes.valid) isValid = true;
-      }
-
-      if (!isValid && backupCode) {
-        const hashedInput = hashSecurityCode(backupCode, uid);
-        const storedHashes: string[] = Array.isArray(secData.backupCodes) ? secData.backupCodes : [];
-        if (storedHashes.includes(hashedInput)) isValid = true;
-      }
-
-      if (!isValid) {
-        res.status(400).json({ error: "Código incorrecto. No se puede desactivar 2FA sin verificación válida." });
-        return;
-      }
-
-      await secDocRef.delete();
-
-      await recordSecurityActivity(uid, {
-        type: "2fa_disabled",
-        title: "Autenticación en dos pasos desactivada",
-        description: "Se desactivó la protección 2FA en tu cuenta.",
-      });
-
-      // Enviar correo de alerta por desactivación
-      if (email) {
-        const userData = await fetchUserData(uid);
-        const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
-        const recipientName = userData.name || req.user!.name || "Cliente Var San";
-        const { subject, html, text } = buildSecurityAlertEmail(emailLang, {
-          recipientName,
-          alertTitle: "2FA Desactivado",
-          alertDetails: "La autenticación en dos pasos (2FA) ha sido desactivada en tu cuenta. Si no realizaste esta acción, cambia tu contraseña de inmediato.",
-        });
-        sendEmail({ to: email, subject, html, text, from: EMAIL_SENDERS.security }).catch(() => {});
-      }
-
-      res.status(200).json({
-        status: "ok",
-        message: "Autenticación en dos pasos desactivada correctamente.",
-      });
-    } catch (err) {
-      logger.error({ err, uid }, "Error al desactivar 2FA");
-      res.status(500).json({ error: "No se pudo desactivar el segundo factor." });
     }
-  },
-);
 
-/**
- * POST /api/auth/2fa/request-rescue-code
- * Envía un código OTP temporal de 6 dígitos al correo del usuario como respaldo de emergencia.
- */
-router.post(
-  "/auth/2fa/request-rescue-code",
-  strictActionRateLimit,
-  requireAuth,
-  async (req: Request, res: Response) => {
-    const parseResult = RequestRescueSchema.safeParse(req.body);
-    const reqLang = parseResult.success ? parseResult.data.language : undefined;
-
-    const uid = req.user!.uid;
-    const email = req.user!.email;
-
-    if (!email) {
-      res.status(400).json({ error: "No hay correo electrónico asociado a esta cuenta." });
+    // ==========================================
+    // MÉTODO 2: CORREO ELECTRÓNICO CON RESEND
+    // ==========================================
+    if (!userEmail) {
+      res.status(400).json({ error: "La cuenta no tiene un correo electrónico registrado para recibir el código." });
       return;
     }
 
     try {
-      const rescueCode = generateRescueCode();
-      const hashedCode = hashSecurityCode(rescueCode, uid);
-      const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 min
+      // Generar código numérico criptográfico de 6 dígitos (100000 - 999999)
+      const code = crypto.randomInt(100000, 1000000).toString();
+      const codeHash = hashSecurityCode(code, uid);
+      const expiresAt = Date.now() + 15 * 60 * 1000; // 15 minutos
 
+      // Guardar en Firestore con hash SHA-256
       await adminDb
         .collection("users")
         .doc(uid)
         .collection("security")
-        .doc("2fa_rescue")
+        .doc("2fa_setup_code")
         .set({
-          hashedCode,
-          expiresAt,
+          codeHash,
+          phone,
+          method: "email",
           attempts: 0,
-          maxAttempts: 3,
+          maxAttempts: 5,
+          expiresAt,
           createdAt: new Date().toISOString(),
         });
 
@@ -667,13 +218,13 @@ router.post(
       const recipientName = userData.name || req.user!.name || "Cliente Var San";
 
       const { subject, html, text } = buildVerificationCodeEmail(emailLang, {
-        code: rescueCode,
+        code,
         recipientName,
-        expiresInMinutes: 10,
+        expiresInMinutes: 15,
       });
 
       await sendEmail({
-        to: email,
+        to: userEmail,
         subject: `[Seguridad] ${subject}`,
         html,
         text,
@@ -682,11 +233,468 @@ router.post(
 
       res.status(200).json({
         status: "ok",
-        message: "Se envió un código de rescate temporal a tu correo electrónico registrado.",
+        message: `Código de 6 dígitos enviado a tu correo ${maskIdentifier(userEmail)}.`,
+        method: "email",
+        phone,
+      });
+    } catch (err: any) {
+      logger.error({ err, uid }, "Error al generar/enviar código de configuración 2FA por correo");
+      res.status(500).json({ error: "No se pudo enviar el código de verificación. Intenta de nuevo." });
+    }
+  },
+);
+
+const VerifyAndEnableSchema = z.object({
+  code: z.string().trim().min(4).max(10, "Introduce el código de verificación recibido."),
+  language: z.string().optional(),
+});
+
+/**
+ * POST /api/auth/2fa/verify-and-enable (y /api/auth/2fa/enable)
+ * Verifica el código (vía Twilio Verify para SMS o SHA-256 para Email) y activa 2FA.
+ */
+router.post(
+  ["/auth/2fa/verify-and-enable", "/auth/two-factor/verify-and-enable", "/auth/2fa/enable", "/auth/two-factor/enable"],
+  strictActionRateLimit,
+  requireAuth,
+  async (req: Request, res: Response) => {
+    const parseResult = VerifyAndEnableSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      res.status(400).json({ error: "Introduce un código de verificación válido." });
+      return;
+    }
+
+    const uid = req.user!.uid;
+    const userEmail = req.user!.email;
+    const { code, language: reqLang } = parseResult.data;
+
+    try {
+      const setupDocRef = adminDb.collection("users").doc(uid).collection("security").doc("2fa_setup_code");
+      const setupDoc = await setupDocRef.get();
+
+      if (!setupDoc.exists) {
+        res.status(400).json({
+          error: "No hay ninguna solicitud de activación pendiente o el código ya fue utilizado. Solicita uno nuevo.",
+        });
+        return;
+      }
+
+      const setupData = setupDoc.data()!;
+      const now = Date.now();
+      const expiresAt = typeof setupData.expiresAt === "number" ? setupData.expiresAt : 0;
+      const attempts = typeof setupData.attempts === "number" ? setupData.attempts : 0;
+
+      if (now > expiresAt) {
+        await setupDocRef.delete();
+        res.status(400).json({ error: "El código de verificación ha expirado (límite 15 minutos). Solicita uno nuevo." });
+        return;
+      }
+
+      if (attempts >= 5) {
+        await setupDocRef.delete();
+        res.status(429).json({ error: "Has alcanzado el límite máximo de intentos (5). Solicita un nuevo código." });
+        return;
+      }
+
+      const method = setupData.method || "email";
+      const phone = setupData.phone || "";
+
+      // 1. Verificación por SMS con Twilio Verify
+      if (method === "sms") {
+        const verifyRes = await checkTwilioVerification(phone, code);
+        if (!verifyRes.approved) {
+          await setupDocRef.update({ attempts: attempts + 1 });
+          const remaining = Math.max(0, 5 - (attempts + 1));
+          res.status(400).json({
+            error: verifyRes.error || `Código SMS incorrecto o expirado. Te quedan ${remaining} intento(s).`,
+          });
+          return;
+        }
+      } else {
+        // 2. Verificación por Correo electrónico con hash SHA-256
+        const inputHash = hashSecurityCode(code, uid);
+        if (inputHash !== setupData.codeHash) {
+          await setupDocRef.update({ attempts: attempts + 1 });
+          const remaining = Math.max(0, 5 - (attempts + 1));
+          res.status(400).json({
+            error: `Código de verificación incorrecto. Te quedan ${remaining} intento(s).`,
+          });
+          return;
+        }
+      }
+
+      // Código correcto: eliminar documento temporal de setup
+      await setupDocRef.delete();
+
+      const nowIso = new Date().toISOString();
+
+      // Guardar en users/{uid}/security/2fa
+      await adminDb.collection("users").doc(uid).collection("security").doc("2fa").set({
+        enabled: true,
+        method,
+        phone,
+        enabledAt: nowIso,
+        updatedAt: nowIso,
+      });
+
+      // Guardar también en el doc principal users/{uid} para sincronización directa
+      await adminDb.collection("users").doc(uid).set(
+        {
+          twoFactor: {
+            enabled: true,
+            method,
+            phone,
+          },
+          phone: phone || undefined,
+        },
+        { merge: true },
+      );
+
+      // Registrar evento de seguridad
+      await recordSecurityActivity(uid, {
+        type: "2fa_enabled",
+        title: "Autenticación en dos fases activada",
+        description: `Se activó la protección 2FA vía ${method === "sms" ? "Mensaje SMS" : "Correo electrónico"}.`,
+      });
+
+      // Notificación de seguridad por correo oficial
+      if (userEmail) {
+        const userData = await fetchUserData(uid);
+        const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
+        const recipientName = userData.name || req.user!.name || "Cliente Var San";
+        const { subject, html, text } = buildSecurityAlertEmail(emailLang, {
+          recipientName,
+          alertTitle: "2FA Activado exitosamente",
+          alertDetails: `La autenticación en dos fases ha sido activada en tu cuenta utilizando ${
+            method === "sms" ? `Mensaje SMS al número ${maskIdentifier(phone, true)}` : "Correo electrónico"
+          }.`,
+        });
+
+        sendEmail({
+          to: userEmail,
+          subject: `[Seguridad] ${subject}`,
+          html,
+          text,
+          from: EMAIL_SENDERS.security,
+        }).catch((err) => logger.warn({ err }, "No se pudo enviar alerta de 2FA activado"));
+      }
+
+      res.status(200).json({
+        status: "ok",
+        message: "¡Autenticación en dos fases activada exitosamente!",
+        twoFactor: {
+          enabled: true,
+          method,
+          phone,
+          enabledAt: nowIso,
+        },
       });
     } catch (err) {
-      logger.error({ err, uid }, "Error al solicitar código de rescate 2FA");
-      res.status(500).json({ error: "No se pudo enviar el código de rescate por correo." });
+      logger.error({ err, uid }, "Error al confirmar y activar 2FA");
+      res.status(500).json({ error: "No se pudo activar 2FA. Intenta de nuevo." });
+    }
+  },
+);
+
+const SendLoginCodeSchema = z.object({
+  uid: z.string().min(1, "UID de usuario requerido."),
+  language: z.string().optional(),
+});
+
+/**
+ * POST /api/auth/2fa/send-login-code
+ * Envía el código 2FA al método configurado cuando un usuario intenta iniciar sesión.
+ */
+router.post(
+  "/auth/2fa/send-login-code",
+  authRateLimit,
+  async (req: Request, res: Response) => {
+    const parseResult = SendLoginCodeSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      res.status(400).json({ error: "Identificador de usuario requerido." });
+      return;
+    }
+
+    const { uid, language: reqLang } = parseResult.data;
+
+    try {
+      const userDoc = await adminDb.collection("users").doc(uid).get();
+      if (!userDoc.exists) {
+        res.status(404).json({ error: "Usuario no encontrado." });
+        return;
+      }
+
+      const userData = userDoc.data()!;
+      const secDoc = await adminDb.collection("users").doc(uid).collection("security").doc("2fa").get();
+      const secData = secDoc.exists ? secDoc.data() : null;
+
+      const enabled = secData?.enabled === true || userData?.twoFactor?.enabled === true;
+      if (!enabled) {
+        res.status(200).json({ enabled: false, message: "2FA no configurado." });
+        return;
+      }
+
+      const method = secData?.method || userData?.twoFactor?.method || "email";
+      const phone = secData?.phone || userData?.twoFactor?.phone || userData?.phone || "";
+      const userEmail = (userData?.email as string) || "";
+
+      // 1. Si el método es SMS, despachar mediante Twilio Verify
+      if (method === "sms") {
+        const twilioConfig = getTwilioVerifyConfig();
+        if (!twilioConfig) {
+          res.status(503).json({
+            error: "SMS_PROVIDER_NOT_CONFIGURED",
+            message: "El servicio de mensajes SMS no está disponible actualmente.",
+          });
+          return;
+        }
+
+        const twilioRes = await sendTwilioVerification(phone, "sms");
+        if (!twilioRes.success) {
+          res.status(400).json({
+            error: twilioRes.error || "No se pudo enviar el código SMS. Intenta de nuevo.",
+          });
+          return;
+        }
+
+        await adminDb
+          .collection("users")
+          .doc(uid)
+          .collection("security")
+          .doc("2fa_login_code")
+          .set({
+            phone,
+            method: "sms",
+            attempts: 0,
+            maxAttempts: 5,
+            expiresAt: Date.now() + 15 * 60 * 1000,
+            createdAt: new Date().toISOString(),
+          });
+
+        res.status(200).json({
+          status: "ok",
+          enabled: true,
+          method: "sms",
+          maskedTarget: maskIdentifier(phone, true),
+          message: `Código enviado por SMS a ${maskIdentifier(phone, true)}.`,
+        });
+        return;
+      }
+
+      // 2. Si el método es Email, generar código y enviar con Resend
+      const code = crypto.randomInt(100000, 1000000).toString();
+      const codeHash = hashSecurityCode(code, uid);
+      const expiresAt = Date.now() + 15 * 60 * 1000;
+
+      await adminDb
+        .collection("users")
+        .doc(uid)
+        .collection("security")
+        .doc("2fa_login_code")
+        .set({
+          codeHash,
+          method: "email",
+          attempts: 0,
+          maxAttempts: 5,
+          expiresAt,
+          createdAt: new Date().toISOString(),
+        });
+
+      if (userEmail) {
+        const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
+        const recipientName = userData.name || "Cliente Var San";
+
+        const { subject, html, text } = buildVerificationCodeEmail(emailLang, {
+          code,
+          recipientName,
+          expiresInMinutes: 15,
+        });
+
+        await sendEmail({
+          to: userEmail,
+          subject: `[Seguridad] ${subject}`,
+          html,
+          text,
+          from: EMAIL_SENDERS.security,
+        });
+      }
+
+      res.status(200).json({
+        status: "ok",
+        enabled: true,
+        method: "email",
+        maskedTarget: maskIdentifier(userEmail),
+        message: `Código enviado a tu correo ${maskIdentifier(userEmail)}.`,
+      });
+    } catch (err) {
+      logger.error({ err, uid }, "Error al enviar código de login 2FA");
+      res.status(500).json({ error: "No se pudo enviar el código de verificación." });
+    }
+  },
+);
+
+const VerifyLoginCodeSchema = z.object({
+  uid: z.string().min(1),
+  code: z.string().trim().min(4).max(10),
+});
+
+/**
+ * POST /api/auth/2fa/verify-login-code
+ * Valida el código 2FA durante el flujo de inicio de sesión.
+ */
+router.post(
+  "/auth/2fa/verify-login-code",
+  authRateLimit,
+  async (req: Request, res: Response) => {
+    const parseResult = VerifyLoginCodeSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      res.status(400).json({ error: "Código de verificación requerido." });
+      return;
+    }
+
+    const { uid, code } = parseResult.data;
+
+    try {
+      const codeDocRef = adminDb.collection("users").doc(uid).collection("security").doc("2fa_login_code");
+      const codeDoc = await codeDocRef.get();
+
+      if (!codeDoc.exists) {
+        res.status(400).json({ error: "El código no existe o ya fue utilizado. Solicita uno nuevo." });
+        return;
+      }
+
+      const codeData = codeDoc.data()!;
+      const now = Date.now();
+      const expiresAt = typeof codeData.expiresAt === "number" ? codeData.expiresAt : 0;
+      const attempts = typeof codeData.attempts === "number" ? codeData.attempts : 0;
+
+      if (now > expiresAt) {
+        await codeDocRef.delete();
+        res.status(400).json({ error: "El código ha expirado. Solicita un nuevo código." });
+        return;
+      }
+
+      if (attempts >= 5) {
+        await codeDocRef.delete();
+        res.status(429).json({ error: "Has superado el límite de 5 intentos fallidos. Solicita un nuevo código." });
+        return;
+      }
+
+      const method = codeData.method || "email";
+      const phone = codeData.phone || "";
+
+      // 1. Si es SMS, validar con Twilio Verify
+      if (method === "sms") {
+        const verifyRes = await checkTwilioVerification(phone, code);
+        if (!verifyRes.approved) {
+          await codeDocRef.update({ attempts: attempts + 1 });
+          const remaining = Math.max(0, 5 - (attempts + 1));
+          res.status(400).json({
+            error: verifyRes.error || `Código SMS incorrecto o expirado. Te quedan ${remaining} intento(s).`,
+          });
+          return;
+        }
+      } else {
+        // 2. Si es Email, validar con hash SHA-256
+        const inputHash = hashSecurityCode(code, uid);
+        if (inputHash !== codeData.codeHash) {
+          await codeDocRef.update({ attempts: attempts + 1 });
+          const remaining = Math.max(0, 5 - (attempts + 1));
+          res.status(400).json({
+            error: `Código incorrecto. Te quedan ${remaining} intento(s).`,
+          });
+          return;
+        }
+      }
+
+      // Código correcto: eliminar documento temporal
+      await codeDocRef.delete();
+
+      await recordSecurityActivity(uid, {
+        type: "login",
+        title: "Inicio de sesión con 2FA completado",
+        description: "Se verificó correctamente el segundo factor de autenticación.",
+      });
+
+      res.status(200).json({
+        status: "ok",
+        verified: true,
+        message: "Verificación de dos fases exitosa.",
+      });
+    } catch (err) {
+      logger.error({ err, uid }, "Error al verificar código de login 2FA");
+      res.status(500).json({ error: "No se pudo procesar la verificación." });
+    }
+  },
+);
+
+/**
+ * POST /api/auth/2fa/disable (y /api/auth/two-factor/disable)
+ * Desactiva la autenticación en dos fases del usuario autenticado.
+ */
+router.post(
+  ["/auth/2fa/disable", "/auth/two-factor/disable"],
+  strictActionRateLimit,
+  requireAuth,
+  async (req: Request, res: Response) => {
+    const uid = req.user!.uid;
+    const userEmail = req.user!.email;
+    const reqLang = (req.body?.language as string) || undefined;
+
+    try {
+      // Actualizar users/{uid}/security/2fa
+      await adminDb.collection("users").doc(uid).collection("security").doc("2fa").set({
+        enabled: false,
+        disabledAt: new Date().toISOString(),
+      });
+
+      // Actualizar users/{uid}
+      await adminDb.collection("users").doc(uid).set(
+        {
+          twoFactor: {
+            enabled: false,
+          },
+        },
+        { merge: true },
+      );
+
+      // Eliminar códigos pendientes si los hubiera
+      await adminDb.collection("users").doc(uid).collection("security").doc("2fa_setup_code").delete().catch(() => {});
+      await adminDb.collection("users").doc(uid).collection("security").doc("2fa_login_code").delete().catch(() => {});
+
+      await recordSecurityActivity(uid, {
+        type: "2fa_disabled",
+        title: "Autenticación en dos fases desactivada",
+        description: "Se desactivó la protección 2FA en tu cuenta.",
+      });
+
+      // Enviar correo de alerta por desactivación
+      if (userEmail) {
+        const userData = await fetchUserData(uid);
+        const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
+        const recipientName = userData.name || req.user!.name || "Cliente Var San";
+        const { subject, html, text } = buildSecurityAlertEmail(emailLang, {
+          recipientName,
+          alertTitle: "2FA Desactivado",
+          alertDetails: "La autenticación en dos fases (2FA) ha sido desactivada en tu cuenta de Distribuidora Var San.",
+        });
+
+        sendEmail({
+          to: userEmail,
+          subject: `[Seguridad] ${subject}`,
+          html,
+          text,
+          from: EMAIL_SENDERS.security,
+        }).catch((err) => logger.warn({ err }, "No se pudo enviar alerta de 2FA desactivado"));
+      }
+
+      res.status(200).json({
+        status: "ok",
+        message: "Autenticación en dos fases desactivada correctamente.",
+      });
+    } catch (err) {
+      logger.error({ err, uid }, "Error al desactivar 2FA");
+      res.status(500).json({ error: "No se pudo desactivar 2FA. Intenta de nuevo." });
     }
   },
 );
