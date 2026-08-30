@@ -368,7 +368,7 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
               company: typeof data.company === 'string' ? data.company.trim() : '',
               phone: typeof data.phone === 'string' ? data.phone.trim() : '',
               username: (data.username as string) || (user.email ? user.email.split('@')[0] : 'usuario'),
-              country: (data.country as string) || 'México',
+              country: typeof data.country === 'string' && data.country.trim().length > 0 ? data.country.trim() : 'México',
               preferredLanguage: (data.preferredLanguage as string) || language,
               autoBugReport: data.autoBugReport ?? true,
               createdAt: data.createdAt,

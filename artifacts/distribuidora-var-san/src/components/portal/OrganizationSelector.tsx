@@ -22,13 +22,22 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
 
   // Determinar si el valor actual coincide con alguno del catálogo o es personalizado
   useEffect(() => {
-    if (!value) return;
-    const found = ORGANIZATION_CATALOG.find((o) => o.name === value);
-    if (!found && value) {
-      setIsCustom(true);
-      setCustomValue(value);
+    if (!value) {
+      setIsCustom(false);
+      setCustomValue('');
+      return;
     }
-  }, []);
+    const found = ORGANIZATION_CATALOG.find(
+      (o) => o.name.trim().toLowerCase() === value.trim().toLowerCase() && o.id !== 'otros'
+    );
+    if (found) {
+      setIsCustom(false);
+      setCustomValue('');
+    } else {
+      setIsCustom(true);
+      setCustomValue(value === 'Otros' ? '' : value);
+    }
+  }, [value]);
 
   // Cerrar al hacer click fuera
   useEffect(() => {
@@ -47,9 +56,10 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
     if (item.id === 'otros') {
       setIsCustom(true);
       setIsOpen(false);
-      onChange(customValue || 'Otros');
+      onChange(customValue.trim());
     } else {
       setIsCustom(false);
+      setCustomValue('');
       onChange(item.name);
       setIsOpen(false);
     }
@@ -76,8 +86,8 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
         data-testid="organization-selector-trigger"
       >
         <Building2 size={16} className="organization-trigger-icon" />
-        <span className={`organization-trigger-text ${!value ? 'placeholder' : ''}`}>
-          {isCustom && customValue ? customValue : value || 'Buscar empresa, escuela u organización...'}
+        <span className={`organization-trigger-text ${(!value && !customValue) ? 'placeholder' : ''}`}>
+          {isCustom ? (customValue || value || 'Buscar empresa, escuela u organización...') : (value || 'Buscar empresa, escuela u organización...')}
         </span>
         <ChevronDown size={16} className={`organization-chevron ${isOpen ? 'rotate' : ''}`} />
       </div>
@@ -126,10 +136,9 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
                   onClick={() => {
                     setIsCustom(true);
                     setIsOpen(false);
-                    if (searchQuery) {
-                      setCustomValue(searchQuery);
-                      onChange(searchQuery);
-                    }
+                    const q = searchQuery.trim();
+                    setCustomValue(q);
+                    onChange(q);
                   }}
                 >
                   <Edit3 size={13} /> Escribir &quot;{searchQuery || 'mi organización'}&quot; manualmente

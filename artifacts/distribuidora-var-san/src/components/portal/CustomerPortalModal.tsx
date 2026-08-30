@@ -11,6 +11,7 @@ import {
   Mail,
   Phone,
   User,
+  Globe,
   ExternalLink,
 } from 'lucide-react';
 import type { User as FirebaseUser } from 'firebase/auth';
@@ -200,6 +201,16 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
                   </span>
                   <strong className="profile-data-value" style={{ fontSize: '0.95rem', color: 'var(--navy)', fontWeight: 700, display: 'block', marginTop: 2 }}>
                     {displayUsername}
+                  </strong>
+                </div>
+
+                {/* País */}
+                <div className="profile-data-field">
+                  <span className="profile-data-label" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.76rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>
+                    <Globe size={13} /> País
+                  </span>
+                  <strong className="profile-data-value" style={{ fontSize: '0.95rem', color: 'var(--navy)', display: 'block', marginTop: 2 }}>
+                    {profile.country || 'México'}
                   </strong>
                 </div>
               </div>

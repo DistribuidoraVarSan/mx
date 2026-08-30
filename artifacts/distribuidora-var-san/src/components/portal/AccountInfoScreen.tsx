@@ -58,12 +58,12 @@ export const AccountInfoScreen: React.FC<AccountInfoScreenProps> = ({
 
   // Sincronizar estado local si el perfil se actualiza o carga de forma asíncrona
   useEffect(() => {
-    if (profile.name !== undefined) setName(profile.name);
-    if (profile.lastName !== undefined) setLastName(profile.lastName);
-    if (profile.phone !== undefined) setPhone(profile.phone);
-    if (profile.company !== undefined) setCompany(profile.company);
+    if (profile.name !== undefined) setName(profile.name || '');
+    if (profile.lastName !== undefined) setLastName(profile.lastName || '');
+    if (profile.phone !== undefined) setPhone(profile.phone || '');
+    if (profile.company !== undefined) setCompany(profile.company || '');
     if (profile.country !== undefined) setCountry(profile.country || 'México');
-  }, [profile]);
+  }, [profile.name, profile.lastName, profile.phone, profile.company, profile.country]);
 
   const displayUsername = profile.username ? `@${profile.username.replace(/^@/, '')}` : (currentUser?.email ? `@${currentUser.email.split('@')[0]}` : '@usuario');
 
@@ -73,30 +73,38 @@ export const AccountInfoScreen: React.FC<AccountInfoScreenProps> = ({
     setSaving(true);
     setFeedback(null);
 
+    const cleanName = name.trim();
+    const cleanLastName = lastName.trim();
+    const cleanPhone = phone.trim();
+    const cleanCompany = company.trim();
+    const cleanCountry = country.trim() || 'México';
+
     try {
       const userRef = doc(db, 'users', currentUser.uid);
       const updateData: any = {
-        name: name.trim(),
-        lastName: lastName.trim(),
-        phone: phone.trim(),
-        company: company.trim(),
-        country: country.trim(),
+        name: cleanName,
+        lastName: cleanLastName,
+        phone: cleanPhone,
+        company: cleanCompany,
+        country: cleanCountry,
         updatedAt: serverTimestamp(),
       };
 
-      if (name.trim()) {
-        await updateProfile(currentUser, { displayName: name.trim() }).catch(() => {});
+      // Sincronizar nombre completo (Nombre + Apellido) en Firebase Auth displayName
+      const fullName = `${cleanName} ${cleanLastName}`.trim();
+      if (fullName) {
+        await updateProfile(currentUser, { displayName: fullName }).catch(() => {});
       }
 
       await setDoc(userRef, updateData, { merge: true });
 
       const updatedProfile = {
         ...profile,
-        name: name.trim(),
-        lastName: lastName.trim(),
-        phone: phone.trim(),
-        company: company.trim(),
-        country: country.trim(),
+        name: cleanName,
+        lastName: cleanLastName,
+        phone: cleanPhone,
+        company: cleanCompany,
+        country: cleanCountry,
       };
 
       onProfileUpdate(updatedProfile);

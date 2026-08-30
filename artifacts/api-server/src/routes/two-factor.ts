@@ -146,7 +146,7 @@ router.post(
       }
 
       try {
-        const twilioRes = await sendTwilioVerification(phone, "sms");
+        const twilioRes = await sendTwilioVerification(phone, "sms", reqLang || "es");
         if (!twilioRes.success) {
           res.status(400).json({
             error: twilioRes.error || "No se pudo enviar el código por SMS. Verifica que el número sea válido.",
@@ -449,7 +449,7 @@ router.post(
           return;
         }
 
-        const twilioRes = await sendTwilioVerification(phone, "sms");
+        const twilioRes = await sendTwilioVerification(phone, "sms", reqLang || (userData?.preferredLanguage as string) || "es");
         if (!twilioRes.success) {
           res.status(400).json({
             error: twilioRes.error || "No se pudo enviar el código SMS. Intenta de nuevo.",
