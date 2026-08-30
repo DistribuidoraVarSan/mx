@@ -3,6 +3,7 @@ import { AlertTriangle, ShieldAlert, Loader2, LogOut } from 'lucide-react';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
+import { getApiBaseUrl } from '../../lib/session-client';
 
 interface DeactivateAccountScreenProps {
   currentUser: FirebaseUser | null;
@@ -31,7 +32,7 @@ export const DeactivateAccountScreen: React.FC<DeactivateAccountScreenProps> = (
 
     try {
       const token = await currentUser.getIdToken();
-      const res = await fetch('/api/auth/account/deactivate', {
+      const res = await fetch(`${getApiBaseUrl()}/auth/account/deactivate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

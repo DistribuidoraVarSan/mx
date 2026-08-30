@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Download, ShieldCheck, Mail, Loader2, CheckCircle2, Clock, FileArchive, Send } from 'lucide-react';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { createZipArchive } from './zipHelper';
+import { getApiBaseUrl } from '../../lib/session-client';
 
 interface DataDownloadScreenProps {
   currentUser: FirebaseUser | null;
@@ -74,7 +75,7 @@ export const DataDownloadScreen: React.FC<DataDownloadScreenProps> = ({
 
     try {
       const token = await currentUser.getIdToken();
-      const res = await fetch('/api/auth/data-export/request-code', {
+      const res = await fetch(`${getApiBaseUrl()}/auth/data-export/request-code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -82,7 +83,7 @@ export const DataDownloadScreen: React.FC<DataDownloadScreenProps> = ({
         },
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setFeedback({
           type: 'success',
@@ -111,7 +112,7 @@ export const DataDownloadScreen: React.FC<DataDownloadScreenProps> = ({
 
     try {
       const token = await currentUser.getIdToken();
-      const res = await fetch('/api/auth/data-export/verify-code', {
+      const res = await fetch(`${getApiBaseUrl()}/auth/data-export/verify-code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -120,7 +121,7 @@ export const DataDownloadScreen: React.FC<DataDownloadScreenProps> = ({
         body: JSON.stringify({ code: code.trim() }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setIsVerified(true);
         setFeedback(null);
@@ -247,7 +248,7 @@ Estado de cuenta: Activa
 
     try {
       const token = await currentUser.getIdToken();
-      const res = await fetch('/api/auth/data-export/send-email', {
+      const res = await fetch(`${getApiBaseUrl()}/auth/data-export/send-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

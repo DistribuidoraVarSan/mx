@@ -104,6 +104,7 @@ import {
   submitBugReport,
   getBrowserStorageEstimate,
   clearSafeBrowserStorage,
+  getApiBaseUrl,
   type DeviceSession,
   type SecurityActivityRecord,
   type TwoFactorStatus,
@@ -346,15 +347,15 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
 
         const rawDisplayName = user.displayName || '';
         const nameParts = rawDisplayName.trim().split(' ');
-        const fallbackFirstName = nameParts[0] || t.portal.defaultClientName;
+        const fallbackFirstName = nameParts[0] || '';
         const fallbackLastName = nameParts.slice(1).join(' ');
 
         setProfile({
-          name: (data.name as string) || fallbackFirstName,
-          lastName: (data.lastName as string) || fallbackLastName,
+          name: typeof data.name === 'string' && data.name.trim().length > 0 ? data.name.trim() : (fallbackFirstName || ''),
+          lastName: typeof data.lastName === 'string' ? data.lastName.trim() : (fallbackLastName || ''),
           email: (data.email as string) || user.email || '',
-          company: (data.company as string) || t.portal.notSpecified,
-          phone: (data.phone as string) || '',
+          company: typeof data.company === 'string' ? data.company.trim() : '',
+          phone: typeof data.phone === 'string' ? data.phone.trim() : '',
           username: (data.username as string) || (user.email ? user.email.split('@')[0] : 'usuario'),
           country: (data.country as string) || 'México',
           preferredLanguage: (data.preferredLanguage as string) || language,
@@ -364,10 +365,10 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
       } catch (error) {
         console.error('Error al cargar el perfil de Firebase:', error);
         setProfile({
-          name: user.displayName || t.portal.defaultClientName,
+          name: user.displayName || '',
           lastName: '',
           email: user.email || '',
-          company: t.portal.notSpecified,
+          company: '',
           phone: '',
           username: user.email ? user.email.split('@')[0] : 'usuario',
           country: 'México',
@@ -457,7 +458,7 @@ window.scrollTo({ top: 0, behavior: 'smooth' });
     setNewsletterMessage('');
 
     try {
-      const response = await fetch('https://varsan-api.onrender.com/api/newsletter/subscribe', {
+      const response = await fetch(`${getApiBaseUrl()}/newsletter/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, language }),
@@ -1185,7 +1186,7 @@ t.account.errorGeneric
     setChatLoading(true);
 
     try {
-      const response = await fetch('https://varsan-api.onrender.com/api/assistant/chat', {
+      const response = await fetch(`${getApiBaseUrl()}/assistant/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text, history, language }),

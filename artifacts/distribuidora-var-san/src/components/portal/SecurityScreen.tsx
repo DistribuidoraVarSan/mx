@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, ShieldAlert, KeyRound, QrCode, Loader2, CheckCircle2, Copy, Check } from 'lucide-react';
 import type { User as FirebaseUser } from 'firebase/auth';
+import {
+  setup2FA,
+  enable2FA,
+  disable2FA,
+  fetch2FAStatus,
+  getApiBaseUrl,
+} from '../../lib/session-client';
 
 interface SecurityScreenProps {
   currentUser: FirebaseUser | null;
@@ -33,31 +40,34 @@ export const SecurityScreen: React.FC<SecurityScreenProps> = ({
 
   const displayUsername = username ? `@${username.replace(/^@/, '')}` : (currentUser?.email ? `@${currentUser.email.split('@')[0]}` : '@usuario');
 
+  // Sincronizar estado fresco de 2FA al montar
+  useEffect(() => {
+    if (currentUser) {
+      fetch2FAStatus(currentUser).then((status) => {
+        if (status) {
+          onStatusChange(status);
+        }
+      }).catch(() => {});
+    }
+  }, [currentUser]);
+
   const handleStartSetup = async () => {
     if (!currentUser) return;
     setLoading(true);
     setFeedback(null);
     try {
-      const token = await currentUser.getIdToken();
-      const res = await fetch('/api/auth/two-factor/setup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await res.json();
-      if (res.ok && data.totpUri) {
-        setQrUri(data.totpUri);
-        setSecretKey(data.secretKey || '');
+      const setup = await setup2FA(currentUser);
+      if (setup && (setup.otpauthUri || (setup as any).totpUri)) {
+        setQrUri(setup.otpauthUri || (setup as any).totpUri);
+        setSecretKey(setup.secretKey || '');
+        setBackupCodes(setup.backupCodes || []);
         setSetupStep('code');
       } else {
-        setFeedback({ type: 'error', message: data.error || 'No se pudo iniciar la configuración 2FA.' });
+        setFeedback({ type: 'error', message: 'No se pudo iniciar la configuración 2FA. Intenta de nuevo.' });
       }
     } catch (err) {
       console.error('Error start 2FA setup:', err);
-      setFeedback({ type: 'error', message: 'Error al conectar con el servidor.' });
+      setFeedback({ type: 'error', message: 'Error de conexión al configurar 2FA.' });
     } finally {
       setLoading(false);
     }
@@ -70,23 +80,12 @@ export const SecurityScreen: React.FC<SecurityScreenProps> = ({
     setFeedback(null);
 
     try {
-      const token = await currentUser.getIdToken();
-      const res = await fetch('/api/auth/two-factor/enable', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ token: verifyCode.trim() }),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        setBackupCodes(data.backupCodes || []);
+      const result = await enable2FA(currentUser, verifyCode.trim());
+      if (result.success) {
         onStatusChange({ enabled: true, method: 'totp', verifiedAt: new Date().toISOString() });
         setSetupStep('success');
       } else {
-        setFeedback({ type: 'error', message: data.error || 'Código 2FA incorrecto. Intenta de nuevo.' });
+        setFeedback({ type: 'error', message: result.error || 'Código 2FA incorrecto. Intenta de nuevo.' });
       }
     } catch (err) {
       console.error('Error verify 2FA:', err);
@@ -100,24 +99,14 @@ export const SecurityScreen: React.FC<SecurityScreenProps> = ({
     if (!currentUser) return;
     setDisabling(true);
     try {
-      const token = await currentUser.getIdToken();
-      const res = await fetch('/api/auth/two-factor/disable', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ token: disableCode.trim() || undefined }),
-      });
-
-      if (res.ok) {
+      const result = await disable2FA(currentUser, { code: disableCode.trim() });
+      if (result.success) {
         onStatusChange({ enabled: false });
         setDisableModalOpen(false);
         setDisableCode('');
         setFeedback({ type: 'success', message: 'La autenticación en dos fases ha sido desactivada.' });
       } else {
-        const data = await res.json();
-        setFeedback({ type: 'error', message: data.error || 'No se pudo desactivar 2FA.' });
+        setFeedback({ type: 'error', message: result.error || 'No se pudo desactivar 2FA.' });
       }
     } catch (err) {
       console.error('Error disable 2FA:', err);

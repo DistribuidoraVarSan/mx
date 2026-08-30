@@ -1,3 +1,5 @@
+import { getApiBaseUrl } from '../../lib/session-client';
+
 export interface UsernameValidationResult {
   valid: boolean;
   error?: string;
@@ -73,7 +75,7 @@ export async function checkUsernameAvailability(username: string): Promise<Usern
   }
 
   try {
-    const response = await fetch('/api/auth/username/check', {
+    const response = await fetch(`${getApiBaseUrl()}/auth/username/check`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: username.trim().toLowerCase() }),

@@ -25,24 +25,41 @@ import { logger } from "../lib/logger";
 const router: IRouter = Router();
 
 const Enable2FASchema = z.object({
-  code: z.string().trim().min(6).max(8, "Código inválido."),
+  code: z.string().trim().optional(),
+  token: z.string().trim().optional(),
   language: z.string().optional(),
+}).transform((d) => ({
+  code: (d.code || d.token || '').trim(),
+  language: d.language,
+})).refine((data) => data.code.length >= 6 && data.code.length <= 8, {
+  message: "Código de verificación requerido (6 dígitos).",
 });
 
 const Verify2FASchema = z.object({
   code: z.string().trim().optional(),
+  token: z.string().trim().optional(),
   backupCode: z.string().trim().optional(),
   rescueCode: z.string().trim().optional(),
   language: z.string().optional(),
-}).refine((data) => data.code || data.backupCode || data.rescueCode, {
+}).transform((d) => ({
+  code: d.code || d.token,
+  backupCode: d.backupCode,
+  rescueCode: d.rescueCode,
+  language: d.language,
+})).refine((data) => data.code || data.backupCode || data.rescueCode, {
   message: "Debes proporcionar un código TOTP, un código de respaldo o un código de rescate.",
 });
 
 const Disable2FASchema = z.object({
   code: z.string().trim().optional(),
+  token: z.string().trim().optional(),
   backupCode: z.string().trim().optional(),
   language: z.string().optional(),
-}).refine((data) => data.code || data.backupCode, {
+}).transform((d) => ({
+  code: d.code || d.token,
+  backupCode: d.backupCode,
+  language: d.language,
+})).refine((data) => data.code || data.backupCode, {
   message: "Debes proporcionar tu código 2FA actual o un código de respaldo para desactivar.",
 });
 
@@ -75,7 +92,7 @@ async function fetchUserData(uid: string): Promise<{ name?: string; preferredLan
  * IMPORTANTE: NUNCA devuelve secretos, claves ni códigos en texto plano.
  */
 router.get(
-  "/auth/2fa/status",
+  ["/auth/2fa/status", "/auth/two-factor/status"],
   requireAuth,
   async (req: Request, res: Response) => {
     const uid = req.user!.uid;
@@ -113,12 +130,12 @@ router.get(
 );
 
 /**
- * POST /api/auth/2fa/setup
+ * POST /api/auth/2fa/setup (y /api/auth/two-factor/setup)
  * Inicia el proceso de configuración de 2FA generando secreto temporal y códigos de respaldo.
  * ÚNICA vez que se retornan los códigos y el secreto para que el usuario los guarde y configure su app.
  */
 router.post(
-  "/auth/2fa/setup",
+  ["/auth/2fa/setup", "/auth/two-factor/setup"],
   strictActionRateLimit,
   requireAuth,
   async (req: Request, res: Response) => {
@@ -152,6 +169,7 @@ router.post(
         status: "ok",
         secretKey: secretBase32,
         otpauthUri,
+        totpUri: otpauthUri,
         backupCodes,
       });
     } catch (err) {
@@ -166,7 +184,7 @@ router.post(
  * Confirma y activa permanentemente 2FA tras verificar el primer código OTP.
  */
 router.post(
-  "/auth/2fa/enable",
+  ["/auth/2fa/enable", "/auth/two-factor/enable"],
   strictActionRateLimit,
   requireAuth,
   async (req: Request, res: Response) => {
@@ -288,7 +306,7 @@ router.post(
  * Valida el reto 2FA en login mediante TOTP, código de respaldo o código de rescate por correo.
  */
 router.post(
-  "/auth/2fa/verify",
+  ["/auth/2fa/verify", "/auth/two-factor/verify"],
   strictActionRateLimit,
   requireAuth,
   async (req: Request, res: Response) => {
@@ -527,7 +545,7 @@ router.post(
  * Desactiva 2FA previa validación de código de seguridad.
  */
 router.post(
-  "/auth/2fa/disable",
+  ["/auth/2fa/disable", "/auth/two-factor/disable"],
   strictActionRateLimit,
   requireAuth,
   async (req: Request, res: Response) => {

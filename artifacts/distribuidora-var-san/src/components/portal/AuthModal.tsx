@@ -22,6 +22,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../../firebase';
+import { getApiBaseUrl } from '../../lib/session-client';
 import { OrganizationSelector } from './OrganizationSelector';
 import { PasswordStrengthMeter, isPasswordValid } from './PasswordStrengthMeter';
 import { validateUsernameFormat, checkUsernameAvailability } from './usernameValidator';
@@ -221,7 +222,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         // Si el usuario ingresó un nombre de usuario (ej. @manuel o manuel sin @)
         if (!loginEmail.includes('@') || !loginEmail.includes('.')) {
-          const res = await fetch('/api/auth/resolve-identifier', {
+          const res = await fetch(`${getApiBaseUrl()}/auth/resolve-identifier`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ identifier: loginEmail }),
@@ -291,9 +292,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           createdAt: serverTimestamp(),
         });
 
-        // Enviar correo de bienvenida institucional desde no-reply@distribuidora.com.mx
+        // Enviar correo de bienvenida institucional desde no-reply@distribuidoravarsan.com.mx
         try {
-          await fetch('/api/auth/welcome-email', {
+          await fetch(`${getApiBaseUrl()}/auth/welcome-email`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -351,7 +352,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setLoading(true);
     setFeedback(null);
     try {
-      const res = await fetch('/api/auth/password-reset/request-code', {
+      const res = await fetch(`${getApiBaseUrl()}/auth/password-reset/request-code`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -359,9 +360,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           language: language || 'es',
         }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setFeedback({ type: 'error', message: data.error || 'Error al solicitar código.' });
+        setFeedback({ type: 'error', message: data.error || 'No se pudo enviar el código de recuperación.' });
         return;
       }
 
@@ -372,9 +373,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         message: 'Hemos enviado un código de 6 dígitos a tu correo registrado.',
       });
     } catch (err) {
+      console.error('Error request reset code:', err);
       setFeedback({
         type: 'error',
-        message: 'No se pudo enviar el código. Verifica la dirección ingresada.',
+        message: 'Error de conexión con el servidor. Intenta de nuevo en unos momentos.',
       });
     } finally {
       setLoading(false);
@@ -402,7 +404,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setLoading(true);
     setFeedback(null);
     try {
-      const res = await fetch('/api/auth/password-reset/verify-and-update', {
+      const res = await fetch(`${getApiBaseUrl()}/auth/password-reset/verify-and-update`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -412,7 +414,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           language: language || 'es',
         }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setFeedback({ type: 'error', message: data.error || 'Error al actualizar contraseña.' });
         return;
@@ -428,6 +430,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setResetNewPassword('');
       setResetConfirmPassword('');
     } catch (err) {
+      console.error('Error verify and update password:', err);
       setFeedback({ type: 'error', message: 'Error de conexión al actualizar contraseña.' });
     } finally {
       setLoading(false);

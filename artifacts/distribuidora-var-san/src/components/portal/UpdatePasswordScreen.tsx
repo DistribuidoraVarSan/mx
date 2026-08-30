@@ -4,10 +4,10 @@ import {
   updatePassword,
   EmailAuthProvider,
   reauthenticateWithCredential,
-  sendPasswordResetEmail,
   type User as FirebaseUser,
 } from 'firebase/auth';
 import { auth } from '../../firebase';
+import { getApiBaseUrl } from '../../lib/session-client';
 import { PasswordStrengthMeter, isPasswordValid } from './PasswordStrengthMeter';
 
 interface UpdatePasswordScreenProps {
@@ -35,16 +35,28 @@ export const UpdatePasswordScreen: React.FC<UpdatePasswordScreenProps> = ({
     setResetLoading(true);
     setFeedback(null);
     try {
-      await sendPasswordResetEmail(auth, currentUser.email);
-      setFeedback({
-        type: 'success',
-        message: `Hemos enviado un enlace de recuperación a ${currentUser.email}.`,
+      const res = await fetch(`${getApiBaseUrl()}/auth/password-reset/request-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier: currentUser.email }),
       });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setFeedback({
+          type: 'success',
+          message: `Hemos enviado un código de seguridad de 6 dígitos a ${currentUser.email} para restablecer tu contraseña.`,
+        });
+      } else {
+        setFeedback({
+          type: 'error',
+          message: data.error || 'No se pudo enviar el código de recuperación. Intenta más tarde.',
+        });
+      }
     } catch (err: any) {
-      console.error('Error al enviar correo de recuperación:', err);
+      console.error('Error al solicitar código de recuperación:', err);
       setFeedback({
         type: 'error',
-        message: 'No se pudo enviar el correo de recuperación. Intenta más tarde.',
+        message: 'Error de conexión al solicitar el código de recuperación.',
       });
     } finally {
       setResetLoading(false);
@@ -83,7 +95,7 @@ export const UpdatePasswordScreen: React.FC<UpdatePasswordScreenProps> = ({
       await updatePassword(currentUser, newPassword);
 
       // 3. Notificar al backend para registro de actividad y correo de confirmación
-      fetch('/api/auth/account/password-changed', {
+      fetch(`${getApiBaseUrl()}/auth/account/password-changed`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

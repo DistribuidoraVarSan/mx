@@ -64,12 +64,12 @@ async function fetchUserData(uid: string): Promise<{ name?: string; preferredLan
  */
 async function verifyTwoFactorIfEnabled(uid: string, code?: string): Promise<{ valid: boolean; error?: string }> {
   try {
-    const secDoc = await adminDb
-      .collection("users")
-      .doc(uid)
-      .collection("security")
-      .doc("2fa_config")
-      .get();
+    let secDocRef = adminDb.collection("users").doc(uid).collection("security").doc("2fa");
+    let secDoc = await secDocRef.get();
+    if (!secDoc.exists) {
+      secDocRef = adminDb.collection("users").doc(uid).collection("security").doc("2fa_config");
+      secDoc = await secDocRef.get();
+    }
 
     if (!secDoc.exists || !secDoc.data()?.enabled) {
       return { valid: true }; // No tiene 2FA activado
@@ -94,14 +94,9 @@ async function verifyTwoFactorIfEnabled(uid: string, code?: string): Promise<{ v
     const backupCodes: string[] = Array.isArray(secData.backupCodes) ? secData.backupCodes : [];
     if (backupCodes.includes(hashed)) {
       // Consumir backup code
-      await adminDb
-        .collection("users")
-        .doc(uid)
-        .collection("security")
-        .doc("2fa_config")
-        .update({
-          backupCodes: backupCodes.filter((c) => c !== hashed),
-        });
+      await secDocRef.update({
+        backupCodes: backupCodes.filter((c) => c !== hashed),
+      });
       return { valid: true };
     }
 

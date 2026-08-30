@@ -17,7 +17,29 @@ export interface SessionRecord {
 export type DeviceSession = SessionRecord;
 
 const STORAGE_SESSION_KEY = "varsan_session_id";
-const API_BASE_URL = "https://varsan-api.onrender.com/api";
+
+/**
+ * Retorna la URL base del backend para llamadas HTTP.
+ * - En desarrollo local (localhost / 127.0.0.1) usa '/api' (aprovecha el proxy de Vite).
+ * - En producción (Firebase Hosting / dominio custom), utiliza VITE_API_URL o el backend en Render.
+ */
+export function getApiBaseUrl(): string {
+  const envUrl = (import.meta as any)?.env?.VITE_API_URL;
+  if (envUrl && typeof envUrl === 'string' && envUrl.trim().length > 0) {
+    return envUrl.trim().replace(/\/$/, '');
+  }
+
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return '/api';
+    }
+  }
+
+  return 'https://varsan-api.onrender.com/api';
+}
+
+const API_BASE_URL = getApiBaseUrl();
 
 /**
  * Genera un identificador de sesión local criptográficamente seguro.

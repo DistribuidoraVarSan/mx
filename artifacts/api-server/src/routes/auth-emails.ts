@@ -1,7 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { z } from "zod";
 import crypto from "crypto";
-import { sendEmail, EMAIL_SENDERS } from "../lib/mailer";
+import { sendEmail, EMAIL_SENDERS, ResendApiError } from "../lib/mailer";
 import {
   buildVerificationCodeEmail,
   buildPasswordResetEmail,
@@ -224,7 +224,7 @@ router.post("/auth/welcome-email", authRateLimit, async (req: Request, res: Resp
       company: company || undefined,
     });
 
-    await sendEmail({
+    const mailResult = await sendEmail({
       to: email,
       subject,
       html,
@@ -232,10 +232,26 @@ router.post("/auth/welcome-email", authRateLimit, async (req: Request, res: Resp
       from: EMAIL_SENDERS.default,
     });
 
-    res.status(200).json({ status: "ok", message: "Correo de bienvenida enviado." });
-  } catch (err) {
+    res.status(200).json({
+      status: "ok",
+      message: "Correo de bienvenida enviado.",
+      resendMessageId: mailResult.messageId,
+    });
+  } catch (err: any) {
     logger.error({ err, email }, "Error al enviar correo de bienvenida");
-    res.status(500).json({ error: "No se pudo enviar el correo de bienvenida." });
+    if (err instanceof ResendApiError) {
+      res.status(500).json({
+        error: "No se pudo enviar el correo de bienvenida.",
+        resendDetails: {
+          statusCode: err.statusCode,
+          errorName: err.errorName || "ResendError",
+          errorMessage: err.errorMessage || err.message,
+          requestId: err.requestId,
+        },
+      });
+    } else {
+      res.status(500).json({ error: "No se pudo enviar el correo de bienvenida." });
+    }
   }
 });
 
@@ -284,7 +300,7 @@ router.post(
         expiresInMinutes: 15,
       });
 
-      await sendEmail({
+      const mailResult = await sendEmail({
         to: email,
         subject,
         html,
@@ -292,10 +308,26 @@ router.post(
         from: EMAIL_SENDERS.security,
       });
 
-      res.status(200).json({ status: "ok", message: "Código de verificación enviado." });
-    } catch (err) {
+      res.status(200).json({
+        status: "ok",
+        message: "Código de verificación enviado.",
+        resendMessageId: mailResult.messageId,
+      });
+    } catch (err: any) {
       logger.error({ err, uid }, "Error al solicitar código de descarga de datos");
-      res.status(500).json({ error: "No se pudo enviar el código de verificación." });
+      if (err instanceof ResendApiError) {
+        res.status(500).json({
+          error: "No se pudo enviar el código de verificación.",
+          resendDetails: {
+            statusCode: err.statusCode,
+            errorName: err.errorName || "ResendError",
+            errorMessage: err.errorMessage || err.message,
+            requestId: err.requestId,
+          },
+        });
+      } else {
+        res.status(500).json({ error: "No se pudo enviar el código de verificación." });
+      }
     }
   },
 );
@@ -435,7 +467,7 @@ router.post(
         expiresInMinutes: 10,
       });
 
-      await sendEmail({
+      const mailResult = await sendEmail({
         to: email,
         subject,
         html,
@@ -443,10 +475,26 @@ router.post(
         from: EMAIL_SENDERS.verification,
       });
 
-      res.status(200).json({ status: "ok", message: "Código de verificación enviado." });
-    } catch (err) {
+      res.status(200).json({
+        status: "ok",
+        message: "Código de verificación enviado.",
+        resendMessageId: mailResult.messageId,
+      });
+    } catch (err: any) {
       logger.error({ err, email }, "Error al enviar código de verificación");
-      res.status(500).json({ error: "No se pudo enviar el correo de verificación." });
+      if (err instanceof ResendApiError) {
+        res.status(500).json({
+          error: "No se pudo enviar el correo de verificación.",
+          resendDetails: {
+            statusCode: err.statusCode,
+            errorName: err.errorName || "ResendError",
+            errorMessage: err.errorMessage || err.message,
+            requestId: err.requestId,
+          },
+        });
+      } else {
+        res.status(500).json({ error: "No se pudo enviar el correo de verificación." });
+      }
     }
   },
 );
@@ -482,7 +530,7 @@ router.post(
         expiresInMinutes: 15,
       });
 
-      await sendEmail({
+      const mailResult = await sendEmail({
         to: email,
         subject,
         html,
@@ -490,10 +538,26 @@ router.post(
         from: EMAIL_SENDERS.security,
       });
 
-      res.status(200).json({ status: "ok", message: "Correo de restablecimiento enviado." });
-    } catch (err) {
+      res.status(200).json({
+        status: "ok",
+        message: "Correo de restablecimiento enviado.",
+        resendMessageId: mailResult.messageId,
+      });
+    } catch (err: any) {
       logger.error({ err, email }, "Error al enviar restablecimiento de contraseña");
-      res.status(500).json({ error: "No se pudo enviar el correo de restablecimiento." });
+      if (err instanceof ResendApiError) {
+        res.status(500).json({
+          error: "No se pudo enviar el correo de restablecimiento.",
+          resendDetails: {
+            statusCode: err.statusCode,
+            errorName: err.errorName || "ResendError",
+            errorMessage: err.errorMessage || err.message,
+            requestId: err.requestId,
+          },
+        });
+      } else {
+        res.status(500).json({ error: "No se pudo enviar el correo de restablecimiento." });
+      }
     }
   },
 );
@@ -677,7 +741,7 @@ router.post("/auth/password-reset/request-code", strictActionRateLimit, async (r
       expiresInMinutes: 15,
     });
 
-    await sendEmail({
+    const mailResult = await sendEmail({
       to: email,
       subject: `Código de recuperación de contraseña: ${code} — Distribuidora Var San`,
       html,
@@ -685,10 +749,27 @@ router.post("/auth/password-reset/request-code", strictActionRateLimit, async (r
       from: EMAIL_SENDERS.security,
     });
 
-    res.status(200).json({ status: "ok", message: "Código de recuperación enviado.", email });
-  } catch (err) {
+    res.status(200).json({
+      status: "ok",
+      message: "Código de recuperación enviado.",
+      email,
+      resendMessageId: mailResult.messageId,
+    });
+  } catch (err: any) {
     logger.error({ err, identifier }, "Error en solicitud de código de recuperación");
-    res.status(500).json({ error: "No se pudo procesar la solicitud de recuperación." });
+    if (err instanceof ResendApiError) {
+      res.status(500).json({
+        error: "No se pudo procesar la solicitud de recuperación.",
+        resendDetails: {
+          statusCode: err.statusCode,
+          errorName: err.errorName || "ResendError",
+          errorMessage: err.errorMessage || err.message,
+          requestId: err.requestId,
+        },
+      });
+    } else {
+      res.status(500).json({ error: "No se pudo procesar la solicitud de recuperación." });
+    }
   }
 });
 
