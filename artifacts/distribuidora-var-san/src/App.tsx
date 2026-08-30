@@ -775,32 +775,74 @@ t.account.errorGeneric
     if (!currentUser) return;
 
     try {
-      const cleanName = profile.name.trim();
-      const cleanLastName = (profile.lastName || '').trim();
-      const cleanCompany = (profile.company || '').trim();
-      const cleanCountry = (profile.country || 'México').trim();
-      const cleanPhone = (profile.phone || '').trim();
+      const cleanName = typeof profile.name === 'string' ? profile.name.trim() : '';
+      const cleanLastName = typeof profile.lastName === 'string' ? profile.lastName.trim() : '';
+      const cleanCompany = typeof profile.company === 'string' ? profile.company.trim() : '';
+      const cleanCountry = typeof profile.country === 'string' && profile.country.trim().length > 0 ? profile.country.trim() : 'México';
+      const cleanPhone = typeof profile.phone === 'string' ? profile.phone.trim() : '';
 
       const fullName = `${cleanName} ${cleanLastName}`.trim();
       if (fullName) {
-        await updateProfile(currentUser, { displayName: fullName }).catch(() => {});
+        await updateProfile(currentUser, { displayName: fullName }).catch((authErr) => {
+          console.warn('Advertencia al actualizar displayName:', authErr);
+        });
       }
 
-      await setDoc(doc(db, 'users', currentUser.uid), {
-        name: cleanName,
-        lastName: cleanLastName,
-        company: cleanCompany,
-        country: cleanCountry,
-        phone: cleanPhone,
-        email: currentUser.email || profile.email || '',
-        preferredLanguage: language,
-        updatedAt: serverTimestamp(),
-      }, { merge: true });
+      let saveSuccess = false;
+      try {
+        await setDoc(doc(db, 'users', currentUser.uid), {
+          name: cleanName,
+          lastName: cleanLastName,
+          company: cleanCompany,
+          country: cleanCountry,
+          phone: cleanPhone,
+          email: currentUser.email || profile.email || '',
+          preferredLanguage: language,
+          updatedAt: serverTimestamp(),
+        }, { merge: true });
+        saveSuccess = true;
+      } catch (firestoreErr: any) {
+        console.warn('Aviso: Escritura directa a Firestore falló, usando fallback backend...', {
+          code: firestoreErr?.code,
+          message: firestoreErr?.message,
+        });
+
+        try {
+          const idToken = await currentUser.getIdToken();
+          const apiRes = await fetch(`${getApiBaseUrl()}/auth/account/update-profile`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({
+              name: cleanName,
+              lastName: cleanLastName,
+              company: cleanCompany,
+              country: cleanCountry,
+              phone: cleanPhone,
+            }),
+          });
+
+          if (apiRes.ok) {
+            saveSuccess = true;
+          }
+        } catch (backendErr) {
+          console.error('Error al invocar fallback backend de perfil:', backendErr);
+        }
+      }
+
+      if (!saveSuccess) {
+        throw new Error('No se pudo guardar la información del perfil.');
+      }
 
       setProfileOpen(false);
       setPortalOpen(true);
-    } catch (error) {
-      console.error('Error al guardar el perfil:', error);
+    } catch (error: any) {
+      console.error('Error al guardar el perfil:', {
+        code: error?.code,
+        message: error?.message || String(error),
+      });
       setAccountMessage(t.account.errorSaveProfile);
     }
   };

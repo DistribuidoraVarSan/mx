@@ -4,6 +4,7 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { updateProfile, type User as FirebaseUser } from 'firebase/auth';
 import { OrganizationSelector } from './OrganizationSelector';
+import { getApiBaseUrl } from '../../lib/session-client';
 
 interface AccountInfoScreenProps {
   currentUser: FirebaseUser | null;
@@ -87,15 +88,16 @@ export const AccountInfoScreen: React.FC<AccountInfoScreenProps> = ({
     setSaving(true);
     setFeedback(null);
 
-    const cleanName = name.trim();
-    const cleanLastName = lastName.trim();
-    const cleanPhone = phone.trim();
-    const cleanCompany = company.trim();
-    const cleanCountry = country.trim() || 'México';
+    // Garantizar que todos los campos sean strings limpios y válidos
+    const cleanName = typeof name === 'string' ? name.trim() : '';
+    const cleanLastName = typeof lastName === 'string' ? lastName.trim() : '';
+    const cleanPhone = typeof phone === 'string' ? phone.trim() : '';
+    const cleanCompany = typeof company === 'string' ? company.trim() : '';
+    const cleanCountry = typeof country === 'string' && country.trim().length > 0 ? country.trim() : 'México';
 
     try {
       const userRef = doc(db, 'users', currentUser.uid);
-      const updateData: any = {
+      const updateData: Record<string, any> = {
         name: cleanName,
         lastName: cleanLastName,
         phone: cleanPhone,
@@ -107,10 +109,54 @@ export const AccountInfoScreen: React.FC<AccountInfoScreenProps> = ({
       // Sincronizar nombre completo (Nombre + Apellido) en Firebase Auth displayName
       const fullName = `${cleanName} ${cleanLastName}`.trim();
       if (fullName) {
-        await updateProfile(currentUser, { displayName: fullName }).catch(() => {});
+        await updateProfile(currentUser, { displayName: fullName }).catch((authErr) => {
+          console.warn('Advertencia al actualizar displayName en Auth:', authErr);
+        });
       }
 
-      await setDoc(userRef, updateData, { merge: true });
+      // 1. Intento primario: Escritura directa a Firestore vía Client SDK
+      let saveSuccess = false;
+      try {
+        await setDoc(userRef, updateData, { merge: true });
+        saveSuccess = true;
+      } catch (firestoreErr: any) {
+        console.warn('Aviso: Escritura directa a Firestore falló, intentando vía backend API...', {
+          code: firestoreErr?.code,
+          message: firestoreErr?.message,
+        });
+
+        // 2. Fallback de alta disponibilidad: Backend API con privilegios Admin SDK
+        try {
+          const idToken = await currentUser.getIdToken();
+          const apiRes = await fetch(`${getApiBaseUrl()}/auth/account/update-profile`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({
+              name: cleanName,
+              lastName: cleanLastName,
+              company: cleanCompany,
+              country: cleanCountry,
+              phone: cleanPhone,
+            }),
+          });
+
+          if (apiRes.ok) {
+            saveSuccess = true;
+          } else {
+            const errData = await apiRes.json().catch(() => ({}));
+            console.error('Error en endpoint backend /auth/account/update-profile:', errData);
+          }
+        } catch (backendErr: any) {
+          console.error('Error de red al invocar backend update-profile:', backendErr);
+        }
+      }
+
+      if (!saveSuccess) {
+        throw new Error('No se pudo persistir la actualización de perfil por ninguno de los canales disponibles.');
+      }
 
       const updatedProfile = {
         ...profile,
@@ -124,7 +170,10 @@ export const AccountInfoScreen: React.FC<AccountInfoScreenProps> = ({
       onProfileUpdate(updatedProfile);
       setFeedback({ type: 'success', message: 'Información de cuenta actualizada correctamente.' });
     } catch (err: any) {
-      console.error('Error al guardar datos de cuenta:', err);
+      console.error('Error al guardar datos de cuenta:', {
+        code: err?.code || 'UNKNOWN_ERROR',
+        message: err?.message || String(err),
+      });
       setFeedback({ type: 'error', message: 'No se pudo guardar la información. Intenta de nuevo.' });
     } finally {
       setSaving(false);

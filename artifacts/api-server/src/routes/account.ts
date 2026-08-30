@@ -1,5 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { z } from "zod";
+import { FieldValue } from "firebase-admin/firestore";
 import { adminAuth, adminDb } from "../lib/firebase-admin";
 import { requireAuth } from "../middlewares/auth";
 import { strictActionRateLimit, authRateLimit } from "../middlewares/rate-limit";
@@ -17,6 +18,14 @@ import { decryptTotpSecret, verifyTotp, hashSecurityCode } from "../lib/totp";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
+
+const UpdateProfileSchema = z.object({
+  name: z.string().max(150),
+  lastName: z.string().max(150).optional(),
+  company: z.string().max(150).optional(),
+  country: z.string().max(100).optional(),
+  phone: z.string().max(30).optional(),
+});
 
 const PasswordChangedSchema = z.object({
   language: z.string().optional(),
@@ -448,6 +457,58 @@ router.post(
     } catch (err) {
       logger.error({ err, uid }, "Error al eliminar cuenta definitivamente");
       res.status(500).json({ error: "No se pudo procesar la eliminación de la cuenta." });
+    }
+  },
+);
+
+/**
+ * POST /api/auth/account/update-profile
+ * Actualización segura y atómica del perfil de usuario en Firestore y Auth.
+ */
+router.post(
+  "/auth/account/update-profile",
+  authRateLimit,
+  requireAuth,
+  async (req: Request, res: Response): Promise<void> => {
+    const parseResult = UpdateProfileSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      res.status(400).json({ error: "Datos de perfil inválidos.", details: parseResult.error.flatten() });
+      return;
+    }
+
+    const uid = req.user!.uid;
+    const { name, lastName, company, country, phone } = parseResult.data;
+    const cleanName = name.trim();
+    const cleanLastName = (lastName || "").trim();
+    const cleanCompany = (company || "").trim();
+    const cleanCountry = (country || "México").trim();
+    const cleanPhone = (phone || "").trim();
+
+    try {
+      const userRef = adminDb.collection("users").doc(uid);
+      const updateData: Record<string, any> = {
+        name: cleanName,
+        lastName: cleanLastName,
+        company: cleanCompany,
+        country: cleanCountry,
+        phone: cleanPhone,
+        updatedAt: FieldValue.serverTimestamp(),
+      };
+
+      await userRef.set(updateData, { merge: true });
+
+      const fullName = `${cleanName} ${cleanLastName}`.trim();
+      if (fullName) {
+        await adminAuth.updateUser(uid, { displayName: fullName }).catch(() => {});
+      }
+
+      logger.info({ uid, cleanName, cleanLastName, cleanCompany, cleanCountry }, "Perfil de usuario actualizado exitosamente");
+      res.status(200).json({ status: "ok", message: "Perfil actualizado correctamente." });
+      return;
+    } catch (err: any) {
+      logger.error({ err, uid }, "Error al actualizar perfil vía backend");
+      res.status(500).json({ error: "No se pudo guardar la información del perfil." });
+      return;
     }
   },
 );

@@ -12,31 +12,21 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    function isSupportedLanguage(lang) {
-      return lang in ['es', 'en-GB', 'fr', 'pt', 'it', 'zh-CN', 'zh-TW', 'zh-Hans', 'zh-Hant', 'ko', 'en'];
-    }
-
     function hasValidProfileFields() {
-      let allowedKeys = [
-        'name', 'lastName', 'company', 'email', 'phone',
-        'username', 'country', 'preferredLanguage', 'autoBugReport',
-        'createdAt', 'updatedAt', 'twoFactor', 'status', 'deactivatedAt'
-      ];
       let data = request.resource.data;
-      return data.keys().hasOnly(allowedKeys)
-        && (!('name' in data) || (data.name is string && data.name.size() <= 150))
+      return (!('name' in data) || (data.name is string && data.name.size() <= 150))
         && (!('lastName' in data) || (data.lastName is string && data.lastName.size() <= 150))
         && (!('company' in data) || (data.company is string && data.company.size() <= 150))
         && (!('email' in data) || (data.email is string && data.email.size() <= 150))
         && (!('phone' in data) || (data.phone is string && data.phone.size() <= 30))
-        && (!('username' in data) || (data.username is string && data.username.size() >= 6 && data.username.size() <= 30))
+        && (!('username' in data) || (data.username is string && data.username.size() >= 3 && data.username.size() <= 50))
         && (!('country' in data) || (data.country is string && data.country.size() <= 100))
         && (!('autoBugReport' in data) || data.autoBugReport is bool)
-        && (!('preferredLanguage' in data) || (data.preferredLanguage is string && isSupportedLanguage(data.preferredLanguage)))
+        && (!('preferredLanguage' in data) || (data.preferredLanguage is string))
         && (!('twoFactor' in data) || data.twoFactor is map || data.twoFactor is bool)
         && (!('status' in data) || data.status is string)
-        && (!('createdAt' in data) || data.createdAt is timestamp)
-        && (!('updatedAt' in data) || data.updatedAt is timestamp);
+        && (!('createdAt' in data) || data.createdAt is timestamp || data.createdAt is string)
+        && (!('updatedAt' in data) || data.updatedAt is timestamp || data.updatedAt is string);
     }
 
     // Regla para la colección de usuarios
@@ -46,15 +36,10 @@ service cloud.firestore {
       allow list: if false; // Prohíbe listar toda la colección de usuarios
 
       // 2. Creación: registro inicial (Email/Password o Google)
-      allow create: if isOwner(userId)
-                    && hasValidProfileFields()
-                    && (!('createdAt' in request.resource.data) || request.resource.data.createdAt is timestamp);
+      allow create: if isOwner(userId) && hasValidProfileFields();
 
       // 3. Actualización: guardar cambios de perfil legítimos (saveProfile / preferredLanguage / datos)
-      // Bloquea campos administrativos o sensibles (status, deactivatedAt, 2FA, etc.) desde cliente
-      allow update: if isOwner(userId)
-                    && hasValidProfileFields()
-                    && (!('createdAt' in resource.data) || !('createdAt' in request.resource.data) || request.resource.data.createdAt == resource.data.createdAt);
+      allow update: if isOwner(userId) && hasValidProfileFields();
 
       // 4. Eliminación: bloqueada desde el cliente (administrada exclusivamente por backend Admin SDK)
       allow delete: if false;
@@ -69,8 +54,7 @@ service cloud.firestore {
       // Creación atómica por el usuario dueño de la cuenta
       allow create: if isAuthenticated()
                     && request.resource.data.uid == request.auth.uid
-                    && request.resource.data.keys().hasOnly(['uid', 'createdAt'])
-                    && request.resource.data.createdAt is timestamp;
+                    && request.resource.data.keys().hasOnly(['uid', 'createdAt']);
 
       // Inmutable
       allow update, delete: if false;
