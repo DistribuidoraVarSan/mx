@@ -9,6 +9,7 @@ import {
   type SecurityAlertEmailParams,
   type TwoFactorStatusEmailParams,
   type VerificationCodeEmailParams,
+  type BackupCodesEmailParams,
   escapeHtml,
 } from "./types";
 
@@ -1693,5 +1694,83 @@ Si tú no solicitaste este código, por favor protege tu cuenta de inmediato.`;
     bodyHtml,
     textBody,
     subject: "Código de verificación para descarga de datos — Distribuidora Var San",
+  });
+}
+
+/**
+ * 10. Correo de Códigos de Respaldo para Autenticación en Dos Pasos (2FA)
+ */
+export function buildBackupCodesEmail(
+  language: EmailLanguage = "es",
+  params: BackupCodesEmailParams,
+): EmailContent {
+  const greeting = params.recipientName ? `Hola, ${escapeHtml(params.recipientName)}:` : "Hola:";
+  const codes = params.backupCodes || [];
+
+  const codesHtml = codes
+    .map(
+      (code) => `
+      <div style="background:#ffffff;border:1px solid #cbd5e1;border-radius:6px;padding:10px 14px;text-align:center;font-family:Consolas,'Courier New',monospace;font-size:16px;font-weight:700;letter-spacing:2px;color:#0a1f44;">
+        ${escapeHtml(code)}
+      </div>`
+    )
+    .join("");
+
+  const bodyHtml = `
+<p style="margin:0 0 16px;color:#2c3e50;font-size:16px;line-height:1.6;">
+<strong>${greeting}</strong>
+</p>
+<p style="margin:0 0 16px;color:#526274;font-size:15px;line-height:1.6;">
+La autenticación en dos fases (2FA) ha sido activada en tu cuenta de <strong>Distribuidora Var San</strong>. A continuación te proporcionamos tus <strong>códigos de respaldo</strong> oficiales.
+</p>
+<p style="margin:0 0 16px;color:#526274;font-size:14px;line-height:1.6;">
+Puedes utilizar cada uno de estos códigos una única vez para acceder a tu cuenta si no tienes acceso a tu número celular o no puedes recibir el mensaje SMS de seguridad.
+</p>
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:20px;margin:20px 0;">
+  <p style="margin:0 0 12px;color:#0a1f44;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;text-align:center;">
+    Tus códigos de respaldo de un solo uso
+  </p>
+  <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:10px;">
+    ${codesHtml}
+  </div>
+</div>
+<div style="background:#fffbeb;border-left:4px solid #f59e0b;padding:12px 16px;border-radius:0 4px 4px 0;margin:18px 0;">
+  <p style="margin:0 0 6px;color:#92400e;font-size:13px;font-weight:700;">
+    Recomendaciones de seguridad importantes:
+  </p>
+  <ul style="margin:0;padding-left:18px;color:#92400e;font-size:13px;line-height:1.5;">
+    <li>Cada código solo puede utilizarse <strong>una sola vez</strong>.</li>
+    <li>Guarda estos códigos en un lugar seguro (por ejemplo, un gestor de contraseñas).</li>
+    <li><strong>Nunca compartas estos códigos con nadie</strong>. El personal de Distribuidora Var San jamás te pedirá tus códigos de respaldo.</li>
+  </ul>
+</div>
+<p style="margin:0 0 10px;color:#64748b;font-size:13px;line-height:1.5;">
+Si sospechas que alguien ha tenido acceso no autorizado a tus códigos, puedes generar un nuevo conjunto en cualquier momento desde la sección de <strong>Seguridad</strong> en tu Portal de Cliente.
+</p>`;
+
+  const codesText = codes.map((c, i) => `  ${i + 1}. ${c}`).join("\n");
+  const textBody = `${greeting}
+
+La autenticación en dos fases (2FA) ha sido activada en tu cuenta de Distribuidora Var San.
+
+Tus códigos de respaldo de un solo uso son:
+
+${codesText}
+
+INSTRUCCIONES DE SEGURIDAD:
+- Cada código puede utilizarse una sola vez si no tienes acceso a tu teléfono celular.
+- Guárdalos en un lugar seguro y no los compartas con nadie.
+- El personal de Distribuidora Var San nunca te solicitará tus códigos de respaldo.
+
+CALIDAD Y CONFIANZA EN CADA SUMINISTRO.
+Distribuidora Var San`;
+
+  return renderBaseEmail({
+    language,
+    kicker: "SEGURIDAD Y PROTECCIÓN",
+    heading: "Tus códigos de respaldo de autenticación en dos pasos",
+    bodyHtml,
+    textBody,
+    subject: "Mis códigos de respaldo — Distribuidora Var San",
   });
 }

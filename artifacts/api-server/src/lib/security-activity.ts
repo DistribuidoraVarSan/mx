@@ -8,6 +8,7 @@ export type SecurityActivityType =
   | "new_device"
   | "2fa_enabled"
   | "2fa_disabled"
+  | "2fa_backup_regenerated"
   | "backup_code_used"
   | "rescue_code_used"
   | "session_revoked"

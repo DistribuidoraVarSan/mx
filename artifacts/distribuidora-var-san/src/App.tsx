@@ -82,6 +82,7 @@ import {
   Database,
   Cpu,
   Layers,
+  MessageSquare,
 } from 'lucide-react';
 import {
   registerDeviceSession,
@@ -95,6 +96,7 @@ import {
   setup2FA,
   enable2FA,
   verify2FAChallenge,
+  send2FALoginCode,
   disable2FA,
   request2FARescueCode,
   notifyPasswordChanged,
@@ -221,7 +223,7 @@ const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [twoFactorCodeInput, setTwoFactorCodeInput] = useState('');
   const [twoFactorBackupInput, setTwoFactorBackupInput] = useState('');
   const [twoFactorRescueInput, setTwoFactorRescueInput] = useState('');
-  const [twoFactorChallengeMethod, setTwoFactorChallengeMethod] = useState<'totp' | 'backup' | 'rescue'>('totp');
+  const [twoFactorChallengeMethod, setTwoFactorChallengeMethod] = useState<'sms' | 'backup' | 'rescue'>('sms');
   const [twoFactorLoading, setTwoFactorLoading] = useState(false);
   const [twoFactorFeedback, setTwoFactorFeedback] = useState<{ type: 'success' | 'warning'; text: string } | null>(null);
   const [copiedKey, setCopiedKey] = useState(false);
@@ -615,11 +617,12 @@ t.account.errorGeneric
         setAccountOpen(false);
         setPortalOpen(false);
         setTwoFactorChallengeOpen(true);
-        setTwoFactorChallengeMethod('totp');
+        setTwoFactorChallengeMethod('sms');
         setTwoFactorCodeInput('');
         setTwoFactorBackupInput('');
         setTwoFactorRescueInput('');
         setTwoFactorFeedback(null);
+        send2FALoginCode(user.uid, language).catch(() => {});
         return;
       }
     } catch (err) {
@@ -727,7 +730,7 @@ t.account.errorGeneric
       const params: { code?: string; backupCode?: string; rescueCode?: string; language?: string } = {
         language,
       };
-      if (twoFactorChallengeMethod === 'totp') params.code = twoFactorCodeInput.trim();
+      if (twoFactorChallengeMethod === 'sms') params.code = twoFactorCodeInput.trim();
       else if (twoFactorChallengeMethod === 'backup') params.backupCode = twoFactorBackupInput.trim();
       else if (twoFactorChallengeMethod === 'rescue') params.rescueCode = twoFactorRescueInput.trim();
 
@@ -2126,8 +2129,10 @@ t.account.errorGeneric
               <BrandMark />
               <div><strong>DISTRIBUIDORA VAR SAN</strong><small>{t.account.portalTitle}</small></div>
             </div>
-            <h2 id="twofactor-challenge-heading">{t.twoFactor.challengeTitle}</h2>
-            <p className="modal-intro">{t.twoFactor.challengeIntro}</p>
+            <h2 id="twofactor-challenge-heading">Verificación en Dos Pasos</h2>
+            <p className="modal-intro">
+              Tu cuenta tiene protección 2FA activa. Te enviaremos un código de 6 dígitos por SMS para confirmar tu identidad.
+            </p>
 
             {twoFactorFeedback && (
               <div className={`account-message account-message--${twoFactorFeedback.type === 'success' ? 'success' : 'warning'}`} style={{ marginBottom: 16 }}>
@@ -2136,37 +2141,37 @@ t.account.errorGeneric
             )}
 
             <form className="account-form" onSubmit={handleVerify2FAChallenge}>
-              {twoFactorChallengeMethod === 'totp' && (
+              {twoFactorChallengeMethod === 'sms' && (
                 <div className="form-field">
-                  <label htmlFor="input-challenge-totp">{t.twoFactor.step2EnterCode}</label>
+                  <label htmlFor="input-challenge-sms">Ingresa el código de 6 dígitos que recibiste por SMS:</label>
                   <input
-                    id="input-challenge-totp"
+                    id="input-challenge-sms"
                     type="text"
                     inputMode="numeric"
                     autoComplete="one-time-code"
                     maxLength={6}
                     required
-                    placeholder={t.twoFactor.inputCodePlaceholder}
+                    placeholder="_ _ _ _ _ _"
                     value={twoFactorCodeInput}
-                    onChange={(e) => setTwoFactorCodeInput(e.target.value)}
+                    onChange={(e) => setTwoFactorCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     style={{ textAlign: 'center', letterSpacing: '0.2em', fontSize: '1.25rem', fontWeight: 700 }}
-                    data-testid="input-2fa-challenge-totp"
+                    data-testid="input-2fa-challenge-sms"
                   />
                 </div>
               )}
 
               {twoFactorChallengeMethod === 'backup' && (
                 <div className="form-field">
-                  <label htmlFor="input-challenge-backup">{t.twoFactor.enterBackupCodePlaceholder}</label>
+                  <label htmlFor="input-challenge-backup">Código de respaldo (un solo uso):</label>
                   <input
                     id="input-challenge-backup"
                     type="text"
                     autoComplete="off"
-                    maxLength={10}
+                    maxLength={9}
                     required
-                    placeholder={t.twoFactor.enterBackupCodePlaceholder}
+                    placeholder="XXXX-XXXX"
                     value={twoFactorBackupInput}
-                    onChange={(e) => setTwoFactorBackupInput(e.target.value)}
+                    onChange={(e) => setTwoFactorBackupInput(e.target.value.toUpperCase())}
                     style={{ textAlign: 'center', letterSpacing: '0.15em', fontSize: '1.1rem', fontWeight: 600, fontFamily: 'monospace' }}
                     data-testid="input-2fa-challenge-backup"
                   />
@@ -2175,16 +2180,16 @@ t.account.errorGeneric
 
               {twoFactorChallengeMethod === 'rescue' && (
                 <div className="form-field">
-                  <label htmlFor="input-challenge-rescue">{t.twoFactor.enterRescueCodePlaceholder}</label>
+                  <label htmlFor="input-challenge-rescue">Código de rescate enviado a tu correo:</label>
                   <input
                     id="input-challenge-rescue"
                     type="text"
                     inputMode="numeric"
                     maxLength={6}
                     required
-                    placeholder={t.twoFactor.inputCodePlaceholder}
+                    placeholder="_ _ _ _ _ _"
                     value={twoFactorRescueInput}
-                    onChange={(e) => setTwoFactorRescueInput(e.target.value)}
+                    onChange={(e) => setTwoFactorRescueInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     style={{ textAlign: 'center', letterSpacing: '0.2em', fontSize: '1.2rem', fontWeight: 700 }}
                     data-testid="input-2fa-challenge-rescue"
                   />
@@ -2199,19 +2204,19 @@ t.account.errorGeneric
                 data-testid="button-submit-2fa-challenge"
               >
                 {twoFactorLoading ? <Loader2 size={15} className="animate-spin" /> : <ShieldCheck size={15} />}
-                <span>{twoFactorLoading ? t.twoFactor.verifying : t.twoFactor.verifyButton}</span>
+                <span>{twoFactorLoading ? 'Verificando...' : 'Verificar y acceder'}</span>
               </button>
             </form>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 16, fontSize: '0.82rem', textAlign: 'center' }}>
-              {twoFactorChallengeMethod !== 'totp' && (
+              {twoFactorChallengeMethod !== 'sms' && (
                 <button
                   type="button"
-                  onClick={() => { setTwoFactorChallengeMethod('totp'); setTwoFactorFeedback(null); }}
+                  onClick={() => { setTwoFactorChallengeMethod('sms'); setTwoFactorFeedback(null); }}
                   style={{ background: 'none', border: 'none', color: 'var(--navy)', textDecoration: 'underline', cursor: 'pointer', padding: 4 }}
                 >
-                  <KeyRound size={12} style={{ display: 'inline', marginRight: 4 }} />
-                  {t.twoFactor.useTotpLink}
+                  <MessageSquare size={12} style={{ display: 'inline', marginRight: 4 }} />
+                  Verificar con código SMS
                 </button>
               )}
 
@@ -2221,8 +2226,8 @@ t.account.errorGeneric
                   onClick={() => { setTwoFactorChallengeMethod('backup'); setTwoFactorFeedback(null); }}
                   style={{ background: 'none', border: 'none', color: 'var(--navy)', textDecoration: 'underline', cursor: 'pointer', padding: 4 }}
                 >
-                  <LockKeyhole size={12} style={{ display: 'inline', marginRight: 4 }} />
-                  {t.twoFactor.useBackupCodeLink}
+                  <KeyRound size={12} style={{ display: 'inline', marginRight: 4 }} />
+                  ¿No tienes acceso a tu teléfono? Usa un código de respaldo
                 </button>
               )}
 
@@ -2234,7 +2239,7 @@ t.account.errorGeneric
                   style={{ background: 'none', border: 'none', color: '#64748b', textDecoration: 'underline', cursor: 'pointer', padding: 4 }}
                 >
                   <Mail size={12} style={{ display: 'inline', marginRight: 4 }} />
-                  {t.twoFactor.rescueEmailLink}
+                  Recibir código de acceso por correo
                 </button>
               )}
             </div>

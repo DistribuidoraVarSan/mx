@@ -541,6 +541,113 @@ export async function disable2FA(
   }
 }
 
+/**
+ * Obtiene los códigos de respaldo 2FA del usuario autenticado.
+ */
+export async function fetch2FABackupCodes(
+  user: FirebaseUser,
+): Promise<{ success: boolean; backupCodes?: string[]; total?: number; unused?: number; error?: string }> {
+  if (!user) return { success: false, error: "Usuario no autenticado." };
+
+  try {
+    const idToken = await user.getIdToken();
+    const currentSessionId = getOrCreateSessionId();
+
+    const response = await fetch(`${getApiBaseUrl()}/auth/2fa/backup-codes`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+        "x-session-id": currentSessionId,
+      },
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { success: false, error: data.error || "No se pudieron obtener los códigos de respaldo." };
+    }
+
+    return {
+      success: true,
+      backupCodes: data.backupCodes || [],
+      total: data.total,
+      unused: data.unused,
+    };
+  } catch (error) {
+    console.error("Error al obtener códigos de respaldo:", error);
+    return { success: false, error: "Error de red al consultar códigos de respaldo." };
+  }
+}
+
+/**
+ * Regenera un conjunto nuevo de códigos de respaldo 2FA.
+ */
+export async function regenerate2FABackupCodes(
+  user: FirebaseUser,
+  language?: string,
+): Promise<{ success: boolean; backupCodes?: string[]; message?: string; error?: string }> {
+  if (!user) return { success: false, error: "Usuario no autenticado." };
+
+  try {
+    const idToken = await user.getIdToken();
+    const currentSessionId = getOrCreateSessionId();
+
+    const response = await fetch(`${getApiBaseUrl()}/auth/2fa/backup-codes/regenerate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
+        "x-session-id": currentSessionId,
+      },
+      body: JSON.stringify({ language }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { success: false, error: data.error || "No se pudieron regenerar los códigos." };
+    }
+
+    return { success: true, backupCodes: data.backupCodes || [], message: data.message };
+  } catch (error) {
+    console.error("Error al regenerar códigos de respaldo:", error);
+    return { success: false, error: "Error de red al regenerar códigos." };
+  }
+}
+
+/**
+ * Envía por correo los códigos de respaldo existentes al usuario.
+ */
+export async function send2FABackupCodesEmail(
+  user: FirebaseUser,
+  language?: string,
+): Promise<{ success: boolean; message?: string; error?: string }> {
+  if (!user) return { success: false, error: "Usuario no autenticado." };
+
+  try {
+    const idToken = await user.getIdToken();
+    const currentSessionId = getOrCreateSessionId();
+
+    const response = await fetch(`${getApiBaseUrl()}/auth/2fa/send-backup-codes-email`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
+        "x-session-id": currentSessionId,
+      },
+      body: JSON.stringify({ language }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { success: false, error: data.error || "No se pudo enviar el correo con los códigos." };
+    }
+
+    return { success: true, message: data.message };
+  } catch (error) {
+    console.error("Error al enviar códigos de respaldo por correo:", error);
+    return { success: false, error: "Error de red al enviar el correo." };
+  }
+}
+
 export interface TwoFactorSetupData {
   status?: string;
   secretKey?: string;

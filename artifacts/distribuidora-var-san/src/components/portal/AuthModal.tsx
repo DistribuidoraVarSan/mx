@@ -68,10 +68,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   // Estados de reto 2FA en login
   const [pending2FAUser, setPending2FAUser] = useState<any>(null);
   const [pending2FAUid, setPending2FAUid] = useState('');
-  const [pending2FAMethod, setPending2FAMethod] = useState<'email' | 'sms'>('email');
+  const [pending2FAMethod, setPending2FAMethod] = useState<'email' | 'sms'>('sms');
   const [pending2FATarget, setPending2FATarget] = useState('');
   const [twoFactorCode, setTwoFactorCode] = useState('');
   const [twoFactorCooldown, setTwoFactorCooldown] = useState(0);
+  const [isUsingBackupCode, setIsUsingBackupCode] = useState(false);
+
 
   // Estados de recuperación de contraseña con código de 6 dígitos
   const [resetStep, setResetStep] = useState<1 | 2>(1);
@@ -485,14 +487,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  // Manejador de verificación de código 2FA en login
+  // Manejador de verificación de código 2FA o código de respaldo en login
   const handleVerify2FALogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pending2FAUid || twoFactorCode.trim().length !== 6) return;
+    const cleanCode = twoFactorCode.trim();
+    if (!pending2FAUid || cleanCode.length < 6) return;
     setLoading(true);
     setFeedback(null);
     try {
-      const res = await verify2FALoginCode(pending2FAUid, twoFactorCode.trim());
+      const res = await verify2FALoginCode(pending2FAUid, cleanCode);
       if (res.success) {
         setIsSuccessAnim(true);
         setTimeout(() => {
@@ -503,7 +506,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           onClose();
         }, 550);
       } else {
-        setFeedback({ type: 'error', message: res.error || 'Código de seguridad incorrecto o expirado.' });
+        setFeedback({ type: 'error', message: res.error || 'Código incorrecto o expirado.' });
       }
     } catch (err) {
       setFeedback({ type: 'error', message: 'Error de conexión al verificar el código.' });
@@ -1146,78 +1149,174 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         )}
 
-        {/* VISTA 4: RETO DE AUTENTICACIÓN EN DOS FASES EN LOGIN */}
+        {/* VISTA 4: RETO DE AUTENTICACIÓN EN DOS PASOS EN LOGIN */}
         {tab === '2fa-challenge' && (
           <form onSubmit={handleVerify2FALogin} noValidate className="auth-forgot-flow" style={{ marginTop: 6 }}>
-            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: 14, marginBottom: 18, textAlign: 'center' }}>
-              <p style={{ fontSize: '0.86rem', color: '#475569', margin: 0, lineHeight: 1.5 }}>
-                Hemos enviado un código de 6 dígitos mediante{' '}
-                <strong style={{ color: 'var(--navy)' }}>
-                  {pending2FAMethod === 'sms' ? `Mensaje SMS a ${pending2FATarget}` : `Correo electrónico (${pending2FATarget})`}
-                </strong>.
+            <div style={{ textAlign: 'center', marginBottom: 16 }}>
+              <h3 style={{ margin: '0 0 6px', color: 'var(--navy)', fontSize: '1.2rem', fontWeight: 800 }}>
+                Verificación en Dos Pasos
+              </h3>
+              <p style={{ fontSize: '0.84rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                Tu cuenta tiene protección 2FA activa. Te enviaremos un código de 6 dígitos por SMS para confirmar tu identidad.
               </p>
             </div>
 
-            <div className="form-field" style={{ marginBottom: 18 }}>
-              <label className="form-label" htmlFor="login-2fa-code" style={{ textAlign: 'center', display: 'block', marginBottom: 8 }}>
-                Código de verificación <span style={{ color: '#b91c1c' }}>*</span>
-              </label>
-              <div style={{ maxWidth: 280, margin: '0 auto' }}>
-                <input
-                  id="login-2fa-code"
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={6}
-                  className="form-input"
-                  placeholder="_ _ _ _ _ _"
-                  value={twoFactorCode}
-                  onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  onFocus={() => setFocusedField('two-factor-code')}
-                  onBlur={() => setFocusedField(null)}
-                  required
-                  autoFocus
-                  style={{
-                    textAlign: 'center',
-                    letterSpacing: 8,
-                    fontWeight: 800,
-                    fontSize: '1.25rem',
-                    padding: '12px 14px',
-                  }}
-                  data-testid="input-login-2fa-code"
-                />
-              </div>
-            </div>
+            {!isUsingBackupCode ? (
+              <>
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: 12, marginBottom: 16, textAlign: 'center' }}>
+                  <p style={{ fontSize: '0.84rem', color: '#334155', margin: 0, lineHeight: 1.5 }}>
+                    Te enviamos un código de 6 dígitos por {pending2FAMethod === 'sms' ? 'SMS a tu número' : 'correo a'}{' '}
+                    <strong style={{ color: 'var(--navy)' }}>{pending2FATarget}</strong>.
+                  </p>
+                </div>
 
-            <div style={{ textAlign: 'center', marginBottom: 20 }}>
-              <button
-                type="button"
-                className="btn-link"
-                onClick={handleResend2FALoginCode}
-                disabled={loading || twoFactorCooldown > 0}
-                style={{ fontSize: '0.84rem', color: twoFactorCooldown > 0 ? '#94a3b8' : 'var(--gold)', fontWeight: 600 }}
-              >
-                {twoFactorCooldown > 0
-                  ? `¿No recibiste el código? Reenviar en ${twoFactorCooldown}s`
-                  : '¿No recibiste el código? Reenviar código'}
-              </button>
-            </div>
+                <div className="form-field" style={{ marginBottom: 16 }}>
+                  <label className="form-label" htmlFor="login-2fa-code" style={{ textAlign: 'center', display: 'block', marginBottom: 8 }}>
+                    Ingresa el código de 6 dígitos que recibiste por {pending2FAMethod === 'sms' ? 'SMS' : 'correo'}:
+                  </label>
+                  <div style={{ maxWidth: 280, margin: '0 auto' }}>
+                    <input
+                      id="login-2fa-code"
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      className="form-input"
+                      placeholder="_ _ _ _ _ _"
+                      value={twoFactorCode}
+                      onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      onFocus={() => setFocusedField('two-factor-code')}
+                      onBlur={() => setFocusedField(null)}
+                      required
+                      autoFocus
+                      style={{
+                        textAlign: 'center',
+                        letterSpacing: 8,
+                        fontWeight: 800,
+                        fontSize: '1.25rem',
+                        padding: '12px 14px',
+                      }}
+                      data-testid="input-login-2fa-code"
+                    />
+                  </div>
+                </div>
 
-            <button
-              type="submit"
-              className="button button--navy"
-              style={{ width: '100%', padding: '12px 20px', fontSize: '0.92rem', marginBottom: 14 }}
-              disabled={loading || twoFactorCode.trim().length !== 6}
-              data-testid="button-submit-2fa-login"
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  <span>Verificando...</span>
-                </>
-              ) : (
-                <span>Verificar e iniciar sesión</span>
-              )}
-            </button>
+                <div style={{ textAlign: 'center', marginBottom: 16 }}>
+                  <button
+                    type="button"
+                    className="btn-link"
+                    onClick={handleResend2FALoginCode}
+                    disabled={loading || twoFactorCooldown > 0}
+                    style={{ fontSize: '0.82rem', color: twoFactorCooldown > 0 ? '#94a3b8' : 'var(--gold)', fontWeight: 600 }}
+                  >
+                    {twoFactorCooldown > 0
+                      ? `¿No recibiste el código? Reenviar en ${twoFactorCooldown}s`
+                      : '¿No recibiste el código? Reenviar código por SMS'}
+                  </button>
+                </div>
+
+                <button
+                  type="submit"
+                  className="button button--navy"
+                  style={{ width: '100%', padding: '12px 20px', fontSize: '0.92rem', marginBottom: 14 }}
+                  disabled={loading || twoFactorCode.trim().length !== 6}
+                  data-testid="button-submit-2fa-login"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Verificando...</span>
+                    </>
+                  ) : (
+                    <span>Verificar y acceder</span>
+                  )}
+                </button>
+
+                <div style={{ textAlign: 'center', marginBottom: 14 }}>
+                  <button
+                    type="button"
+                    className="btn-link"
+                    onClick={() => {
+                      setIsUsingBackupCode(true);
+                      setTwoFactorCode('');
+                      setFeedback(null);
+                    }}
+                    style={{ fontSize: '0.82rem', color: 'var(--navy)', textDecoration: 'underline' }}
+                  >
+                    ¿No tienes acceso a tu teléfono? Usa un código de respaldo
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: 12, marginBottom: 16, textAlign: 'center' }}>
+                  <p style={{ fontSize: '0.84rem', color: '#334155', margin: 0, lineHeight: 1.5 }}>
+                    Introduce uno de tus <strong>códigos de respaldo de un solo uso</strong> (formato <code>XXXX-XXXX</code>).
+                  </p>
+                </div>
+
+                <div className="form-field" style={{ marginBottom: 16 }}>
+                  <label className="form-label" htmlFor="login-backup-code" style={{ textAlign: 'center', display: 'block', marginBottom: 8 }}>
+                    Código de respaldo:
+                  </label>
+                  <div style={{ maxWidth: 280, margin: '0 auto' }}>
+                    <input
+                      id="login-backup-code"
+                      type="text"
+                      maxLength={9}
+                      className="form-input"
+                      placeholder="XXXX-XXXX"
+                      value={twoFactorCode}
+                      onChange={(e) => setTwoFactorCode(e.target.value.toUpperCase())}
+                      onFocus={() => setFocusedField('two-factor-code')}
+                      onBlur={() => setFocusedField(null)}
+                      required
+                      autoFocus
+                      style={{
+                        textAlign: 'center',
+                        letterSpacing: 4,
+                        fontWeight: 700,
+                        fontFamily: 'monospace',
+                        fontSize: '1.15rem',
+                        padding: '12px 14px',
+                      }}
+                      data-testid="input-login-backup-code"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="button button--navy"
+                  style={{ width: '100%', padding: '12px 20px', fontSize: '0.92rem', marginBottom: 14 }}
+                  disabled={loading || twoFactorCode.trim().length < 8}
+                  data-testid="button-submit-backup-code"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Verificando...</span>
+                    </>
+                  ) : (
+                    <span>Verificar con código de respaldo</span>
+                  )}
+                </button>
+
+                <div style={{ textAlign: 'center', marginBottom: 14 }}>
+                  <button
+                    type="button"
+                    className="btn-link"
+                    onClick={() => {
+                      setIsUsingBackupCode(false);
+                      setTwoFactorCode('');
+                      setFeedback(null);
+                    }}
+                    style={{ fontSize: '0.82rem', color: 'var(--navy)', textDecoration: 'underline' }}
+                  >
+                    ← Volver a verificación por SMS
+                  </button>
+                </div>
+              </>
+            )}
 
             <div style={{ textAlign: 'center' }}>
               <button

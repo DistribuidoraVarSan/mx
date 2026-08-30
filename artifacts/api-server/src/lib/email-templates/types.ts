@@ -115,3 +115,9 @@ export interface DataExportReadyEmailParams {
   expiresInHours?: number;
   summaryText?: string;
 }
+
+export interface BackupCodesEmailParams {
+  recipientName?: string;
+  backupCodes: string[];
+  generatedAt?: string;
+}

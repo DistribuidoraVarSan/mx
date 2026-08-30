@@ -8,6 +8,7 @@ import { sendEmail, EMAIL_SENDERS } from "../lib/mailer";
 import {
   buildVerificationCodeEmail,
   buildSecurityAlertEmail,
+  buildBackupCodesEmail,
   resolveEmailLanguage,
 } from "../lib/email-templates";
 import { recordSecurityActivity } from "../lib/security-activity";
@@ -20,9 +21,33 @@ import {
 
 const router: IRouter = Router();
 
-// Helper para generar hash SHA-256 seguro de un código numérico
+// Helper para generar hash SHA-256 seguro de un código numérico o de respaldo
 function hashSecurityCode(code: string, salt: string): string {
-  return crypto.createHash("sha256").update(`${salt}:${code}`).digest("hex");
+  const normalized = code.trim().toUpperCase();
+  return crypto.createHash("sha256").update(`${salt}:${normalized}`).digest("hex");
+}
+
+// Genera un conjunto de códigos de respaldo criptográficamente aleatorios de un solo uso
+function generateBackupCodes(uid: string, count = 8): {
+  rawCodes: string[];
+  hashedRecords: { codeHash: string; used: boolean; createdAt: string }[];
+} {
+  const rawCodes: string[] = [];
+  const hashedRecords: { codeHash: string; used: boolean; createdAt: string }[] = [];
+  const nowIso = new Date().toISOString();
+
+  for (let i = 0; i < count; i++) {
+    const part1 = crypto.randomBytes(2).toString("hex").toUpperCase();
+    const part2 = crypto.randomBytes(2).toString("hex").toUpperCase();
+    const code = `${part1}-${part2}`;
+    rawCodes.push(code);
+    hashedRecords.push({
+      codeHash: hashSecurityCode(code, uid),
+      used: false,
+      createdAt: nowIso,
+    });
+  }
+  return { rawCodes, hashedRecords };
 }
 
 // Normaliza un número telefónico (e.g. +52 55 1234 5678 -> +525512345678)
@@ -328,11 +353,22 @@ router.post(
 
       const nowIso = new Date().toISOString();
 
+      // Generar 8 códigos de respaldo criptográficos de un solo uso
+      const { rawCodes, hashedRecords } = generateBackupCodes(uid, 8);
+
+      // Guardar códigos hasheados en users/{uid}/security/2fa_backup_codes
+      await adminDb.collection("users").doc(uid).collection("security").doc("2fa_backup_codes").set({
+        codes: hashedRecords,
+        generatedAt: nowIso,
+      });
+
       // Guardar en users/{uid}/security/2fa
       await adminDb.collection("users").doc(uid).collection("security").doc("2fa").set({
         enabled: true,
         method,
         phone,
+        backupCodes: rawCodes,
+        backupCodesCount: rawCodes.length,
         enabledAt: nowIso,
         updatedAt: nowIso,
       });
@@ -357,31 +393,30 @@ router.post(
         description: `Se activó la protección 2FA vía ${method === "sms" ? "Mensaje SMS" : "Correo electrónico"}.`,
       });
 
-      // Notificación de seguridad por correo oficial
+      // Enviar correo de códigos de respaldo oficial con Resend
       if (userEmail) {
         const userData = await fetchUserData(uid);
         const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
         const recipientName = userData.name || req.user!.name || "Cliente Var San";
-        const { subject, html, text } = buildSecurityAlertEmail(emailLang, {
+        const backupEmail = buildBackupCodesEmail(emailLang, {
           recipientName,
-          alertTitle: "2FA Activado exitosamente",
-          alertDetails: `La autenticación en dos fases ha sido activada en tu cuenta utilizando ${
-            method === "sms" ? `Mensaje SMS al número ${maskIdentifier(phone, true)}` : "Correo electrónico"
-          }.`,
+          backupCodes: rawCodes,
+          generatedAt: nowIso,
         });
 
         sendEmail({
           to: userEmail,
-          subject: `[Seguridad] ${subject}`,
-          html,
-          text,
+          subject: backupEmail.subject,
+          html: backupEmail.html,
+          text: backupEmail.text,
           from: EMAIL_SENDERS.security,
-        }).catch((err) => logger.warn({ err }, "No se pudo enviar alerta de 2FA activado"));
+        }).catch((err) => logger.warn({ err }, "No se pudo enviar correo de códigos de respaldo"));
       }
 
       res.status(200).json({
         status: "ok",
         message: "¡Autenticación en dos fases activada exitosamente!",
+        backupCodes: rawCodes,
         twoFactor: {
           enabled: true,
           method,
@@ -392,6 +427,207 @@ router.post(
     } catch (err) {
       logger.error({ err, uid }, "Error al confirmar y activar 2FA");
       res.status(500).json({ error: "No se pudo activar 2FA. Intenta de nuevo." });
+    }
+  },
+);
+
+/**
+ * GET /api/auth/2fa/backup-codes (y /api/auth/two-factor/backup-codes)
+ * Consulta los códigos de respaldo del usuario autenticado.
+ */
+router.get(
+  ["/auth/2fa/backup-codes", "/auth/two-factor/backup-codes"],
+  strictActionRateLimit,
+  requireAuth,
+  async (req: Request, res: Response) => {
+    const uid = req.user!.uid;
+    try {
+      const secDoc = await adminDb.collection("users").doc(uid).collection("security").doc("2fa").get();
+      const backupDoc = await adminDb.collection("users").doc(uid).collection("security").doc("2fa_backup_codes").get();
+
+      if (!secDoc.exists || secDoc.data()?.enabled !== true) {
+        res.status(400).json({ error: "La autenticación en dos fases no está activa." });
+        return;
+      }
+
+      const secData = secDoc.data()!;
+      const backupData = backupDoc.exists ? backupDoc.data()! : null;
+      const hashedCodes = backupData?.codes || [];
+      const unusedCount = hashedCodes.filter((c: any) => !c.used).length;
+
+      let codes: string[] = secData.backupCodes || [];
+      if (codes.length === 0) {
+        const generated = generateBackupCodes(uid, 8);
+        codes = generated.rawCodes;
+        await adminDb.collection("users").doc(uid).collection("security").doc("2fa_backup_codes").set({
+          codes: generated.hashedRecords,
+          generatedAt: new Date().toISOString(),
+        });
+        await adminDb.collection("users").doc(uid).collection("security").doc("2fa").set(
+          { backupCodes: codes, backupCodesCount: codes.length },
+          { merge: true },
+        );
+      }
+
+      res.status(200).json({
+        status: "ok",
+        backupCodes: codes,
+        total: codes.length,
+        unused: unusedCount || codes.length,
+        generatedAt: secData.updatedAt || secData.enabledAt,
+      });
+    } catch (err) {
+      logger.error({ err, uid }, "Error al obtener códigos de respaldo");
+      res.status(500).json({ error: "No se pudieron obtener los códigos de respaldo." });
+    }
+  },
+);
+
+/**
+ * POST /api/auth/2fa/backup-codes/regenerate (y /api/auth/two-factor/backup-codes/regenerate)
+ * Regenera un conjunto nuevo de códigos de respaldo y los envía por correo.
+ */
+router.post(
+  ["/auth/2fa/backup-codes/regenerate", "/auth/two-factor/backup-codes/regenerate"],
+  strictActionRateLimit,
+  requireAuth,
+  async (req: Request, res: Response) => {
+    const uid = req.user!.uid;
+    const userEmail = req.user!.email;
+    const reqLang = (req.body?.language as string) || undefined;
+
+    try {
+      const secDoc = await adminDb.collection("users").doc(uid).collection("security").doc("2fa").get();
+      if (!secDoc.exists || secDoc.data()?.enabled !== true) {
+        res.status(400).json({ error: "La autenticación en dos fases no está activa." });
+        return;
+      }
+
+      const nowIso = new Date().toISOString();
+      const { rawCodes, hashedRecords } = generateBackupCodes(uid, 8);
+
+      await adminDb.collection("users").doc(uid).collection("security").doc("2fa_backup_codes").set({
+        codes: hashedRecords,
+        generatedAt: nowIso,
+      });
+
+      await adminDb.collection("users").doc(uid).collection("security").doc("2fa").set(
+        {
+          backupCodes: rawCodes,
+          backupCodesCount: rawCodes.length,
+          updatedAt: nowIso,
+        },
+        { merge: true },
+      );
+
+      await recordSecurityActivity(uid, {
+        type: "2fa_backup_regenerated",
+        title: "Códigos de respaldo regenerados",
+        description: "Se generó un nuevo conjunto de códigos de respaldo de un solo uso.",
+      });
+
+      // Enviar correo con los nuevos códigos
+      if (userEmail) {
+        const userData = await fetchUserData(uid);
+        const emailLang = resolveEmailLanguage(userData.preferredLanguage, reqLang);
+        const recipientName = userData.name || req.user!.name || "Cliente Var San";
+        const backupEmail = buildBackupCodesEmail(emailLang, {
+          recipientName,
+          backupCodes: rawCodes,
+          generatedAt: nowIso,
+        });
+
+        sendEmail({
+          to: userEmail,
+          subject: backupEmail.subject,
+          html: backupEmail.html,
+          text: backupEmail.text,
+          from: EMAIL_SENDERS.security,
+        }).catch((err) => logger.warn({ err }, "No se pudo enviar correo de códigos de respaldo regenerados"));
+      }
+
+      res.status(200).json({
+        status: "ok",
+        message: "Nuevos códigos de respaldo generados y enviados a tu correo.",
+        backupCodes: rawCodes,
+        generatedAt: nowIso,
+      });
+    } catch (err) {
+      logger.error({ err, uid }, "Error al regenerar códigos de respaldo");
+      res.status(500).json({ error: "No se pudieron regenerar los códigos de respaldo." });
+    }
+  },
+);
+
+/**
+ * POST /api/auth/2fa/send-backup-codes-email (y /api/auth/two-factor/send-backup-codes-email)
+ * Envía por correo los códigos de respaldo existentes al usuario.
+ */
+router.post(
+  ["/auth/2fa/send-backup-codes-email", "/auth/two-factor/send-backup-codes-email"],
+  strictActionRateLimit,
+  async (req: Request, res: Response) => {
+    const userEmail = (req.body?.email as string) || req.user?.email;
+    const uid = (req.body?.uid as string) || req.user?.uid;
+    const reqLang = (req.body?.language as string) || undefined;
+
+    if (!userEmail) {
+      res.status(400).json({ error: "Correo electrónico requerido." });
+      return;
+    }
+
+    try {
+      let codes: string[] = [];
+      let recipientName = "Cliente Var San";
+
+      if (uid) {
+        const secDoc = await adminDb.collection("users").doc(uid).collection("security").doc("2fa").get();
+        const secData = secDoc.exists ? secDoc.data()! : null;
+        codes = secData?.backupCodes || [];
+
+        const userData = await fetchUserData(uid);
+        recipientName = userData.name || "Cliente Var San";
+      }
+
+      if (codes.length === 0) {
+        const generated = generateBackupCodes(uid || "temp", 8);
+        codes = generated.rawCodes;
+        if (uid) {
+          await adminDb.collection("users").doc(uid).collection("security").doc("2fa_backup_codes").set({
+            codes: generated.hashedRecords,
+            generatedAt: new Date().toISOString(),
+          });
+          await adminDb.collection("users").doc(uid).collection("security").doc("2fa").set(
+            { backupCodes: codes, backupCodesCount: codes.length },
+            { merge: true },
+          );
+        }
+      }
+
+      const emailLang = resolveEmailLanguage(undefined, reqLang);
+      const backupEmail = buildBackupCodesEmail(emailLang, {
+        recipientName,
+        backupCodes: codes,
+        generatedAt: new Date().toISOString(),
+      });
+
+      const emailResult = await sendEmail({
+        to: userEmail,
+        subject: backupEmail.subject,
+        html: backupEmail.html,
+        text: backupEmail.text,
+        from: EMAIL_SENDERS.security,
+      });
+
+      res.status(200).json({
+        status: "ok",
+        accepted: emailResult.success,
+        messageId: emailResult.messageId || undefined,
+        message: `Códigos de respaldo enviados a ${maskIdentifier(userEmail)}.`,
+      });
+    } catch (err: any) {
+      logger.error({ err, userEmail }, "Error al enviar correo de códigos de respaldo");
+      res.status(500).json({ error: "No se pudo enviar el correo de códigos de respaldo." });
     }
   },
 );
@@ -555,6 +791,53 @@ router.post(
     const { uid, code } = parseResult.data;
 
     try {
+      const cleanCode = code.trim().toUpperCase();
+
+      // 1. Verificar primero si es un código de respaldo de un solo uso
+      const backupDocRef = adminDb.collection("users").doc(uid).collection("security").doc("2fa_backup_codes");
+      const backupDoc = await backupDocRef.get();
+      if (backupDoc.exists) {
+        const backupData = backupDoc.data()!;
+        const codes: any[] = backupData.codes || [];
+        const normalizedCode = cleanCode.replace(/-/g, "").length === 8
+          ? `${cleanCode.replace(/-/g, "").slice(0, 4)}-${cleanCode.replace(/-/g, "").slice(4)}`
+          : cleanCode;
+        const codeHash = hashSecurityCode(normalizedCode, uid);
+        const matchIdx = codes.findIndex((c) => c.codeHash === codeHash);
+
+        if (matchIdx !== -1) {
+          if (codes[matchIdx].used) {
+            res.status(400).json({
+              error: "Este código de respaldo ya fue utilizado previamente. Introduce otro código de respaldo o un código SMS.",
+            });
+            return;
+          }
+
+          // Marcar código como consumido de forma definitiva
+          codes[matchIdx].used = true;
+          codes[matchIdx].usedAt = new Date().toISOString();
+          await backupDocRef.update({ codes });
+
+          // Limpiar código temporal de login
+          await adminDb.collection("users").doc(uid).collection("security").doc("2fa_login_code").delete().catch(() => {});
+
+          await recordSecurityActivity(uid, {
+            type: "backup_code_used",
+            title: "Inicio de sesión con código de respaldo",
+            description: "Se utilizó un código de respaldo de un solo uso para acceder a la cuenta.",
+          });
+
+          res.status(200).json({
+            status: "ok",
+            verified: true,
+            usedBackupCode: true,
+            message: "Verificación con código de respaldo exitosa.",
+          });
+          return;
+        }
+      }
+
+      // 2. Si no es código de respaldo, verificar código OTP temporal
       const codeDocRef = adminDb.collection("users").doc(uid).collection("security").doc("2fa_login_code");
       const codeDoc = await codeDocRef.get();
 
