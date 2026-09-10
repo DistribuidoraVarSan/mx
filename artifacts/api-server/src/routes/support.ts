@@ -101,34 +101,59 @@ router.post(
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Informe de Fallo [${safeReportId}]</title>
+<style type="text/css">
+body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+table { border-collapse: collapse !important; }
+body { margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #F4F6F8; }
+@media screen and (max-width: 600px) {
+  .email-container { width: 100% !important; max-width: 100% !important; margin: 0 auto !important; border-radius: 0 !important; border: none !important; }
+  .header-cell { padding: 24px 20px 18px !important; }
+  .body-cell { padding: 24px 20px 24px !important; }
+  .footer-cell { padding: 20px 20px !important; }
+}
+</style>
 </head>
-<body style="margin:0;padding:0;background-color:#F5F7FA;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;color:#10233F;">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0;padding:0;background-color:#F5F7FA;">
+<body style="margin:0;padding:0;background-color:#F4F6F8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#172033;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0;padding:0;background-color:#F4F6F8;">
 <tr>
-<td align="center" style="padding:28px 12px;">
+<td align="center" style="padding:36px 12px;">
 
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;background-color:#FFFFFF;margin:0 auto;box-shadow:0 4px 24px rgba(7,29,58,0.07);border-radius:10px;overflow:hidden;border:1px solid #E2E8F0;">
+<table role="presentation" class="email-container" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;background-color:#FFFFFF;margin:0 auto;box-shadow:0 4px 24px rgba(7,29,58,0.05);border-radius:14px;overflow:hidden;border:1px solid #E5E9F0;">
 
-<!-- HEADER -->
+<!-- TOP BAR -->
 <tr>
-<td style="background-color:#071D3A;padding:36px 36px 30px;text-align:left;border-bottom:3px solid #C9A84C;">
-  <img src="https://distribuidoravarsan.com.mx/dvs-logo-transparent.png" alt="Distribuidora Var San" width="140" style="display:block;border:0;outline:none;text-decoration:none;max-width:140px;height:auto;margin-bottom:18px;" />
-  <p style="margin:0 0 10px;color:#C9A84C;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">
+<td class="header-cell" style="background-color:#FFFFFF;padding:32px 36px 20px;border-bottom:1px solid #EEF2F6;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+<tr>
+<td align="left" style="vertical-align:middle;">
+  <img src="https://distribuidoravarsan.com.mx/dvs-logo-transparent.png" alt="Distribuidora Var San" width="140" style="display:block;border:0;outline:none;text-decoration:none;max-width:140px;height:auto;" />
+</td>
+<td align="right" style="vertical-align:middle;">
+  <span style="background-color:#071D3A;color:#C9A84C;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;border-radius:20px;display:inline-block;white-space:nowrap;">
     SOPORTE TÉCNICO
-  </p>
-  <h1 style="margin:0;color:#FFFFFF;font-size:22px;line-height:1.3;font-weight:800;">
-    Nuevo Informe de Fallo [${safeReportId}]
-  </h1>
+  </span>
+</td>
+</tr>
+</table>
 </td>
 </tr>
 
 <!-- CUERPO -->
 <tr>
-<td style="padding:32px 36px 28px;color:#10233F;font-size:14px;line-height:1.65;">
-  <div style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid ${severity === "critical" ? "#DC2626" : "#071D3A"};border-radius:6px;padding:16px 18px;margin-bottom:20px;">
-    <p style="margin:0 0 6px;color:#64748B;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">TÍTULO DEL INFORME</p>
+<td class="body-cell" style="background-color:#FFFFFF;padding:36px 36px 28px;color:#172033;font-size:14px;line-height:1.65;">
+  <p style="margin:0 0 6px;color:#C9A84C;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">
+    TICKET DE INCIDENCIA
+  </p>
+  <h1 style="margin:0 0 16px;color:#071D3A;font-size:22px;line-height:1.3;font-weight:800;letter-spacing:-0.3px;">
+    Informe de Fallo [${safeReportId}]
+  </h1>
+
+  <div style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid ${severity === "critical" ? "#DC2626" : "#071D3A"};border-radius:8px;padding:16px 18px;margin-bottom:20px;">
+    <p style="margin:0 0 4px;color:#64748B;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">TÍTULO DEL INFORME</p>
     <p style="margin:0 0 6px;color:#071D3A;font-size:15px;font-weight:700;">${safeTitle}</p>
-    <p style="margin:0;color:#64748B;font-size:12px;"><strong>Severidad:</strong> <span style="font-weight:700;color:${severity === "critical" ? "#DC2626" : "#0284C7"};text-transform:uppercase;">${safeSeverity}</span></p>
+    <p style="margin:0;color:#64748B;font-size:12px;"><strong>Severidad:</strong> <span style="font-weight:700;color:${severity === "critical" ? "#DC2626" : "#071D3A"};text-transform:uppercase;">${safeSeverity}</span></p>
   </div>
 
   <p style="margin:0 0 6px;color:#071D3A;font-size:13px;font-weight:700;">Descripción del problema:</p>
@@ -147,7 +172,7 @@ router.post(
   </div>
 
   <!-- METADATOS TÉCNICOS -->
-  <div style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-radius:6px;padding:16px 18px;margin-top:20px;">
+  <div style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:16px 18px;margin-top:20px;">
     <p style="margin:0 0 10px;color:#071D3A;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Metadatos Técnicos</p>
     <table role="presentation" width="100%" style="font-size:12px;color:#475569;line-height:1.7;">
       <tr><td style="width:40%;color:#64748B;font-weight:600;">Versión Portal:</td><td style="color:#071D3A;">${safeAppVersion}</td></tr>
@@ -158,29 +183,14 @@ router.post(
       <tr><td style="color:#64748B;font-weight:600;">Fecha/Hora:</td><td style="color:#071D3A;">${safeTimestamp}</td></tr>
     </table>
   </div>
-
-  <!-- FIRMA INSTITUCIONAL -->
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top:1px solid #E2E8F0;margin-top:24px;padding-top:20px;">
-  <tr>
-  <td style="padding-top:20px;">
-    <p style="margin:0 0 4px;color:#071D3A;font-size:14px;font-weight:800;">
-      Distribuidora Var San
-    </p>
-    <p style="margin:0;color:#C9A84C;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">
-      SISTEMA DE SOPORTE Y MONITOREO
-    </p>
-  </td>
-  </tr>
-  </table>
 </td>
 </tr>
 
 <!-- FOOTER -->
 <tr>
-<td style="background-color:#071D3A;padding:20px 36px;border-top:3px solid #C9A84C;text-align:center;">
-  <p style="margin:0;color:#CBD5E1;font-size:11px;">
-    2026 Distribuidora Var San. Todos los derechos reservados.
-  </p>
+<td class="footer-cell" style="background-color:#F8FAFC;padding:24px 36px;border-top:1px solid #EEF2F6;text-align:center;">
+<p style="margin:0 0 4px;color:#071D3A;font-size:13px;font-weight:700;letter-spacing:0.3px;">Distribuidora Var San</p>
+<p style="margin:0;color:#8C9BAE;font-size:11px;">Sistema Interno de Soporte y Monitoreo • © 2026</p>
 </td>
 </tr>
 

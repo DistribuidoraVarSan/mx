@@ -1,378 +1,321 @@
-import { type EmailContent, type EmailLanguage, type WelcomeEmailParams, escapeHtml } from "./types";
+import {
+  type EmailContent,
+  type EmailLanguage,
+  type WelcomeEmailParams,
+  escapeHtml,
+} from "./types";
 
-interface EmiliaTranslation {
+interface EmiliaTranslations {
   subject: string;
-  kicker: string;
-  heading: string;
-  welcomeIntro: string;
-  p1: string;
-  p2: string;
-  p3: string;
-  p4: string;
-  quote: string;
-  p5: string;
-  p6: string;
-  p7: string;
-  p8: string;
-  closingTitle: string;
-  closingSubtitle: string;
-  companyName: string;
+  badge: string;
+  heroHeading: string;
+  introParagraph: string;
+  editorialHeading: string;
+  editorialQuote: string;
+  editorialAuthor: string;
+  benefit1Title: string;
+  benefit1Desc: string;
+  benefit2Title: string;
+  benefit2Desc: string;
+  benefit3Title: string;
+  benefit3Desc: string;
+  buttonLabel: string;
   tagline: string;
-  contactPrompt: string;
   footerNotice: string;
-  unsubscribeLink: string;
+  supportPrompt: string;
 }
 
-const EMILIA_TRANSLATIONS: Record<EmailLanguage, EmiliaTranslation> = {
+export const EMILIA_TRANSLATIONS: Record<EmailLanguage, EmiliaTranslations> = {
   es: {
-    subject: "¡Bienvenido a la familia Var San!",
-    kicker: "DISTRIBUIDORA VAR SAN",
-    heading: "¡Bienvenido a la<br />familia Var San!",
-    welcomeIntro: "Nos alegra mucho darte la bienvenida.",
-    p1: "Hoy no solamente comenzamos a compartir información contigo; comenzamos también a construir una relación que esperamos que crezca con el tiempo.",
-    p2: "En <strong style=\"color:#0a1f44;\">Distribuidora Var San</strong> creemos que detrás de cada producto, cada pedido y cada servicio existe algo mucho más importante: las personas. Por eso, para nosotros, tenerte aquí significa mucho más que contar con un nuevo contacto. Significa abrirte las puertas de nuestra familia.",
-    p3: "Queremos que encuentres en Var San una empresa cercana, responsable y comprometida contigo. Un lugar donde puedas conocer nuevas opciones, descubrir productos, encontrar oportunidades y, sobre todo, sentir que siempre hay alguien dispuesto a escucharte y ayudarte.",
-    p4: "A través de nuestros mensajes podrás conocer nuestras novedades, nuevos productos, promociones y todo aquello que vayamos construyendo para seguir creciendo junto a quienes confían en nosotros.",
-    quote: "Porque una empresa puede ofrecer productos, pero una familia construye vínculos.",
-    p5: "Pero esta relación no queremos que se quede solamente en un correo.",
-    p6: "Queremos que Var San trascienda más allá de una compra. Que cada experiencia, cada atención y cada contacto deje algo positivo y nos permita construir una relación basada en la confianza.",
-    p7: "Y nosotros queremos construirlos contigo.",
-    p8: "Gracias por confiar en <strong style=\"color:#0a1f44;\">Distribuidora Var San</strong> y por permitirnos darte la bienvenida a este espacio que, desde hoy, también es tuyo.",
-    closingTitle: "Bienvenido a la familia Var San.",
-    closingSubtitle: "Nos alegra tenerte aquí.",
-    companyName: "Distribuidora Var San",
-    tagline: "CALIDAD Y CONFIANZA EN CADA SUMINISTRO.",
-    contactPrompt: "Para cualquier duda o comentario, puedes comunicarte con nosotros:",
-    footerNotice: "Recibiste este correo porque te suscribiste al sitio de Distribuidora Var San.",
-    unsubscribeLink: "Cancelar mi suscripción",
+    subject: "Bienvenido a Emilia — Boletín Oficial de Distribuidora Var San",
+    badge: "BOLETÍN EDITORIAL",
+    heroHeading: "Limpieza, Protección y Vanguardia",
+    introParagraph: "Nos emociona darte la bienvenida a <strong>Emilia</strong>, el espacio de divulgación, asesoría técnica y novedades de <strong>Distribuidora Var San</strong>. A partir de ahora recibirás contenido curado con los mejores estándares de la industria.",
+    editorialHeading: "Nuestra Visión",
+    editorialQuote: "La excelencia operativa y la bioseguridad no son un gasto, sino el pilar fundamental que resguarda la reputación de tu empresa.",
+    editorialAuthor: "— Consejo Editorial de Distribuidora Var San",
+    benefit1Title: "Protocolos Técnicos",
+    benefit1Desc: "Guías prácticas y dosificaciones exactas para optimizar tus procesos de desinfección.",
+    benefit2Title: "Novedades y Lanzamientos",
+    benefit2Desc: "Acceso preferente a nuevas fórmulas químicas, equipos y soluciones de protección.",
+    benefit3Title: "Asesoría Directa",
+    benefit3Desc: "Acompañamiento especializado de nuestro equipo técnico para resolver requerimientos específicos.",
+    buttonLabel: "EXPLORAR PRODUCTOS Y SOLUCIONES",
+    tagline: "Soluciones en limpieza y protección para tu empresa.",
+    footerNotice: "Recibes este correo porque te suscribiste a Emilia en distribuidoravarsan.com.mx.",
+    supportPrompt: "¿Necesitas ayuda?",
   },
   "en-GB": {
-    subject: "Welcome to the Var San Family!",
-    kicker: "DISTRIBUIDORA VAR SAN",
-    heading: "Welcome to the<br />Var San Family!",
-    welcomeIntro: "We are delighted to welcome you.",
-    p1: "Today we do not merely begin sharing updates with you; we also begin building a relationship that we hope will flourish over time.",
-    p2: "At <strong style=\"color:#0a1f44;\">Distribuidora Var San</strong>, we believe that behind every product, order, and service lies something far more essential: people. Having you with us means much more than gaining a new contact. It means opening the doors of our family to you.",
-    p3: "We want you to discover in Var San an approachable, responsible, and dedicated partner. A place where you can explore solutions, discover premium products, and always know there is someone ready to assist you.",
-    p4: "Through our communications, you will stay informed about our latest solutions, specialised products, and initiatives crafted to grow alongside those who place their trust in us.",
-    quote: "Because a company may supply products, but a family builds enduring bonds.",
-    p5: "Yet we aspire for this relationship to extend far beyond email correspondence.",
-    p6: "We want Var San to transcend beyond transactions. We strive for every interaction and service experience to foster genuine mutual trust.",
-    p7: "And we look forward to building those bonds together with you.",
-    p8: "Thank you for trusting <strong style=\"color:#0a1f44;\">Distribuidora Var San</strong> and allowing us to welcome you to a community that is now yours as well.",
-    closingTitle: "Welcome to the Var San family.",
-    closingSubtitle: "We are truly glad to have you here.",
-    companyName: "Distribuidora Var San",
-    tagline: "QUALITY AND TRUST IN EVERY SUPPLY.",
-    contactPrompt: "For any questions or feedback, please feel free to reach out to us:",
-    footerNotice: "You received this email because you subscribed to Distribuidora Var San.",
-    unsubscribeLink: "Unsubscribe from newsletter",
+    subject: "Welcome to Emilia — Distribuidora Var San's Official Newsletter",
+    badge: "EDITORIAL NEWSLETTER",
+    heroHeading: "Cleaning, Protection & Innovation",
+    introParagraph: "We are thrilled to welcome you to <strong>Emilia</strong>, the technical newsletter from <strong>Distribuidora Var San</strong>. You will receive curated insights and industry standards directly to your inbox.",
+    editorialHeading: "Our Vision",
+    editorialQuote: "Operational excellence and biosafety are not mere expenses; they are the foundation guarding your corporate reputation.",
+    editorialAuthor: "— Editorial Board, Distribuidora Var San",
+    benefit1Title: "Technical Protocols",
+    benefit1Desc: "Practical disinfection guides and precise chemical dosages.",
+    benefit2Title: "Product Launches",
+    benefit2Desc: "Early access to novel formulations and safety equipment.",
+    benefit3Title: "Expert Consultation",
+    benefit3Desc: "Direct technical guidance tailored to your specific organizational needs.",
+    buttonLabel: "EXPLORE PRODUCTS & SOLUTIONS",
+    tagline: "Cleaning and protective solutions for your business.",
+    footerNotice: "You received this email because you subscribed to Emilia at distribuidoravarsan.com.mx.",
+    supportPrompt: "Need help?",
   },
   fr: {
-    subject: "Bienvenue dans la famille Var San !",
-    kicker: "DISTRIBUIDORA VAR SAN",
-    heading: "Bienvenue dans la<br />famille Var San !",
-    welcomeIntro: "Nous sommes ravis de vous accueillir.",
-    p1: "Aujourd'hui, nous ne commençons pas seulement à partager des informations avec vous ; nous commençons également à tisser une relation que nous espérons voir grandir avec le temps.",
-    p2: "Chez <strong style=\"color:#0a1f44;\">Distribuidora Var San</strong>, nous sommes convaincus que derrière chaque produit, chaque commande et chaque service se trouve l'essentiel : les personnes. Vous compter parmi nous signifie vous ouvrir grand les portes de notre famille.",
-    p3: "Nous souhaitons que vous trouviez en Var San une entreprise proche, responsable et dévouée. Un lieu où vous découvrirez des solutions fiables et où une équipe attentive sera toujours prête à vous accompagner.",
-    p4: "À travers nos messages, vous découvrirez nos nouveautés, produits spécialisés et offres conçues pour évoluer ensemble.",
-    quote: "Parce qu'une entreprise peut fournir des produits, mais une famille bâtit des liens.",
-    p5: "Et nous souhaitons que cette relation aille bien au-delà d'un simple échange de courriels.",
-    p6: "Nous voulons que chaque échange et chaque attention renforcent une relation solide et durable, fondée sur la confiance mutuelle.",
-    p7: "Et nous désirons la construire chaque jour à vos côtés.",
-    p8: "Merci pour votre confiance en <strong style=\"color:#0a1f44;\">Distribuidora Var San</strong> et de nous permettre de vous accueillir dans cet espace qui est désormais aussi le vôtre.",
-    closingTitle: "Bienvenue dans la famille Var San.",
-    closingSubtitle: "Nous sommes très heureux de vous compter parmi nous.",
-    companyName: "Distribuidora Var San",
-    tagline: "QUALITÉ ET CONFIANCE DANS CHAQUE APPROVISIONNEMENT.",
-    contactPrompt: "Pour toute question ou demande, n'hésitez pas à nous contacter :",
-    footerNotice: "Vous avez reçu cet e-mail car vous vous êtes inscrit sur le site de Distribuidora Var San.",
-    unsubscribeLink: "Se désabonner",
+    subject: "Bienvenue sur Emilia — Bulletin Officiel Distribuidora Var San",
+    badge: "BULLETIN ÉDITORIAL",
+    heroHeading: "Propreté, Protection & Innovation",
+    introParagraph: "Nous sommes ravis de vous accueillir sur <strong>Emilia</strong>, le bulletin technique de <strong>Distribuidora Var San</strong>.",
+    editorialHeading: "Notre Vision",
+    editorialQuote: "L'excellence opérationnelle et la biosécurité sont le fondement de la réputation de votre entreprise.",
+    editorialAuthor: "— Conseil Éditorial, Distribuidora Var San",
+    benefit1Title: "Protocoles Techniques",
+    benefit1Desc: "Guides de désinfection et dosages précis pour vos installations.",
+    benefit2Title: "Nouveautés Produits",
+    benefit2Desc: "Accès privilégié à nos dernières formulations chimiques et équipements.",
+    benefit3Title: "Conseil Expert",
+    benefit3Desc: "Accompagnement personnalisé pour vos exigences techniques.",
+    buttonLabel: "DÉCOUVRIR NOS SOLUTIONS",
+    tagline: "Solutions de nettoyage et de protection pour votre entreprise.",
+    footerNotice: "Vous recevez cet e-mail car vous êtes inscrit à Emilia sur distribuidoravarsan.com.mx.",
+    supportPrompt: "Besoin d'aide ?",
   },
   pt: {
-    subject: "Bem-vindo à família Var San!",
-    kicker: "DISTRIBUIDORA VAR SAN",
-    heading: "Bem-vindo à<br />família Var San!",
-    welcomeIntro: "Estamos muito felizes em dar-lhe as boas-vindas.",
-    p1: "Hoje não apenas começamos a compartilhar novidades com você; começamos também a construir um relacionamento que esperamos que cresça com o tempo.",
-    p2: "Na <strong style=\"color:#0a1f44;\">Distribuidora Var San</strong>, acreditamos que por trás de cada produto, pedido e serviço está o que há de mais valioso: as pessoas. Ter você conosco significa abrir-lhe as portas da nossa família.",
-    p3: "Queremos que encontre na Var San uma empresa próxima, responsável e comprometida. Um espaço onde possa conhecer novas soluções, produtos especializados e contar com atendimento dedicado.",
-    p4: "Através de nossas mensagens, você acompanhará lançamentos, linhas institucionais e tudo o que preparamos para crescer junto com quem confia em nós.",
-    quote: "Porque uma empresa pode fornecer produtos, mas uma família constrói vínculos.",
-    p5: "E não queremos que este relacionamento fique restrito apenas a um e-mail.",
-    p6: "Queremos que a Var San vá além das compras, proporcionando experiências positivas e alicerçadas na confiança mútua.",
-    p7: "E queremos construir esses laços junto com você.",
-    p8: "Obrigado por confiar na <strong style=\"color:#0a1f44;\">Distribuidora Var San</strong> e por nos permitir recebê-lo neste espaço que agora também é seu.",
-    closingTitle: "Bem-vindo à família Var San.",
-    closingSubtitle: "É uma grande satisfação ter você aqui.",
-    companyName: "Distribuidora Var San",
-    tagline: "QUALIDADE E CONFIANÇA EM CADA FORNECIMENTO.",
-    contactPrompt: "Para qualquer dúvida ou comentário, entre em contato conosco:",
-    footerNotice: "Você recebeu este e-mail porque se cadastrou no site da Distribuidora Var San.",
-    unsubscribeLink: "Cancelar minha inscrição",
+    subject: "Bem-vindo à Emilia — Boletim Oficial da Distribuidora Var San",
+    badge: "BOLETIM EDITORIAL",
+    heroHeading: "Limpeza, Proteção e Inovação",
+    introParagraph: "É com grande satisfação que lhe damos as boas-vindas à <strong>Emilia</strong>, o boletim técnico da <strong>Distribuidora Var San</strong>.",
+    editorialHeading: "Nossa Visão",
+    editorialQuote: "A excelência operacional e a biossegurança são os pilares que protegem a reputação da sua empresa.",
+    editorialAuthor: "— Conselho Editorial, Distribuidora Var San",
+    benefit1Title: "Protocolos Técnicos",
+    benefit1Desc: "Guias práticos de desinfecção e dosagens precisas para seus processos.",
+    benefit2Title: "Lançamentos e Produtos",
+    benefit2Desc: "Acesso antecipado a novas soluções e equipamentos de proteção.",
+    benefit3Title: "Consultoria Especializada",
+    benefit3Desc: "Suporte direto da nossa equipe técnica para suas necessidades.",
+    buttonLabel: "CONHECER SOLUÇÕES",
+    tagline: "Soluções em limpeza e proteção para sua empresa.",
+    footerNotice: "Você está recebendo este e-mail porque se inscreveu na Emilia em distribuidoravarsan.com.mx.",
+    supportPrompt: "Precisa de ajuda?",
   },
   it: {
-    subject: "Benvenuto nella famiglia Var San!",
-    kicker: "DISTRIBUIDORA VAR SAN",
-    heading: "Benvenuto nella<br />famiglia Var San!",
-    welcomeIntro: "Siamo felici di darti il benvenuto.",
-    p1: "Oggi non iniziamo soltanto a condividere informazioni con te; iniziamo anche a costruire una relazione destinata a crescere nel tempo.",
-    p2: "In <strong style=\"color:#0a1f44;\">Distribuidora Var San</strong> crediamo che dietro ogni prodotto, ordine e servizio ci siano le persone. Averti qui con noi significa aprirti le porte della nostra famiglia.",
-    p3: "Vogliamo che tu trovi in Var San un partner vicino, trasparente e dedicato. Un luogo dove scoprire nuove soluzioni e contare sempre su persone pronte ad ascoltarti.",
-    p4: "Attraverso le nostre comunicazioni scoprirai novità, prodotti selezionati e opportunità per crescere insieme.",
-    quote: "Perché un'azienda può offrire prodotti, ma una famiglia costruisce legami.",
-    p5: "Ma non desideriamo che questo rapporto si limiti a un semplice scambio di e-mail.",
-    p6: "Vogliamo che ogni contatto ed esperienza crei valore positivo e consolidi una fiducia reciproca e duratura.",
-    p7: "E desideriamo costruirla insieme a te.",
-    p8: "Grazie per la fiducia in <strong style=\"color:#0a1f44;\">Distribuidora Var San</strong> e per permetterci di darti il benvenuto in questo spazio che da oggi è anche tuo.",
-    closingTitle: "Benvenuto nella famiglia Var San.",
-    closingSubtitle: "Siamo lieti di averti con noi.",
-    companyName: "Distribuidora Var San",
-    tagline: "QUALITÀ E FIDUCIA IN OGNI FORNITURA.",
-    contactPrompt: "Per qualsiasi dubbio o informazione, puoi contattarci qui:",
-    footerNotice: "Hai ricevuto questa e-mail perché ti sei iscritto al sito di Distribuidora Var San.",
-    unsubscribeLink: "Annulla iscrizione",
+    subject: "Benvenuto su Emilia — Bollettino Ufficiale Distribuidora Var San",
+    badge: "BOLLETTINO EDITORIALE",
+    heroHeading: "Pulizia, Protezione e Innovazione",
+    introParagraph: "Siamo lieti di darti il benvenuto su <strong>Emilia</strong>, la newsletter tecnica di <strong>Distribuidora Var San</strong>.",
+    editorialHeading: "La Nostra Visione",
+    editorialQuote: "L'eccellenza operativa e la biosicurezza sono il fondamento che tutela la reputazione della tua azienda.",
+    editorialAuthor: "— Comitato Editoriale, Distribuidora Var San",
+    benefit1Title: "Protocolli Tecnici",
+    benefit1Desc: "Guide pratiche di sanificazione e dosaggi precisi.",
+    benefit2Title: "Nuovi Prodotti",
+    benefit2Desc: "Accesso privilegiato alle più recenti formulazioni chimiche.",
+    benefit3Title: "Consulenza Tecnica",
+    benefit3Desc: "Supporto dedicato per le esigenze specifiche della tua impresa.",
+    buttonLabel: "SCOPRI LE SOLUZIONI",
+    tagline: "Soluzioni per la pulizia e la protezione della tua azienda.",
+    footerNotice: "Ricevi questa email perché ti sei iscritto a Emilia su distribuidoravarsan.com.mx.",
+    supportPrompt: "Hai bisogno di aiuto?",
   },
   "zh-CN": {
-    subject: "欢迎加入 Var San 大家庭！",
-    kicker: "DISTRIBUIDORA VAR SAN",
-    heading: "欢迎加入<br />Var San 大家庭！",
-    welcomeIntro: "我们非常荣幸能向您致以最诚挚的欢迎。",
-    p1: "今天，我们不仅开始与您分享最新资讯，更开启了一段我们希望随着时间不断深化的长远伙伴关系。",
-    p2: "在 <strong style=\"color:#0a1f44;\">Distribuidora Var San</strong>，我们深信在每一款产品、每一笔订单与每一项服务背后，最核心的始终是人。您的加入对我们而言意义非凡，这代表着我们向您敞开了家族的大门。",
-    p3: "我们希望您在 Var San 找到一家亲近、负责且值得信赖的企业。在这里，您可以探索优质解决方案，并随时感受到专业团队真诚的支持与协助。",
-    p4: "通过我们的消息，您将及时了解最新产品、优惠活动以及我们与信赖我们的客户共同成长的各项成果。",
-    quote: "因为企业可以提供产品，而家族能够筑起温暖与信任的纽带。",
-    p5: "我们希望这段关系绝不仅止于往来的电子邮件。",
-    p6: "我们致力于让每一次合作与服务体验都能带来长久的价值，建立在坚如磐石的互信之上。",
-    p7: "我们期待与您携手共建长远未来。",
-    p8: "衷心感谢您对 <strong style=\"color:#0a1f44;\">Distribuidora Var San</strong> 的信任，欢迎来到属于您的新家园。",
-    closingTitle: "欢迎加入 Var San 大家庭。",
-    closingSubtitle: "很高兴有您的陪伴。",
-    companyName: "Distribuidora Var San",
-    tagline: "每次供应，品质与信赖相随。",
-    contactPrompt: "如有任何疑问或建议，欢迎随时与我们联系：",
-    footerNotice: "您收到此邮件是因为您订阅了 Distribuidora Var San 官网资讯。",
-    unsubscribeLink: "取消订阅",
+    subject: "欢迎订阅 Emilia — Distribuidora Var San 官方精选",
+    badge: "官方专刊",
+    heroHeading: "专业清洁 · 安全防护 · 行业创新",
+    introParagraph: "很高兴您加入 <strong>Emilia</strong> — <strong>Distribuidora Var San</strong> 的技术专栏与行业资讯平台。",
+    editorialHeading: "核心理念",
+    editorialQuote: "卓越的运营标准与生物安全保障，是守护企业声誉不可或缺的坚实基石。",
+    editorialAuthor: "— Distribuidora Var San 专家团队",
+    benefit1Title: "技术操作规程",
+    benefit1Desc: "专业的消毒杀菌指南与精确的化学配比方案。",
+    benefit2Title: "新品与前沿动态",
+    benefit2Desc: "优先了解高品质化学制剂与专业防护设备。",
+    benefit3Title: "专属技术支持",
+    benefit3Desc: "专业团队为您提供量身定制的清洁与防护咨询。",
+    buttonLabel: "查看产品与解决方案",
+    tagline: "企业专业清洁与防护解决方案。",
+    footerNotice: "您收到此邮件是因为在 distribuidoravarsan.com.mx 订阅了 Emilia。",
+    supportPrompt: "需要帮助？",
   },
   "zh-TW": {
-    subject: "歡迎加入 Var San 大家庭！",
-    kicker: "DISTRIBUIDORA VAR SAN",
-    heading: "歡迎加入<br />Var San 大家庭！",
-    welcomeIntro: "我們非常榮幸向您致以最誠摯的歡迎。",
-    p1: "今天，我們不僅開始與您分享最新資訊，更開啟了一段我們期盼隨著時間持續深化的長遠夥伴關係。",
-    p2: "在 <strong style=\"color:#0a1f44;\">Distribuidora Var San</strong>，我們深信在每一款產品、每一筆訂單與每一項服務背後，最核心的始終是人。您的加入對我們意義非凡，象徵著我們向您敞開了家族的大門。",
-    p3: "我們期盼您在 Var San 找到一間值得信賴、溫暖且負責的企業。在這裡，您可以探索專業解決方案，隨時享有專業團隊的貼心協助。",
-    p4: "透過我們的訊息，您將掌握最新產品動態、專屬優惠以及我們與夥伴共同成長的精彩歷程。",
-    quote: "因為企業可以供應產品，而家族能締造溫暖與信賴的緊密連結。",
-    p5: "我們期盼這段關係不僅僅是一封封往來的電子郵件。",
-    p6: "我們致力於讓每一次的合作與服務體驗都能留下深厚價值，建立起以信任為基石的永續夥伴關係。",
-    p7: "我們衷心期待與您攜手同行。",
-    p8: "感謝您對 <strong style=\"color:#0a1f44;\">Distribuidora Var San</strong> 的信賴，歡迎來到這個自今日起也屬於您的空間。",
-    closingTitle: "歡迎加入 Var San 大家庭。",
-    closingSubtitle: "非常高興能與您同行。",
-    companyName: "Distribuidora Var San",
-    tagline: "每次供應，品質與信賴相隨。",
-    contactPrompt: "如有任何疑問或建議，歡迎隨時與我們聯繫：",
-    footerNotice: "您收到此信件是因為您訂閱了 Distribuidora Var San 官方資訊。",
-    unsubscribeLink: "取消訂閱",
+    subject: "歡迎訂閱 Emilia — Distribuidora Var San 官方精選",
+    badge: "官方專刊",
+    heroHeading: "專業清潔 · 安全防護 · 行業創新",
+    introParagraph: "非常榮幸您加入 <strong>Emilia</strong> — <strong>Distribuidora Var San</strong> 的技術專欄與行業資訊平台。",
+    editorialHeading: "核心理念",
+    editorialQuote: "卓越的營運標準與生物安全保障，是守護企業商譽不可或缺的基石。",
+    editorialAuthor: "— Distribuidora Var San 專家團隊",
+    benefit1Title: "技術操作規程",
+    benefit1Desc: "專業的消毒殺菌指南與精確的化學配比方案。",
+    benefit2Title: "新品與前沿動態",
+    benefit2Desc: "優先了解高品質化學製劑與專業防護設備。",
+    benefit3Title: "專屬技術支援",
+    benefit3Desc: "專業團隊為您提供量身定制的清潔與防護諮詢。",
+    buttonLabel: "探索產品與解決方案",
+    tagline: "企業專業清潔與防護解決方案。",
+    footerNotice: "您收到此郵件是因為在 distribuidoravarsan.com.mx 訂閱了 Emilia。",
+    supportPrompt: "需要協助？",
   },
   ko: {
-    subject: "Var San 가족이 되신 것을 진심으로 환영합니다!",
-    kicker: "DISTRIBUIDORA VAR SAN",
-    heading: "Var San 가족이 되신 것을<br />진심으로 환영합니다!",
-    welcomeIntro: "고객님을 맞이하게 되어 매우 기쁩니다.",
-    p1: "오늘 우리는 유용한 정보를 공유할 뿐만 아니라, 시간이 지날수록 더욱 깊어질 소중한 신뢰 관계를 함께 만들어 나갑니다.",
-    p2: "<strong style=\"color:#0a1f44;\">Distribuidora Var San</strong>은 모든 제품과 주문, 서비스 뒤에 가장 중요한 ‘사람’이 있다고 굳게 믿습니다. 고객님과 함께한다는 것은 단순한 연락처 추가가 아닌, 우리 가족의 문을 활짝 열어드리는 의미입니다.",
-    p3: "고객님께서 언제나 곁에서 신뢰할 수 있는 책임감 있는 파트너를 발견하시길 바랍니다. 차별화된 솔루션을 확인하시고, 언제든 귀 기울여 도와드릴 준비가 되어 있는 든든한 팀을 만나보세요.",
-    p4: "정기 소식을 통해 최신 제품 정보와 프로모션, 신뢰 속에 함께 성장하는 Var San의 다양한 소식을 가장 먼저 받아보실 수 있습니다.",
-    quote: "기업은 제품을 공급하지만, 가족은 진정한 유대와 신뢰를 만듭니다.",
-    p5: "우리의 만남이 단순한 이메일에만 머무르지 않기를 희망합니다.",
-    p6: "모든 소통과 서비스 경험이 긍정적인 가치를 남기고 굳건한 신뢰로 이어지도록 최선을 다하겠습니다.",
-    p7: "고객님과 함께 그 소중한 가치를 만들어 가고자 합니다.",
-    p8: "<strong style=\"color:#0a1f44;\">Distribuidora Var San</strong>을 신뢰해 주셔서 감사드리며, 오늘부터 고객님의 공간이 될 이곳에 오신 것을 진심으로 환영합니다.",
-    closingTitle: "Var San 가족이 되신 것을 환영합니다.",
-    closingSubtitle: "고객님과 함께하게 되어 대단히 기쁩니다.",
-    companyName: "Distribuidora Var San",
-    tagline: "모든 공급에 품질과 신뢰를 담습니다.",
-    contactPrompt: "궁금한 점이나 의견이 있으시면 언제든지 문의해 주세요:",
-    footerNotice: "본 이메일은 Distribuidora Var San 공식 사이트에서 구독을 신청하셨기에 발송되었습니다.",
-    unsubscribeLink: "구독 취소",
+    subject: "Emilia 구독을 환영합니다 — Distribuidora Var San 공식 뉴스레터",
+    badge: "공식 뉴스레터",
+    heroHeading: "전문 위생 · 안전 보호 · 기술 혁신",
+    introParagraph: "<strong>Distribuidora Var San</strong>의 전문 기술 및 솔루션 뉴스레터인 <strong>Emilia</strong>에 오신 것을 진심으로 환영합니다.",
+    editorialHeading: "우리의 가치",
+    editorialQuote: "철저한 위생 관리와 안전은 단순한 비용이 아닌, 기업의 신뢰를 지키는 가장 견고한 기반입니다.",
+    editorialAuthor: "— Distribuidora Var San 편집위원회",
+    benefit1Title: "전문 위생 지침",
+    benefit1Desc: "정확한 배합과 최적의 소독 프로토콜 가이드.",
+    benefit2Title: "신제품 및 소식",
+    benefit2Desc: "최신 화학 제제 및 안전 보호 장비 정보 우선 제공.",
+    benefit3Title: "전문 기술 지원",
+    benefit3Desc: "고객사의 환경에 맞춘 전문 컨설팅 서비스.",
+    buttonLabel: "제품 및 솔루션 확인하기",
+    tagline: "기업을 위한 전문 청소 및 위생 솔루션.",
+    footerNotice: "distribuidoravarsan.com.mx에서 Emilia를 구독하셨기에 본 메일이 발송되었습니다.",
+    supportPrompt: "도움이 필요하신가요?",
   },
 };
 
-/**
- * Genera el correo de bienvenida oficial de Emilia en el idioma seleccionado.
- */
 export function buildEmiliaWelcomeEmail(
   language: EmailLanguage = "es",
   params: WelcomeEmailParams,
 ): EmailContent {
   const tr = EMILIA_TRANSLATIONS[language] || EMILIA_TRANSLATIONS.es;
-  const htmlLang = language === "en-GB" ? "en" : language;
+  const safeUnsubscribe = escapeHtml(params.unsubscribeUrl || "https://distribuidoravarsan.com.mx/portal");
+  const greeting = params.recipientName ? `Hola, ${escapeHtml(params.recipientName)}:` : "Hola:";
 
   const html = `<!doctype html>
-<html lang="${htmlLang}">
+<html lang="${language === "en-GB" ? "en" : language}">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
 <title>${tr.subject}</title>
-<!--[if mso]>
-<style type="text/css">
-body, table, td, p, a, h1, h2, h3 { font-family: Arial, sans-serif !important; }
-</style>
-<![endif]-->
 <style type="text/css">
 body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
 table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
 img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
 table { border-collapse: collapse !important; }
-body { margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #F5F7FA; }
+body { margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #F4F6F8; }
 @media screen and (max-width: 600px) {
   .email-container { width: 100% !important; max-width: 100% !important; margin: 0 auto !important; border-radius: 0 !important; border: none !important; }
-  .header-cell { padding: 28px 20px 24px !important; }
-  .body-cell { padding: 24px 20px 20px !important; }
+  .header-cell { padding: 24px 20px 18px !important; }
+  .body-cell { padding: 24px 20px 24px !important; }
   .footer-cell { padding: 20px 20px !important; }
   .h1-title { font-size: 22px !important; line-height: 1.3 !important; }
+  .button-cta { display: block !important; width: 100% !important; box-sizing: border-box !important; text-align: center !important; }
 }
 </style>
 </head>
-<body style="margin:0;padding:0;background-color:#F5F7FA;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;color:#10233F;">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0;padding:0;background-color:#F5F7FA;">
+<body style="margin:0;padding:0;background-color:#F4F6F8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#172033;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0;padding:0;background-color:#F4F6F8;">
 <tr>
-<td align="center" style="padding:28px 12px;">
+<td align="center" style="padding:36px 12px;">
 
-<!-- CONTENEDOR CENTRAL BLANCO TIPO TARJETA -->
-<table role="presentation" class="email-container" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:620px;background-color:#FFFFFF;margin:0 auto;box-shadow:0 4px 24px rgba(7,29,58,0.07);border-radius:10px;overflow:hidden;border:1px solid #E2E8F0;">
+<table role="presentation" class="email-container" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;background-color:#FFFFFF;margin:0 auto;box-shadow:0 4px 24px rgba(7,29,58,0.05);border-radius:14px;overflow:hidden;border:1px solid #E5E9F0;">
 
-<!-- HEADER AZUL MARINO -->
+<!-- TOP BAR -->
 <tr>
-<td class="header-cell" style="background-color:#071D3A;padding:36px 36px 30px;text-align:left;border-bottom:3px solid #C9A84C;">
+<td class="header-cell" style="background-color:#FFFFFF;padding:32px 36px 20px;border-bottom:1px solid #EEF2F6;">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
 <tr>
-<td>
-  <img src="https://distribuidoravarsan.com.mx/dvs-logo-transparent.png" alt="Distribuidora Var San" width="140" style="display:block;border:0;outline:none;text-decoration:none;max-width:140px;height:auto;margin-bottom:18px;" />
-  <p style="margin:0 0 10px;color:#C9A84C;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">
-    ${tr.kicker}
-  </p>
-  <h1 class="h1-title" style="margin:0;color:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:26px;line-height:1.25;font-weight:800;letter-spacing:-0.2px;">
-    ${tr.heading}
-  </h1>
+<td align="left" style="vertical-align:middle;">
+  <img src="https://distribuidoravarsan.com.mx/dvs-logo-transparent.png" alt="Distribuidora Var San" width="140" style="display:block;border:0;outline:none;text-decoration:none;max-width:140px;height:auto;" />
+</td>
+<td align="right" style="vertical-align:middle;">
+  <span style="background-color:#071D3A;color:#C9A84C;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;border-radius:20px;display:inline-block;white-space:nowrap;">
+    ${tr.badge}
+  </span>
 </td>
 </tr>
 </table>
 </td>
 </tr>
 
-<!-- CONTENIDO EDITORIAL BLANCO -->
+<!-- BODY -->
 <tr>
-<td class="body-cell" style="background-color:#FFFFFF;padding:36px 36px 28px;color:#10233F;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.75;">
+<td class="body-cell" style="background-color:#FFFFFF;padding:36px 36px 28px;color:#172033;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;">
 
-<p style="margin:0 0 20px;color:#071D3A;font-size:16px;font-weight:700;line-height:1.5;">
-${tr.welcomeIntro}
+<p style="margin:0 0 6px;color:#C9A84C;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">
+  BOLETÍN EMILIA
+</p>
+<h1 class="h1-title" style="margin:0 0 16px;color:#071D3A;font-size:24px;font-weight:800;letter-spacing:-0.4px;">
+  ${tr.heroHeading}
+</h1>
+<p style="margin:0 0 24px;color:#475569;font-size:15px;line-height:1.65;">
+  ${tr.introParagraph}
 </p>
 
-<p style="margin:0 0 18px;color:#334155;">
-${tr.p1}
-</p>
+<!-- CITA EDITORIAL -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid #C9A84C;border-radius:8px;margin:24px 0;">
+<tr>
+<td style="padding:20px 22px;">
+  <p style="margin:0 0 8px;color:#071D3A;font-size:14px;font-style:italic;line-height:1.6;">
+    "${tr.editorialQuote}"
+  </p>
+  <p style="margin:0;color:#667085;font-size:12px;font-weight:700;">
+    ${tr.editorialAuthor}
+  </p>
+</td>
+</tr>
+</table>
 
-<p style="margin:0 0 18px;color:#334155;">
-${tr.p2}
-</p>
-
-<p style="margin:0 0 18px;color:#334155;">
-${tr.p3}
-</p>
-
-<p style="margin:0 0 20px;color:#334155;">
-${tr.p4}
-</p>
-
-<!-- FRASE DESTACADA INSTITUCIONAL CON BORDE DORADO -->
+<!-- BENEFICIOS -->
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;">
-<tr>
-<td style="border-left:4px solid #C9A84C;background-color:#F8FAFC;padding:18px 22px;border-radius:0 6px 6px 0;border-top:1px solid #E2E8F0;border-right:1px solid #E2E8F0;border-bottom:1px solid #E2E8F0;">
-  <p style="margin:0;color:#071D3A;font-size:15px;line-height:1.6;font-weight:700;font-style:italic;">
-    “${tr.quote}”
-  </p>
-</td>
-</tr>
+  <tr>
+    <td style="padding:10px 0;border-bottom:1px solid #F1F5F9;">
+      <p style="margin:0 0 2px;color:#071D3A;font-size:14px;font-weight:700;">• ${tr.benefit1Title}</p>
+      <p style="margin:0;color:#64748B;font-size:13px;">${tr.benefit1Desc}</p>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:10px 0;border-bottom:1px solid #F1F5F9;">
+      <p style="margin:0 0 2px;color:#071D3A;font-size:14px;font-weight:700;">• ${tr.benefit2Title}</p>
+      <p style="margin:0;color:#64748B;font-size:13px;">${tr.benefit2Desc}</p>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:10px 0;">
+      <p style="margin:0 0 2px;color:#071D3A;font-size:14px;font-weight:700;">• ${tr.benefit3Title}</p>
+      <p style="margin:0;color:#64748B;font-size:13px;">${tr.benefit3Desc}</p>
+    </td>
+  </tr>
 </table>
 
-<p style="margin:0 0 18px;color:#334155;">
-${tr.p5}
-</p>
-
-<p style="margin:0 0 18px;color:#334155;">
-${tr.p6}
-</p>
-
-<p style="margin:0 0 18px;color:#071D3A;font-weight:700;">
-${tr.p7}
-</p>
-
-<p style="margin:0 0 24px;color:#334155;">
-${tr.p8}
-</p>
-
-<!-- CIERRE -->
-<div style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid #071D3A;border-radius:6px;padding:18px 20px;margin:24px 0;">
-  <p style="margin:0 0 4px;color:#071D3A;font-size:16px;font-weight:800;">
-    ${tr.closingTitle}
-  </p>
-  <p style="margin:0;color:#64748B;font-size:14px;">
-    ${tr.closingSubtitle}
-  </p>
-</div>
-
-<!-- TARJETA DE SOPORTE -->
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid #C9A84C;border-radius:6px;margin-top:24px;">
+<!-- CTA BUTTON -->
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:28px 0 16px;">
 <tr>
-<td style="padding:16px 20px;">
-  <p style="margin:0 0 4px;color:#071D3A;font-size:14px;font-weight:700;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">¿Necesitas ayuda?</p>
-  <p style="margin:0 0 8px;color:#475569;font-size:13px;line-height:1.5;">Nuestro equipo de soporte está para ayudarte.</p>
-  <p style="margin:0;color:#071D3A;font-size:13px;font-weight:600;">
-    <a href="mailto:distribuidora.varsan@outlook.com" style="color:#071D3A;text-decoration:underline;">distribuidora.varsan@outlook.com</a>
-  </p>
-  <p style="margin:4px 0 0;color:#64748B;font-size:12px;">Teléfono: Próximamente</p>
-</td>
-</tr>
-</table>
-
-<!-- FIRMA INSTITUCIONAL -->
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top:1px solid #E2E8F0;margin-top:24px;padding-top:20px;">
-<tr>
-<td style="padding-top:20px;">
-  <p style="margin:0 0 4px;color:#071D3A;font-size:15px;font-weight:800;letter-spacing:-0.2px;">
-    ${tr.companyName}
-  </p>
-  <p style="margin:0;color:#C9A84C;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">
-    ${tr.tagline}
-  </p>
-</td>
-</tr>
-</table>
-
-</td>
-</tr>
-
-<!-- FOOTER AZUL MARINO -->
-<tr>
-<td class="footer-cell" style="background-color:#071D3A;padding:24px 36px;border-top:3px solid #C9A84C;text-align:center;">
-<p style="margin:0 0 6px;color:#CBD5E1;font-size:12px;line-height:1.5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-  2026 Distribuidora Var San. Todos los derechos reservados.
-</p>
-<p style="margin:0 0 8px;color:#94A3B8;font-size:11px;line-height:1.4;">
-  ${tr.footerNotice}
-</p>
-<p style="margin:0;">
-  <a href="${escapeHtml(params.unsubscribeUrl)}" style="color:#C9A84C;font-size:11px;text-decoration:underline;">
-    ${tr.unsubscribeLink}
+<td align="center" style="border-radius:8px;background-color:#071D3A;">
+  <a href="https://distribuidoravarsan.com.mx" class="button-cta" style="display:inline-block;padding:15px 36px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:#FFFFFF;text-decoration:none;border-radius:8px;letter-spacing:0.5px;">
+    ${tr.buttonLabel} →
   </a>
-</p>
+</td>
+</tr>
+</table>
+
+<!-- SECCIÓN DE SOPORTE COMPACTA -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:32px;padding-top:20px;border-top:1px solid #EEF2F6;">
+<tr>
+<td style="color:#667085;font-size:13px;line-height:1.5;">
+  ${tr.supportPrompt} <a href="mailto:distribuidora.varsan@outlook.com" style="color:#071D3A;font-weight:700;text-decoration:underline;">distribuidora.varsan@outlook.com</a>
+</td>
+</tr>
+</table>
+
+</td>
+</tr>
+
+<!-- FOOTER -->
+<tr>
+<td class="footer-cell" style="background-color:#F8FAFC;padding:24px 36px;border-top:1px solid #EEF2F6;text-align:center;">
+<p style="margin:0 0 4px;color:#071D3A;font-size:13px;font-weight:700;letter-spacing:0.3px;">Distribuidora Var San</p>
+<p style="margin:0 0 6px;color:#667085;font-size:12px;">${tr.tagline}</p>
+<p style="margin:0 0 8px;color:#8C9BAE;font-size:11px;">${tr.footerNotice}</p>
+<p style="margin:0;color:#8C9BAE;font-size:11px;">© 2026 Distribuidora Var San | <a href="${safeUnsubscribe}" style="color:#64748B;text-decoration:underline;">Gestionar suscripción</a></p>
 </td>
 </tr>
 
@@ -384,44 +327,24 @@ ${tr.p8}
 </body>
 </html>`;
 
-  const text = `${tr.subject}
+  const text = `${tr.heroHeading}
+[${tr.badge}]
 
-${tr.kicker}
+${greeting}
 
-${tr.welcomeIntro}
+${tr.introParagraph.replace(/<[^>]+>/g, '')}
 
-${tr.p1}
+${tr.editorialHeading}:
+"${tr.editorialQuote}"
+${tr.editorialAuthor}
 
-${tr.p2.replace(/<[^>]+>/g, "")}
+Beneficios:
+- ${tr.benefit1Title}: ${tr.benefit1Desc}
+- ${tr.benefit2Title}: ${tr.benefit2Desc}
+- ${tr.benefit3Title}: ${tr.benefit3Desc}
 
-${tr.p3}
-
-${tr.p4}
-
-"${tr.quote}"
-
-${tr.p5}
-
-${tr.p6}
-
-${tr.p7}
-
-${tr.p8.replace(/<[^>]+>/g, "")}
-
-${tr.closingTitle}
-${tr.closingSubtitle}
-
-${tr.companyName}
-${tr.tagline}
-
-¿Necesitas ayuda?
-distribuidora.varsan@outlook.com
-Teléfono: Próximamente
-
-${tr.footerNotice}
-${tr.unsubscribeLink}: ${params.unsubscribeUrl}
-
-2026 Distribuidora Var San. Todos los derechos reservados.`;
+Visita: https://distribuidoravarsan.com.mx
+Cancelar suscripción: ${params.unsubscribeUrl || "https://distribuidoravarsan.com.mx"}`;
 
   return { subject: tr.subject, html, text };
 }
