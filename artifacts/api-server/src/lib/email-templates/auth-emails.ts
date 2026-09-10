@@ -1048,7 +1048,7 @@ ${tr.common.footerCopyright}`;
 }
 
 /**
- * 1. Correo de Bienvenida al Portal (Onboarding)
+ * 1. Correo de Bienvenida al Portal (Onboarding / Familia Var San)
  */
 export function buildClientWelcomeEmail(
   language: EmailLanguage = "es",
@@ -1057,83 +1057,240 @@ export function buildClientWelcomeEmail(
   const greetingName = params.recipientName ? escapeHtml(params.recipientName) : "";
   const safeCompany = params.company ? escapeHtml(params.company) : "Distribuidora Var San";
   const safeCountry = params.country ? escapeHtml(params.country) : "México";
-  const safeEmail = params.email ? escapeHtml(params.email) : "vargassmanolo67@gmail.com";
+  const safeEmail = params.email ? escapeHtml(params.email) : "vargassmanolo@gmail.com";
   const portalUrl = params.portalUrl || "https://distribuidoravarsan.com.mx";
 
-  const titleGreeting = greetingName ? `¡Bienvenido, ${greetingName}!` : "¡Bienvenido!";
+  const subject = "¡Bienvenido a la familia Var San! — Distribuidora Var San";
 
-  const bodyHtml = `
-<!-- HEADER TITLE -->
-<p style="margin:0 0 6px;color:#C9A84C;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">
+  const html = `<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
+<title>${subject}</title>
+<!--[if mso]>
+<style type="text/css">
+body, table, td, p, a, h1, h2, h3, span { font-family: Arial, sans-serif !important; }
+</style>
+<![endif]-->
+<style type="text/css">
+body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+table { border-collapse: collapse !important; }
+body { margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #041326; }
+@media screen and (max-width: 600px) {
+  .email-container { width: 100% !important; max-width: 100% !important; margin: 0 auto !important; border-radius: 0 !important; border: none !important; }
+  .header-cell { padding: 26px 20px 20px !important; }
+  .body-cell { padding: 28px 20px 24px !important; }
+  .footer-cell { padding: 22px 20px !important; }
+  .h1-title { font-size: 24px !important; line-height: 1.25 !important; }
+  .quote-box { padding: 18px 16px !important; }
+  .button-cta { display: block !important; width: 100% !important; box-sizing: border-box !important; text-align: center !important; }
+}
+</style>
+</head>
+<body style="margin:0;padding:0;background-color:#041326;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;color:#E2E8F0;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0;padding:0;background-color:#041326;">
+<tr>
+<td align="center" style="padding:36px 12px;">
+
+<!-- CONTENEDOR PRINCIPAL AZUL CORPORATIVO -->
+<table role="presentation" class="email-container" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;background-color:#071D3A;margin:0 auto;box-shadow:0 12px 36px rgba(0,0,0,0.35);border-radius:14px;overflow:hidden;border:1px solid #1E3A60;">
+
+<!-- TOP BAR CON LOGOTIPO Y BADGE DORADO -->
+<tr>
+<td class="header-cell" style="background-color:#05172E;padding:32px 36px 24px;border-bottom:1px solid #1E3A60;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+<tr>
+<td align="left" style="vertical-align:middle;">
+  <img src="https://distribuidoravarsan.com.mx/dvs-logo-transparent.png" alt="Distribuidora Var San" width="145" style="display:block;border:0;outline:none;text-decoration:none;max-width:145px;height:auto;" />
+</td>
+<td align="right" style="vertical-align:middle;">
+  <span style="background-color:#041326;color:#C9A84C;border:1px solid #C9A84C;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;border-radius:20px;display:inline-block;white-space:nowrap;">
+    DISTRIBUIDORA VAR SAN
+  </span>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+
+<!-- LÍNEA DECORATIVA DORADA -->
+<tr>
+<td height="2" style="background-color:#C9A84C;font-size:0;line-height:0;">&nbsp;</td>
+</tr>
+
+<!-- CUERPO PRINCIPAL DEL MENSAJE -->
+<tr>
+<td class="body-cell" style="background-color:#071D3A;padding:36px 36px 30px;color:#E2E8F0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.75;">
+
+<!-- KICKER & TÍTULO PROTAGONISTA -->
+<p style="margin:0 0 8px;color:#C9A84C;font-size:11px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;">
   DISTRIBUIDORA VAR SAN
 </p>
-<h1 class="h1-title" style="margin:0 0 16px;color:#071D3A;font-size:26px;font-weight:800;letter-spacing:-0.5px;line-height:1.25;">
-  ${titleGreeting}
+<h1 class="h1-title" style="margin:0 0 14px;color:#FFFFFF;font-size:28px;font-weight:800;letter-spacing:-0.5px;line-height:1.22;">
+  ¡Bienvenido a la familia Var San!
 </h1>
-<p style="margin:0 0 28px;color:#475569;font-size:15px;line-height:1.65;">
-  Tu cuenta ha sido creada correctamente y ya puedes comenzar a utilizar el <strong>Portal de Clientes</strong>.
+
+<p style="margin:0 0 24px;color:#E3CC8A;font-size:16px;font-weight:700;line-height:1.5;">
+  Nos alegra mucho darte la bienvenida.
 </p>
 
-<!-- FICHA RESUMEN DE PERFIL -->
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;margin:0 0 28px;overflow:hidden;">
+<!-- PÁRRAFO 1 -->
+<p style="margin:0 0 20px;color:#CBD5E1;font-size:15px;line-height:1.75;">
+  Hoy no solamente comenzamos a compartir información contigo; comenzamos también a construir una relación que esperamos que crezca con el tiempo.
+</p>
+
+<!-- PÁRRAFO 2 -->
+<p style="margin:0 0 20px;color:#CBD5E1;font-size:15px;line-height:1.75;">
+  En <strong style="color:#FFFFFF;">Distribuidora Var San</strong> creemos que detrás de cada producto, cada pedido y cada servicio existe algo mucho más importante: las personas. Por eso, para nosotros, tenerte aquí significa mucho más que contar con un nuevo contacto. Significa abrirte las puertas de nuestra familia.
+</p>
+
+<!-- PÁRRAFO 3 -->
+<p style="margin:0 0 20px;color:#CBD5E1;font-size:15px;line-height:1.75;">
+  Queremos que encuentres en Var San una empresa cercana, responsable y comprometida contigo. Un lugar donde puedas conocer nuevas opciones, descubrir productos, encontrar oportunidades y, sobre todo, sentir que siempre hay alguien dispuesto a escucharte y ayudarte.
+</p>
+
+<!-- PÁRRAFO 4 -->
+<p style="margin:0 0 28px;color:#CBD5E1;font-size:15px;line-height:1.75;">
+  A través de nuestros mensajes podrás conocer nuestras novedades, nuevos productos, promociones y todo aquello que vayamos construyendo para seguir creciendo junto a quienes confían en nosotros.
+</p>
+
+<!-- CITA EDITORIAL DESTACADA EN DORADO Y NAVY OSCURO -->
+<table role="presentation" class="quote-box" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#041326;border:1px solid #1E3A60;border-left:4px solid #C9A84C;border-radius:10px;margin:28px 0;">
 <tr>
 <td style="padding:22px 24px;">
-  <p style="margin:0 0 16px;color:#071D3A;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;border-bottom:1px solid #E2E8F0;padding-bottom:8px;">
-    DATOS DEL CLIENTE
+  <p style="margin:0;color:#E3CC8A;font-size:16px;font-style:italic;font-weight:700;line-height:1.65;">
+    “Porque una empresa puede ofrecer productos, pero una familia construye vínculos.”
   </p>
-
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
-    <tr>
-      <td style="padding:6px 0;width:40%;color:#667085;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">NOMBRE</td>
-      <td style="padding:6px 0;color:#071D3A;font-size:14px;font-weight:700;">${greetingName || "Usuario"}</td>
-    </tr>
-    <tr>
-      <td style="padding:6px 0;color:#667085;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">EMPRESA / INSTITUCIÓN</td>
-      <td style="padding:6px 0;color:#071D3A;font-size:14px;font-weight:700;">${safeCompany}</td>
-    </tr>
-    <tr>
-      <td style="padding:6px 0;color:#667085;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">PAÍS</td>
-      <td style="padding:6px 0;color:#071D3A;font-size:14px;font-weight:700;">${safeCountry}</td>
-    </tr>
-    <tr>
-      <td style="padding:6px 0;color:#667085;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">CORREO</td>
-      <td style="padding:6px 0;color:#071D3A;font-size:14px;font-weight:600;">${safeEmail}</td>
-    </tr>
-  </table>
 </td>
 </tr>
 </table>
 
-<!-- CTA BUTTON -->
-<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:28px 0 16px;">
+<!-- PÁRRAFO 5 -->
+<p style="margin:0 0 20px;color:#CBD5E1;font-size:15px;line-height:1.75;">
+  Pero esta relación no queremos que se quede solamente en un correo.
+</p>
+
+<!-- PÁRRAFO 6 -->
+<p style="margin:0 0 20px;color:#CBD5E1;font-size:15px;line-height:1.75;">
+  Queremos que Var San trascienda más allá de una compra. Que cada experiencia, cada atención y cada contacto deje algo positivo y nos permita construir una relación basada en la confianza.
+</p>
+
+<!-- FRASE DE ÉNFASIS -->
+<p style="margin:0 0 20px;color:#C9A84C;font-size:15px;font-weight:700;line-height:1.75;">
+  Y nosotros queremos construirlos contigo.
+</p>
+
+<!-- PÁRRAFO 7 -->
+<p style="margin:0 0 28px;color:#CBD5E1;font-size:15px;line-height:1.75;">
+  Gracias por confiar en <strong style="color:#FFFFFF;">Distribuidora Var San</strong> y por permitirnos darte la bienvenida a este espacio que, desde hoy, también es tuyo.
+</p>
+
+<!-- CIERRE EDITORIAL PROTAGONISTA -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#051A36;border:1px solid #1E3A60;border-radius:10px;margin:24px 0 28px;">
 <tr>
-<td align="center" style="border-radius:8px;background-color:#071D3A;">
-  <a href="${escapeHtml(portalUrl)}" class="button-cta" style="display:inline-block;padding:15px 36px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:#FFFFFF;text-decoration:none;border-radius:8px;letter-spacing:0.5px;">
+<td style="padding:20px 22px;text-align:center;">
+  <p style="margin:0 0 6px;color:#C9A84C;font-size:17px;font-weight:800;letter-spacing:0.3px;">
+    Bienvenido a la familia Var San.
+  </p>
+  <p style="margin:0;color:#FFFFFF;font-size:14px;font-weight:600;">
+    Nos alegra tenerte aquí.
+  </p>
+</td>
+</tr>
+</table>
+
+<!-- CTA BUTTON EN DORADO DE ALTO IMPACTO -->
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0 16px;">
+<tr>
+<td align="center" style="border-radius:8px;background-color:#C9A84C;">
+  <a href="${escapeHtml(portalUrl)}" class="button-cta" style="display:inline-block;padding:15px 36px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:800;color:#041326;text-decoration:none;border-radius:8px;letter-spacing:0.5px;">
     ENTRAR AL PORTAL →
   </a>
 </td>
 </tr>
-</table>`;
+</table>
 
-  const textBody = `${titleGreeting}
+<!-- SECCIÓN DE SOPORTE COMPACTA -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:32px;padding-top:20px;border-top:1px solid #1E3A60;">
+<tr>
+<td style="color:#8C9BAE;font-size:13px;line-height:1.5;">
+  ¿Necesitas ayuda? <a href="mailto:distribuidora.varsan@outlook.com" style="color:#C9A84C;font-weight:700;text-decoration:underline;">distribuidora.varsan@outlook.com</a>
+</td>
+</tr>
+</table>
 
-Tu cuenta ha sido creada correctamente y ya puedes comenzar a utilizar el Portal de Clientes.
+</td>
+</tr>
 
-NOMBRE: ${greetingName || "Usuario"}
-EMPRESA / INSTITUCIÓN: ${safeCompany}
-PAÍS: ${safeCountry}
-CORREO: ${safeEmail}
+<!-- FOOTER CORPORATIVO OSCURO -->
+<tr>
+<td class="footer-cell" style="background-color:#041326;padding:26px 36px;border-top:1px solid #1E3A60;text-align:center;">
+<p style="margin:0 0 4px;color:#FFFFFF;font-size:13px;font-weight:700;letter-spacing:0.3px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  Distribuidora Var San
+</p>
+<p style="margin:0 0 6px;color:#8C9BAE;font-size:12px;line-height:1.4;">
+  Soluciones en limpieza y protección para tu empresa.
+</p>
+<p style="margin:0 0 6px;color:#8C9BAE;font-size:12px;">
+  distribuidora.varsan@outlook.com
+</p>
+<p style="margin:0;color:#64748B;font-size:11px;">
+  © 2026 Distribuidora Var San
+</p>
+</td>
+</tr>
 
-ENTRAR AL PORTAL: ${portalUrl}`;
+</table>
 
-  return renderEditorialEmail({
-    language,
-    badgeText: "DISTRIBUIDORA VAR SAN",
-    heading: titleGreeting,
-    bodyHtml,
-    textBody,
-    subject: "Bienvenido a Distribuidora Var San — Tu cuenta está lista",
-  });
+</td>
+</tr>
+</table>
+</body>
+</html>`;
+
+  const text = `DISTRIBUIDORA VAR SAN
+
+¡Bienvenido a la familia Var San!
+
+Nos alegra mucho darte la bienvenida.
+
+Hoy no solamente comenzamos a compartir información contigo; comenzamos también a construir una relación que esperamos que crezca con el tiempo.
+
+En Distribuidora Var San creemos que detrás de cada producto, cada pedido y cada servicio existe algo mucho más importante: las personas. Por eso, para nosotros, tenerte aquí significa mucho más que contar con un nuevo contacto. Significa abrirte las puertas de nuestra familia.
+
+Queremos que encuentres en Var San una empresa cercana, responsable y comprometida contigo. Un lugar donde puedas conocer nuevas opciones, descubrir productos, encontrar oportunidades y, sobre todo, sentir que siempre hay alguien dispuesto a escucharte y ayudarte.
+
+A través de nuestros mensajes podrás conocer nuestras novedades, nuevos productos, promociones y todo aquello que vayamos construyendo para seguir creciendo junto a quienes confían en nosotros.
+
+Porque una empresa puede ofrecer productos, pero una familia construye vínculos.
+
+Pero esta relación no queremos que se quede solamente en un correo.
+
+Queremos que Var San trascienda más allá de una compra. Que cada experiencia, cada atención y cada contacto deje algo positivo y nos permita construir una relación basada en la confianza.
+
+Y nosotros queremos construirlos contigo.
+
+Gracias por confiar en Distribuidora Var San y por permitirnos darte la bienvenida a este espacio que, desde hoy, también es tuyo.
+
+Bienvenido a la familia Var San.
+
+Nos alegra tenerte aquí.
+
+ENTRAR AL PORTAL: ${portalUrl}
+
+¿Necesitas ayuda? distribuidora.varsan@outlook.com
+
+Distribuidora Var San
+Soluciones en limpieza y protección para tu empresa.
+distribuidora.varsan@outlook.com
+© 2026 Distribuidora Var San`;
+
+  return { subject, html, text };
 }
 
 /**
