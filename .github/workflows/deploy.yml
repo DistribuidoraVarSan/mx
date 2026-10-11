@@ -50,7 +50,7 @@ jobs:
         run: pnpm build
 
       - name: Preserve custom domain
-        run: echo "distribuidoravarsan.com.mx" > artifacts/distribuidora-var-san/dist/public/CNAME
+        run: cp CNAME artifacts/distribuidora-var-san/dist/public/CNAME 2>/dev/null || echo "www.distribuidoravarsan.com" > artifacts/distribuidora-var-san/dist/public/CNAME
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

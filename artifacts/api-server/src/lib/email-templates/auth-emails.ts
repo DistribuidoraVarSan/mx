@@ -1080,7 +1080,7 @@ body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;
 table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
 img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
 table { border-collapse: collapse !important; }
-body { margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #041326; }
+body { margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #011855; }
 @media screen and (max-width: 600px) {
   .email-container { width: 100% !important; max-width: 100% !important; margin: 0 auto !important; border-radius: 0 !important; border: none !important; }
   .header-cell { padding: 26px 20px 20px !important; }
@@ -1092,24 +1092,24 @@ body { margin: 0 !important; padding: 0 !important; width: 100% !important; back
 }
 </style>
 </head>
-<body style="margin:0;padding:0;background-color:#041326;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;color:#E2E8F0;">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0;padding:0;background-color:#041326;">
+<body style="margin:0;padding:0;background-color:#011855;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;color:#E2E8F0;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0;padding:0;background-color:#011855;">
 <tr>
 <td align="center" style="padding:36px 12px;">
 
-<!-- CONTENEDOR PRINCIPAL AZUL CORPORATIVO -->
-<table role="presentation" class="email-container" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;background-color:#071D3A;margin:0 auto;box-shadow:0 12px 36px rgba(0,0,0,0.35);border-radius:14px;overflow:hidden;border:1px solid #1E3A60;">
+<!-- CONTENEDOR PRINCIPAL AZUL CORPORATIVO #011855 -->
+<table role="presentation" class="email-container" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;background-color:#011855;margin:0 auto;box-shadow:0 12px 36px rgba(0,0,0,0.35);border-radius:14px;overflow:hidden;border:1px solid #102B78;">
 
 <!-- TOP BAR CON LOGOTIPO Y BADGE DORADO -->
 <tr>
-<td class="header-cell" style="background-color:#05172E;padding:32px 36px 24px;border-bottom:1px solid #1E3A60;">
+<td class="header-cell" style="background-color:#011447;padding:32px 36px 24px;border-bottom:1px solid #102B78;">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
 <tr>
 <td align="left" style="vertical-align:middle;">
   <img src="https://distribuidoravarsan.com.mx/dvs-logo-transparent.png" alt="Distribuidora Var San" width="145" style="display:block;border:0;outline:none;text-decoration:none;max-width:145px;height:auto;" />
 </td>
 <td align="right" style="vertical-align:middle;">
-  <span style="background-color:#041326;color:#C9A84C;border:1px solid #C9A84C;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;border-radius:20px;display:inline-block;white-space:nowrap;">
+  <span style="background-color:#011855;color:#C9A84C;border:1px solid #C9A84C;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;border-radius:20px;display:inline-block;white-space:nowrap;">
     DISTRIBUIDORA VAR SAN
   </span>
 </td>
@@ -1125,7 +1125,7 @@ body { margin: 0 !important; padding: 0 !important; width: 100% !important; back
 
 <!-- CUERPO PRINCIPAL DEL MENSAJE -->
 <tr>
-<td class="body-cell" style="background-color:#071D3A;padding:36px 36px 30px;color:#E2E8F0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.75;">
+<td class="body-cell" style="background-color:#011855;padding:36px 36px 30px;color:#E2E8F0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.75;">
 
 <!-- KICKER & TÍTULO PROTAGONISTA -->
 <p style="margin:0 0 8px;color:#C9A84C;font-size:11px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;">
@@ -1160,7 +1160,7 @@ body { margin: 0 !important; padding: 0 !important; width: 100% !important; back
 </p>
 
 <!-- CITA EDITORIAL DESTACADA EN DORADO Y NAVY OSCURO -->
-<table role="presentation" class="quote-box" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#041326;border:1px solid #1E3A60;border-left:4px solid #C9A84C;border-radius:10px;margin:28px 0;">
+<table role="presentation" class="quote-box" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#01123F;border:1px solid #102B78;border-left:4px solid #C9A84C;border-radius:10px;margin:28px 0;">
 <tr>
 <td style="padding:22px 24px;">
   <p style="margin:0;color:#E3CC8A;font-size:16px;font-style:italic;font-weight:700;line-height:1.65;">
@@ -1191,7 +1191,7 @@ body { margin: 0 !important; padding: 0 !important; width: 100% !important; back
 </p>
 
 <!-- CIERRE EDITORIAL PROTAGONISTA -->
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#051A36;border:1px solid #1E3A60;border-radius:10px;margin:24px 0 28px;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#011447;border:1px solid #102B78;border-radius:10px;margin:24px 0 28px;">
 <tr>
 <td style="padding:20px 22px;text-align:center;">
   <p style="margin:0 0 6px;color:#C9A84C;font-size:17px;font-weight:800;letter-spacing:0.3px;">
@@ -1208,7 +1208,7 @@ body { margin: 0 !important; padding: 0 !important; width: 100% !important; back
 <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0 16px;">
 <tr>
 <td align="center" style="border-radius:8px;background-color:#C9A84C;">
-  <a href="${escapeHtml(portalUrl)}" class="button-cta" style="display:inline-block;padding:15px 36px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:800;color:#041326;text-decoration:none;border-radius:8px;letter-spacing:0.5px;">
+  <a href="${escapeHtml(portalUrl)}" class="button-cta" style="display:inline-block;padding:15px 36px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:800;color:#011855;text-decoration:none;border-radius:8px;letter-spacing:0.5px;">
     ENTRAR AL PORTAL →
   </a>
 </td>
@@ -1216,7 +1216,7 @@ body { margin: 0 !important; padding: 0 !important; width: 100% !important; back
 </table>
 
 <!-- SECCIÓN DE SOPORTE COMPACTA -->
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:32px;padding-top:20px;border-top:1px solid #1E3A60;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:32px;padding-top:20px;border-top:1px solid #102B78;">
 <tr>
 <td style="color:#8C9BAE;font-size:13px;line-height:1.5;">
   ¿Necesitas ayuda? <a href="mailto:distribuidora.varsan@outlook.com" style="color:#C9A84C;font-weight:700;text-decoration:underline;">distribuidora.varsan@outlook.com</a>
@@ -1229,7 +1229,7 @@ body { margin: 0 !important; padding: 0 !important; width: 100% !important; back
 
 <!-- FOOTER CORPORATIVO OSCURO -->
 <tr>
-<td class="footer-cell" style="background-color:#041326;padding:26px 36px;border-top:1px solid #1E3A60;text-align:center;">
+<td class="footer-cell" style="background-color:#01123F;padding:26px 36px;border-top:1px solid #102B78;text-align:center;">
 <p style="margin:0 0 4px;color:#FFFFFF;font-size:13px;font-weight:700;letter-spacing:0.3px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
   Distribuidora Var San
 </p>
